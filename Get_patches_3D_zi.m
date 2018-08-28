@@ -235,5 +235,5 @@ else
 end
 
 if plotflag
-  plot_slices;
+  Plot_slices;  %%==== script ==================
 end
