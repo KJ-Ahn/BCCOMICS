@@ -72,27 +72,10 @@
 
 more off; %% enables to see progress
 disp('----------------Initializing----------------');
-outputdir='setup_output';  %% output directory name
-TFstr1   ='CAMB_for_mode_finding/bccomics_transfer_z'; %% CAMB TF output string (head)
-TFstr2   ='_out.dat';                                  %% CAMB TF output string (tail)
-zxestr   ='output_recfast'; %% redshift-(ionized fraction) data; recfast preferred
-Cosmology='LCDM.m'; %% '*.m' file containing cosmological parameters
-plotflag =false     %% true if plots wanted, or false
-matlabflag=false     %% true if using MATLAB, false if using gnu octave
-zzend     = 200;    %% Redshift at which you want to have initial condition.
-
-%% Box configuration for patches. Nmode being an odd number makes FFTing
-%% intuitively easier because k runs from -floor(Ncell/2) to floor(Ncell/2),
-%% in a symmetric way.
-Lbox    = 604;         %% in Mpc unit; let it be (odd number)*4
-Vbox    = Lbox^3;      %% box volume in Mpc^3 unit
-Ncell   = 151;         %% # of cells along one axis: make it an odd number
-Lcell   = Lbox/Ncell;  %% cell size in Mpc unit; 4 Mpc is fiducial, for correct DeltaT fit
-Vcell   = Lcell^3;     %% cell volume in Mpc^3 unit
-Nmode   = Ncell;       %% number of k modes along one axis
-Nhalf   = floor(Ncell/2); 
-Nc      = Nhalf+1;     %% index for center of k-space 
-kunit   = 2*pi/Lbox;   %% unit k in Mpc^-1
+%% Read in essential parameters
+params;  %%==== script ==================
+%% Define some box-related quantities
+box_init;  %%==== script ==================
 if (mod(Ncell,2)==0)
   disp('Choose an odd number to make a patch 4 Mpc in size');
   return;
@@ -585,18 +568,33 @@ Vcb           = sqrt(V_cb_1.^2+V_cb_2.^2+V_cb_3.^2);
 
 %% BCCOMICS needs large-scale monopole values at output redshift -- begin
 %% First at z=1000
-save([outputdir '/Dc3D.dat'],   'Delta_c', '-v6'); 
-save([outputdir '/Db3D.dat'],   'Delta_b', '-v6'); 
-save([outputdir '/THc3D.dat'],  'Theta_c', '-v6'); 
-save([outputdir '/THb3D.dat'],  'Theta_b', '-v6'); 
-save([outputdir '/DT.dat'],     'Delta_T', '-v6');
+if matlabflag
+  save([outputdir '/Dc3D.dat'],   'Delta_c', '-v6'); 
+  save([outputdir '/Db3D.dat'],   'Delta_b', '-v6'); 
+  save([outputdir '/THc3D.dat'],  'Theta_c', '-v6'); 
+  save([outputdir '/THb3D.dat'],  'Theta_b', '-v6'); 
+  save([outputdir '/DT.dat'],     'Delta_T', '-v6');
 
-save([outputdir '/V_cb_1.dat'], 'V_cb_1',  '-v6'); 
-save([outputdir '/V_cb_2.dat'], 'V_cb_2',  '-v6'); 
-save([outputdir '/V_cb_3.dat'], 'V_cb_3',  '-v6'); 
-save([outputdir '/V_c_1.dat'],  'V_c_1',   '-v6'); 
-save([outputdir '/V_c_2.dat'],  'V_c_2',   '-v6'); 
-save([outputdir '/V_c_3.dat'],  'V_c_3',   '-v6'); 
+  save([outputdir '/V_cb_1.dat'], 'V_cb_1',  '-v6'); 
+  save([outputdir '/V_cb_2.dat'], 'V_cb_2',  '-v6'); 
+  save([outputdir '/V_cb_3.dat'], 'V_cb_3',  '-v6'); 
+  save([outputdir '/V_c_1.dat'],  'V_c_1',   '-v6'); 
+  save([outputdir '/V_c_2.dat'],  'V_c_2',   '-v6'); 
+  save([outputdir '/V_c_3.dat'],  'V_c_3',   '-v6'); 
+else
+  save('-mat-binary', [outputdir '/Dc3D.dat'],   'Delta_c'); 
+  save('-mat-binary', [outputdir '/Db3D.dat'],   'Delta_b'); 
+  save('-mat-binary', [outputdir '/THc3D.dat'],  'Theta_c'); 
+  save('-mat-binary', [outputdir '/THb3D.dat'],  'Theta_b'); 
+  save('-mat-binary', [outputdir '/DT.dat'],     'Delta_T');
+
+  save('-mat-binary', [outputdir '/V_cb_1.dat'], 'V_cb_1'); 
+  save('-mat-binary', [outputdir '/V_cb_2.dat'], 'V_cb_2'); 
+  save('-mat-binary', [outputdir '/V_cb_3.dat'], 'V_cb_3'); 
+  save('-mat-binary', [outputdir '/V_c_1.dat'],  'V_c_1' ); 
+  save('-mat-binary', [outputdir '/V_c_2.dat'],  'V_c_2' ); 
+  save('-mat-binary', [outputdir '/V_c_3.dat'],  'V_c_3' ); 
+end
 
 if plotflag
   plot_slices;
@@ -621,14 +619,25 @@ THb3D_azend = -aH*(Deltagro*dDpg_da + Deltadec*dDpd_da) +aH*fc*Deltastr*dDms_da;
 %% This prepares for getting DeltaT at any a.
 Get_DeltaT_fit; %%==== script ==================
 
-save([outputdir '/V_cb_1_azend.dat'], 'V_cb_1_azend', '-v6'); % @ azend
-save([outputdir '/V_cb_2_azend.dat'], 'V_cb_2_azend', '-v6'); % @ azend
-save([outputdir '/V_cb_3_azend.dat'], 'V_cb_3_azend', '-v6'); % @ azend
-save([outputdir '/Dc3D_azend.dat'],   'Dc3D_azend',   '-v6'); % @ azend
-save([outputdir '/Db3D_azend.dat'],   'Db3D_azend',   '-v6'); % @ azend
-save([outputdir '/THc3D_azend.dat'],  'THc3D_azend',  '-v6'); % @ azend
-save([outputdir '/THb3D_azend.dat'],  'THb3D_azend',  '-v6'); % @ azend
-save([outputdir '/DT_azend.dat'],     'DT3D_azend',   '-v6'); % @ azend
+if matlabflag
+  save([outputdir '/V_cb_1_azend.dat'], 'V_cb_1_azend', '-v6'); % @ azend
+  save([outputdir '/V_cb_2_azend.dat'], 'V_cb_2_azend', '-v6'); % @ azend
+  save([outputdir '/V_cb_3_azend.dat'], 'V_cb_3_azend', '-v6'); % @ azend
+  save([outputdir '/Dc3D_azend.dat'],   'Dc3D_azend',   '-v6'); % @ azend
+  save([outputdir '/Db3D_azend.dat'],   'Db3D_azend',   '-v6'); % @ azend
+  save([outputdir '/THc3D_azend.dat'],  'THc3D_azend',  '-v6'); % @ azend
+  save([outputdir '/THb3D_azend.dat'],  'THb3D_azend',  '-v6'); % @ azend
+  save([outputdir '/DT_azend.dat'],     'DT3D_azend',   '-v6'); % @ azend
+else
+  save('-mat-binary', [outputdir '/V_cb_1_azend.dat'], 'V_cb_1_azend'); % @ azend
+  save('-mat-binary', [outputdir '/V_cb_2_azend.dat'], 'V_cb_2_azend'); % @ azend
+  save('-mat-binary', [outputdir '/V_cb_3_azend.dat'], 'V_cb_3_azend'); % @ azend
+  save('-mat-binary', [outputdir '/Dc3D_azend.dat'],   'Dc3D_azend'  ); % @ azend
+  save('-mat-binary', [outputdir '/Db3D_azend.dat'],   'Db3D_azend'  ); % @ azend
+  save('-mat-binary', [outputdir '/THc3D_azend.dat'],  'THc3D_azend' ); % @ azend
+  save('-mat-binary', [outputdir '/THb3D_azend.dat'],  'THb3D_azend' ); % @ azend
+  save('-mat-binary', [outputdir '/DT_azend.dat'],     'DT3D_azend'  ); % @ azend
+end
 
 if plotflag
   ifig = ifig+1;
@@ -786,8 +795,11 @@ dmu = 0.05;
 mu  = 0:dmu:1; %% Use symmetry of P(k,mu) about mu=0 to save calculation time.
 Nmu = length(mu);
 
-save('mu.dat','mu','-ascii');
-
+if matlabflag
+  save([outputdir '/mu.dat'],'mu','-ascii');
+else
+  save('-ascii',[outputdir '/mu.dat'],'mu');
+end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Loop over different k values ----------------------------------------begin
 
 
@@ -796,23 +808,12 @@ Nsample    = length(ksampletab)
 
 save([outputdir '/ksample.dat'],'ksampletab','-ascii');
 
-%% high-k mode initial condition(no randomization) as perfect match to power spectrum
-%% Pkc & Pkb are in Mpc^3 unit, and dDelta_c_dt & dDelta_b_dt in Mpc^(3/2) Myr^-1 unit.
-%% No need to further normalize, because we are only interested in power spectrum for
-%% high-k modes.
+%% high-k mode fluctuations at z=zi.
 delta_c_k = interp1(ktab, Dc_zi,  ksampletab, 'spline');
 theta_c_k = interp1(ktab, THc_zi, ksampletab, 'spline');
 delta_b_k = interp1(ktab, Db_zi,  ksampletab, 'spline');
 theta_b_k = interp1(ktab, THb_zi, ksampletab, 'spline');
 delta_T_k = interp1(ktab, DT_zi,  ksampletab, 'spline');
-
-%% c=cdm, b=baryon, m=matter, Th=theta, T=temperature
-%% 1:Pkc, 2:Pkb, 3:Pkm, 4:PkThc, 5:PkThb, 6:PkThm, 7:PkT
-%% Pk_z_*_all is the box-averaged power spectrum
-Pk_Ahn_all  = zeros(7,Nzz1,Nsample); %% Ahn
-Pk_TH_all   = zeros(7,Nzz1,Nsample); %% T&H
-Pk_norel    = zeros(7,Nzz1,Nsample); %% no streaming veloicity, no mode coupling
-
 
 %% Time integration interval for ode45
 azbegin = ai;    %% z=1000
@@ -820,7 +821,11 @@ azend   = 1/(1+zzend);
 zzbegin = 1/azbegin-1;
 zzend   = 1/azend  -1;
 
-save([outputdir '/zz.dat'], 'zzbegin','zzend', '-ascii');
+if matlabflag
+  save([outputdir '/zz.dat'], 'zzbegin','zzend', '-ascii');
+else
+  save('-ascii', [outputdir '/zz.dat'], 'zzbegin','zzend');
+end
 disp('----------------Main integration starting----------------');
 ic = icc1;
 jc = icc2;
