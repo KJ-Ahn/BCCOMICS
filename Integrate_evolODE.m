@@ -45,7 +45,7 @@ if matlabflag
 else
   save('-ascii', [outputdir '/zz.dat'], 'zzbegin','zzend');
 end
-disp('----------------Main integration starting----------------');
+
 ic = icc1;
 jc = icc2;
 kc = icc3;

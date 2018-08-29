@@ -40,6 +40,17 @@
 %% and compare to one-swoop integration of "Fgrow". They match nicely.
 %%%%
 
+%% Need to backward integrate with decreasing scale factor.
+%% Some old version of ode45 does not allow this. If so, use
+%% provided ODE package. The 6-line snippet below is for checking
+%% this capability and switching to provided ODE pkg in case.
+tspan = [1 0];
+y0 = 0;
+[t,y] = ode45(@(t,y) t, tspan, y0);
+if (length(t)==1) %% if ode45 does not do backward integration, length(t)=1.
+  addpath('odepkg-0.8.5');
+end
+
 %% designated scale factors for a-D tables.
 log10a      = linspace(log10(ai), log10(1), 100000)';
 azz         = 10.^log10a;
@@ -99,14 +110,6 @@ F0                   = [Fdecay_init; dFda_init];
 [adodeB, FdecayodeB] = ode45(@Fdecay, [abegin, 1/(1+1000)], F0, options);
 FdecayodeB1          = FdecayodeB(:,1);
 FdecayodeB2          = FdecayodeB(:,2);
-%% -- Need to backward-integrate, but some old versions of ode45 do not allow this.
-%% -- In this case, integration halts and the output array is just F0.
-%% -- So stop the code in this case, and you need to upgrade the ode45 version.
-if (length(adodeB) == 1)
-  disp('Installed ode45 version not allowing backward integration; Halting.');
-  disp('Please update ode package for gnu octave.');
-  return;
-end
 
 [adodeF, FdecayodeF] = ode45(@Fdecay, [abegin, 1], F0, options);
 FdecayodeF1 = FdecayodeF(:,1);

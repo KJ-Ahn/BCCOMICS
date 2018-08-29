@@ -1,5 +1,9 @@
 %% Generate 3D real-space maps at z=zi=1000
 
+k1_3D = zeros(Nmode,Nmode,Nmode);
+k2_3D = zeros(Nmode,Nmode,Nmode);
+k3_3D = zeros(Nmode,Nmode,Nmode);
+
 %% k1 component on each (k1,k2,k3) point, as a 3D matrix
 for ik=-Nhalf:Nhalf
   k1               = kunit*ik;

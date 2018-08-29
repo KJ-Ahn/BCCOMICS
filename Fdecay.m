@@ -1,4 +1,5 @@
-%% as expanded over trivial solution by Tseliakhovich & Hirata
+%% Eq. 27 of A16, after calculating dlnH/da and Omega_matter
+
 function dFda = Fdecay(a,F)
   global Om0 Omr0 OmLambda0;
 

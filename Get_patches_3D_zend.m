@@ -39,6 +39,10 @@ end
 if plotflag
   ifig = ifig+1;
   figure(ifig);
+  if ~matflag
+    disp('Be patient, hist2 plot takes a few minutes');
+  end
   hist2d([Dc3D_azend(:),THc3D_azend(:)],100,100);
+  daspect([1 1 1]);
   view(2);
 end

@@ -32,19 +32,25 @@ stddec  = std(Deltadec(:));
 if plotflag
   ifig = ifig+1;
   figure(ifig);
-  %% actual data
+  %% actual data in histogram
   if matlabflag
-    histogram(Vcb,100,'Normalization','probability');
+    hh     = histogram(Vcb(:)*MpcMyr_2_kms,100,'Normalization','probability');
+    drelVV = hh.BinWidth;
   else
-    hist(Vcb,100,1);
+    [nn,xx] = hist(Vcb(:)*MpcMyr_2_kms,100,1); %% xx: bin centers
+    drelVV  = xx(2)-xx(1);
   end
   hold on;
   stdVcb_1D_kms = rmsVcb*MpcMyr_2_kms/sqrt(3)
-  relVV = stdVcb_1D_kms*(0:0.05:30);
-  %% theoretical
-  fVV = sqrt(2/pi)*(relVV.^2/stdVcb_1D_kms^3).*exp(-relVV.^2 /2/stdVcb_1D_kms^2);
-  plot(relVV,fVV);
-  axis([0 100 0 0.04])
+  relVV         = stdVcb_1D_kms*(0:0.02:10);
+  %% theoretical in curve: P(Vbc)*dVbc, where P(Vbc) is given by eq. 14 of A16
+  %% and dVbc(=drelVV) is the bin width from histogram 
+  fVV           = sqrt(2/pi)*(relVV.^2/stdVcb_1D_kms^3).*exp(-relVV.^2 /2/stdVcb_1D_kms^2)*drelVV;
+  plot(relVV,fVV,'h');
+  axis([0 100 0 0.04]);
+  xlabel('V_{cb} (km/s)');
+  ylabel('probability');
+  hold off;
 end
 
 %% In case azend values are used...

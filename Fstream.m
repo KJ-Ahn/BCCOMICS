@@ -1,4 +1,4 @@
-%% as expanded over trivial solution by Tseliakhovich & Hirata
+%% Eq. 28 of A16, after calculating dlnH/da
 function dFda = Fstream(a,F)
   global Om0 Omr0 OmLambda0;
 
