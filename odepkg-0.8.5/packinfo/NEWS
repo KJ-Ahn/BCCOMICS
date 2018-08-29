@@ -1,0 +1,21 @@
+Summary of important user-visible changes for releases of the odepkg package
+
+====================================================================================
+odepkg-0.8.5   Release Date: 2015-05-19   Release Manager: Jacopo Corno
+====================================================================================
+
+ ** enable to work on octave 4.0 (thanks to Tatsuro Matsuoka)
+    See discussuion on the octave-maintainers list
+    http://octave.1599824.n4.nabble.com/Octave-Forge-Octave-4-0-call-for-packages-td4669204i20.html#a4669709
+
+
+===============================================================================
+odepkg-0.8.4   Release Date: 2013-02-22   Release Manager: Thomas Treichl
+===============================================================================
+
+ ** Added new function ode23s.
+
+ ** Makefile fixed to work with non-standard linker options e.g on
+    Apple.
+
+ ** Package is no longer automatically loaded.

@@ -1,0 +1,11 @@
+Name: OdePkg
+Version: 0.8.5
+Date: 2015-05-19
+Author: Thomas Treichl <treichl@users.sourceforge.net>
+Maintainer: Jacopo Corno <corno@gsc.tu-darmstadt.de>
+Title: OdePkg
+Description: A package for solving ordinary differential equations and more.
+Categories: Differential Equations
+Depends: octave (>= 3.8.0)
+License: GPLv2+
+Url: http://octave.sf.net

@@ -9,6 +9,8 @@ Cosmology  = 'LCDM.m'; %% '*.m' file containing cosmological parameters
 plotflag   = false     %% true if plots wanted, or false
 matlabflag = false     %% true if using MATLAB, false if using gnu octave
 THflag     = false     %% true if formalism by Tseliakhovich & Hirata and its output are ALSO wanted
+OWRTflag   = true      %% true if to overwrite existing data output (under outputdir/deltas and outputdir/deltasTH) wanted.
+
 zzend      = 200;    %% Redshift at which you want to have initial condition.
 
 %% Box configuration for patches. Ncell being an odd number makes FFTing

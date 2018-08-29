@@ -84,6 +84,37 @@ if choose_zi_flag
   Vcbnum = input(['Enter Vbc at z = ' num2str(zi) ' in units of km/s: ']);
   Vcbnum = abs(Vcbnum) /MpcMyr_2_kms; %% into Mpc/Myr unit
 
+  %% Find index of patches with user-selected overdensity and Vcb (with ~1% margin)
+  %% Need ee*sDc and ee*rmsVcb for odnum=0 case.
+  %% numeric flags are multiplied below to mimic "AND" boolean
+  ind_od  = find(((1-ee)*odnum -ee*stdDc <= Delta_c(:)).*(Delta_c(:) <= (1+ee)*odnum +ee*stdDc ));
+  ind_vcb = find(((1-ee)*Vcbnum          <= Vcb(:)    ).*(Vcb(:)     <= (1+ee)*Vcbnum+ee*rmsVcb));
+
+  %% indices of patches satisfying both conditions
+  indices_patch = ind_od(ismember(ind_od,ind_vcb));
+  if (length(indices_patch)>0)
+    disp([num2str(length(indices_patch)) ' patches out of total ' num2str(Ncell^3) ' patches satisfy your chosen condition with 1% margin.']);
+  else %% In case no patch is found, relax the condition
+    disp('Loosening patch finding condition to 2%');
+    ind_od  = find(((1-2*ee)*odnum -2*ee*stdDc <= Delta_c(:)).*(Delta_c(:) <= (1+2*ee)*odnum +2*ee*stdDc   ));
+    ind_vcb = find(((1-2*ee)*Vcbnum            <= Vcb(:)    ).*(Vcb(:)     <= (1+2*ee)*Vcbnum+2*ee*rmsVcb));
+
+    indices_patch = ind_od(ismember(ind_od,ind_vcb));
+    if (length(indices_patch)==0)
+      disp('No such patch exists. Note that Vcb=0 case is very rare by nature!!');
+      disp('Also check whether Vcb is in km/s and not like 6 sigma away from zero.');
+      return;  
+    end
+  end
+
+  %% Find the best matching patch
+  disp('----------------One best matching patch is being found----------------');
+  relerr = (Delta_c(indices_patch)-odnum).^2/stdDc^2 + (Vcb(indices_patch)-Vcbnum).^2/rmsVcb^2;
+  [minrelerr, indmin] = min(relerr);
+  ind_patch = indices_patch(indmin);
+  disp(['Wanted Delta_c = ' num2str(odnum*stdDc) '; Selected patch''s Delta_c = ' num2str(Delta_c(ind_patch))]);
+  disp(['Wanted Vcb = ' num2str(Vcbnum*MpcMyr_2_kms) ' km/s; Selected patch''s Vcb = ' num2str(Vcb(ind_patch)*MpcMyr_2_kms) ' km/s']);
+  %% When azend values are used: --------------------------------------------- end
 else
   %% When zzend values are used: ------------------------------------------- begin
   disp(['Standard deviation of CDM overdensities (sDc) is ' num2str(sDc_azend)]);

@@ -90,19 +90,26 @@ end
 %% Some old versions of gnu octave has buggy ifftshift routine, so for
 %% octave version older than 4.0.1, just use working one under the provided
 %% directory. In case statistics package (for raylrnd) is not installed,
-%% use provided statistics package.
+%% use provided statistics package. In case ode45 is not available, use
+%% provided ODE package. All this can be avoided by upgrading to recent
+%% octave version and installing octave-statistics package.
 if ~matlabflag
   if compare_versions(OCTAVE_VERSION,'4.0.1','<')
     %% Messages "warning: function * shadows ..." should be welcomed.
     addpath('mfiles_for_octave'); 
   end
-  if (exist('raylrnd')==0)
-    addpath('statistics-1.3.0');
+  if ~exist('raylrnd')
+    addpath('statistics-1.3.0/inst');
+  end
+  if ~exist('ode45')
+    addpath('odepkg-0.8.5');
   end
 end
 
 %% Create directory to dump outputs
-mkdir(outputdir);
+if ~exist(outputdir)
+  mkdir(outputdir);
+end
 
 %% take time unit to be 10^6 year, and length unit to be Mpc.
 global mH kb MpcMyr_2_kms;

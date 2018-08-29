@@ -1,3 +1,5 @@
+%% Generate 3D real-space maps at z=zzend
+
 V_cb_1_azend = V_cb_1 * (azbegin/azend);
 V_cb_2_azend = V_cb_2 * (azbegin/azend);
 V_cb_3_azend = V_cb_3 * (azbegin/azend);
