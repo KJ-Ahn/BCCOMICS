@@ -1,0 +1,118 @@
+statistics >> Statistics
+Distributions
+ anderson_darling_cdf
+ bbscdf bbsinv bbspdf bbsrnd
+ betastat
+ binostat binotest
+ burrcdf burrinv burrpdf burrrnd
+ cdf
+ chi2stat
+ cl_multinom
+ copulacdf copulapdf copularnd
+ expstat
+ fstat
+ gamlike
+ gamstat
+ geostat
+ gevcdf gevfit gevfit_lmom gevinv gevlike gevpdf gevrnd gevstat
+ gpcdf gpinv gppdf gprnd
+ hygestat
+ iwishpdf iwishrnd
+ jsucdf
+ jsupdf
+ lognstat
+ mvnpdf mvnrnd mvncdf
+ mnpdf mnrnd
+ mvtcdf mvtpdf mvtrnd
+ nakacdf nakainv nakapdf nakarnd
+ nbinstat
+ normalise_distribution
+ normstat
+ pdf
+ poisstat
+ qrandn
+ random
+ randsample
+ raylcdf raylinv raylpdf raylrnd raylstat
+ tstat
+ tricdf triinv tripdf trirnd
+ unidstat
+ unifstat
+ vmpdf vmrnd
+ wblstat
+ wishpdf wishrnd
+Descriptive statistics
+ combnk
+ dcov
+ geomean
+ harmmean
+ jackknife
+ mad
+ nanmax
+ nanmean
+ nanmedian
+ nanmin
+ nanstd
+ nansum
+ nanvar
+ trimmean
+ tabulate
+Experimental design
+ fullfact ff2n
+Regression
+ anovan
+ crossval
+ monotone_smooth
+ princomp
+ pcares
+ pcacov
+ plsregress
+ regress
+ regress_gp
+ stepwisefit
+Plots
+ boxplot
+ dendrogram
+ histfit
+ hist3
+ normplot
+ repanova
+ violin
+Models
+ hmmestimate 
+ hmmgenerate 
+ hmmviterbi
+Hypothesis testing
+ anderson_darling_test
+ runstest
+ signtest
+ ttest
+ ttest2
+ vartest
+ vartest2
+ ztest
+Fitting
+ gamfit
+Clustering
+ cmdscale
+ kmeans
+ linkage
+ mahal
+ pdist
+ pdist2
+ squareform
+Reading and Writing
+ caseread
+ casewrite
+ tblread
+ tblwrite
+Cvpartition (class of set partitions for cross-validation, used in crossval)
+ @cvpartition/cvpartition
+ @cvpartition/display
+ @cvpartition/get 
+ @cvpartition/repartition
+ @cvpartition/set
+ @cvpartition/test
+ @cvpartition/training
+Categorical data
+ grp2idx
