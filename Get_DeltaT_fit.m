@@ -1,9 +1,6 @@
 %% Prepares for DeltaT fit.
 %% Also generates DeltaT at azend.
 
-global beta gamma;
-global signDT alpha coeff_Delta_T;
-
 %% construct 3D field of DTA
 %% 0.279 is the coefficient, but depending on cosmology this
 %% can be somewhat different

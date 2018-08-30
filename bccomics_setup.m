@@ -51,8 +51,8 @@
 %%
 %% Some details:
 %% ----------
-%% Evolve_DeltaT_accurate.m and Check_mu_symmetry.m are NOT used. These are
-%% just for reference.
+%% Evolve_DeltaT_accurate.m, fdDTda.m, Check_mu_symmetry.m are NOT used.
+%% These are just for reference and possible future update.
 %%
 %% Capital lettered (Delta, Theta, ..) matter quantities describe patch
 %% quantities. They are evolved with linear growth factors: constant for the 
@@ -283,13 +283,14 @@ gauss3D = reshape(gauss(1:Nmode^3),Nmode,Nmode,Nmode);
 disp('----------------Generating real-space 3D fields----------------');
 %% Random-number-seeding and FFTing to generate 3D fields of patches at z=zi=1000
 Get_patches_3D_zi;  %%==== script ==================
-return;
 
 azbegin = ai;    %% z=1000
 azend   = 1/(1+zzend);
 
 %% By using modes generate 3D fields of patches at z=zzend.
 %% Only for DeltaT, fitting formula is used (Get_DeltaT_fit used inside the script)
+global beta gamma;
+global signDT alpha coeff_Delta_T;
 Get_patches_3D_zend;  %%==== script ==================
 
 %% Choose a patch at z=zi=1000. Cherry picking!! 
@@ -297,8 +298,8 @@ Get_patches_3D_zend;  %%==== script ==================
 Choose_patch;  %%==== script ==================
 
 %% master equation for high k modes:
-%% *_kk is one of the 4 modes at one given k value.
-global ksample costh Deltagro_kk Deltadec_kk Deltacom_kk Deltastr_kk;
+%% *_p are the 4 modes at a chosen patch
+global ksample costh Deltagro_p Deltadec_p Deltacom_p Deltastr_p;
 
 %% for mu(=cosine of angle between Vcb and k) loop
 dmu = 0.05;
@@ -315,4 +316,6 @@ disp('----------------Integrating----------------');
 %% Integrate evolution ODE equation, eq. 11 of A16.
 %% If wanted(THflag), evolution equation by TH is also solved for reference.
 %% Also dump fluctuations at zzend, which will be used by bccomics.m
+global Thc_i Thb_i rV_i;
+return;
 Integrate_evolODE;  %%==== script ==================

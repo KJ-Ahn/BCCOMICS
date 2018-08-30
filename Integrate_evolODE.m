@@ -68,16 +68,16 @@ for isample=1:Nsample  %% this loop takes a long while!!
     return;
   end
   if (~exist(stroutD) || OWRTflag)
-    Deltagro_kk   = Dgro3D (ic, jc, kc);
-    Deltadec_kk   = Ddec3D (ic, jc, kc);
-    Deltacom_kk   = Dcom3D (ic, jc, kc);
-    Deltastr_kk   = Dstr3D (ic, jc, kc);
-    Thc_i         = Theta_c(ic, jc, kc);
-    Thb_i         = Theta_b(ic, jc, kc);
+    Deltagro_kk   = Deltagro(ic, jc, kc);
+    Deltadec_kk   = Deltadec(ic, jc, kc);
+    Deltacom_kk   = Deltacom(ic, jc, kc);
+    Deltastr_kk   = Deltastr(ic, jc, kc);
+    Thc_i         = Theta_c (ic, jc, kc);
+    Thb_i         = Theta_b (ic, jc, kc);
     signDT        = sign(DTA3D(ic, jc, kc));
-    alpha         = log10(DTB3D(ic,jc,kc)/DTA3D(ic,jc,kc))*alphacoeff;
+    alpha         = log10(DTB3D(ic,jc,kc)/DTA3D(ic,jc,kc))*alphaYcoeff;
     coeff_Delta_T = abs(DTA3D(ic,jc,kc))^powDTA /abs(DTB3D(ic,jc,kc))^powDTB; %% 10^-Y, Y defined in eq. 30 of A16
-    rV_i          = Vcb    (ic, jc, kc);
+    rV_i          = Vcb     (ic, jc, kc);
 
     %% These are complex values.
     %% for a given patch(icc).

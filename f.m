@@ -14,7 +14,7 @@
 function dxda = f(a,x)
   global mH kb MpcMyr_2_kms H0 Om0 Omr0 OmLambda0 TCMB0 ai aa1 aa2 fb fc Thc_i Thb_i rV_i;
   global Dplus_grow Dplus_decay Dminus_stream dDplus_grow_da dDplus_decay_da azz log10az_min dlog10az;
-  global Deltagro_kk Deltadec_kk Deltacom_kk Deltastr_kk;
+  global Deltagro_p Deltadec_p Deltacom_p Deltastr_p;
   global signDT alpha coeff_Delta_T beta gamma;
   global log10az_min dlog10az
   global zrecf xerecf dzrecf zrecf1 tgamma;
@@ -50,16 +50,16 @@ function dxda = f(a,x)
   dDpd_da = (dDplus_decay_da(ind2)-dDplus_decay_da(ind1))/(az2-az1)*(a-az1)+dDplus_decay_da(ind1); %% dD^{d}(a)/da in A16, Eq. 7.
 
   %% now for large-scale Delta_c, Delta_b, Theta_c, Theta_b
-  Delta_plus_g    = Deltagro_kk * Dpg;  %% Deltagro_kk = Delta_{gro} in A16, Eq. 7.
-  Delta_plus_d    = Deltadec_kk * Dpd;  %% Deltadec_kk = Delta_{dec} in A16, Eq. 7.
-  Delta_minus_str = Deltastr_kk * Dms;  %% Deltastr_kk = Delta_{str} in A16, Eq. 7.
+  Delta_plus_g    = Deltagro_p * Dpg;  %% Deltagro_p = Delta_{gro} in A16, Eq. 7.
+  Delta_plus_d    = Deltadec_p * Dpd;  %% Deltadec_p = Delta_{dec} in A16, Eq. 7.
+  Delta_minus_str = Deltastr_p * Dms;  %% Deltastr_p = Delta_{str} in A16, Eq. 7.
 
-  Theta_plus_g    = -aH* Deltagro_kk * dDpg_da;
-  Theta_plus_d    = -aH* Deltadec_kk * dDpd_da;
+  Theta_plus_g    = -aH* Deltagro_p * dDpg_da;
+  Theta_plus_d    = -aH* Deltadec_p * dDpd_da;
   
   %% A16, Eq. 7.
-  Delta_c = (Delta_plus_g + Delta_plus_d) +fb*(Deltacom_kk + Delta_minus_str);
-  Delta_b = (Delta_plus_g + Delta_plus_d) -fc*(Deltacom_kk + Delta_minus_str);
+  Delta_c = (Delta_plus_g + Delta_plus_d) +fb*(Deltacom_p + Delta_minus_str);
+  Delta_b = (Delta_plus_g + Delta_plus_d) -fc*(Deltacom_p + Delta_minus_str);
   Theta_c = (Theta_plus_g + Theta_plus_d) +fb*(Thc_i-Thb_i)*(a/ai)^-2;
   Theta_b = (Theta_plus_g + Theta_plus_d) -fc*(Thc_i-Thb_i)*(a/ai)^-2;
   rV      = rV_i * (a/ai)^-1;
