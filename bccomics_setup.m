@@ -325,5 +325,5 @@ disp('----------------Integrating----------------');
 %% If wanted(THflag), evolution equation by TH is also solved for reference.
 %% Also dump fluctuations at zzend, which will be used by bccomics.m
 global Thc_i Thb_i rV_i;
-return;
+
 Integrate_evolODE;  %%==== script ==================

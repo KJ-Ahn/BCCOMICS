@@ -84,6 +84,7 @@ if (~exist(stroutD) || OWRTflag)  %% big if beginning
     x0 = [delta_c_k(isample); theta_c_k(isample); delta_b_k(isample); theta_b_k(isample); delta_c_k(isample); theta_c_k(isample); delta_b_k(isample); theta_b_k(isample); delta_T_k(isample); delta_T_k(isample)]/sqrt(2);
 
     for imu=1:Nmu
+      disp(['* ' num2str(imu) 'th angle otta ' num2str(Nmu) ' is being handled.']);
       costh = mu(imu);
 
       %% A16 ================
