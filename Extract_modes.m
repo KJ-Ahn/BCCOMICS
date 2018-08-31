@@ -58,6 +58,7 @@ iz2 = lookUP(zzz,800);
 if (zzz(iz1)~=1000 | zzz(iz2)~=800)  %% little safeguard
   disp('Designated redshifts for mode extraction not chosen or files nonexixtent.')
   return;
+  returnflag = true;
 end
 
 Delta_plus_1  = fc*Dc(:,iz1) + fb*Db(:,iz1);

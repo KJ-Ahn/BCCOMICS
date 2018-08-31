@@ -28,6 +28,14 @@ stdstr  = std(Deltastr(:));
 stdgro  = std(Deltagro(:));
 stddec  = std(Deltadec(:));
 
+%% record some stats at zi
+datstat = [stdDc stdTc rmsVc*MpcMyr_2_kms stdDb stdTb rmsVb*MpcMyr_2_kms rmsVcb*MpcMyr_2_kms Vcbp*MpcMyr_2_kms stdT];
+fout    = fopen([outputdir '/stats_zi.dat'],'w');
+fprintf(fout,'@ zi:  stdDc stdThc rmsVc stdDb stdThb rmsVb rmsVcb Vcbp stdT\n');
+fprintf(fout,'Units: None  Myr^-1 km/s  None  Myr^-1 km/s  km/s   km/s None\n');
+fprintf(fout,'%e %e %e %e %e %e %e %e %e\n', datstat);
+fclose(fout);
+
 %% PDF of relV at z=1000
 if plotflag
   ifig = ifig+1;
@@ -80,8 +88,9 @@ if choose_zi_flag
   else
     disp('Wrong choice.');
     return;
+    returnflag=true;
   end
-  disp(['CDM overdensity chosen: Delta_c = ' num2str(odnum) '*sDc = ' num2str(odnum*stdDc)]);
+  disp(['CDM overdensity chosen: Delta_c = ' num2str(odnum/stdDc) '*sDc = ' num2str(odnum)]);
   disp('---------------------------------------');
 
   disp(['RMS of Vbc (rmsV) at z = ' num2str(zi) ' is ' num2str(rmsVcb*MpcMyr_2_kms) ' km/s']);
@@ -110,6 +119,7 @@ if choose_zi_flag
       disp('No such patch exists. Note that Vcb=0 case is very rare by nature!!');
       disp('Also check whether Vcb is in km/s and not like 6 sigma away from zero.');
       return;  
+      returnflag=true;
     end
   end
 
@@ -118,7 +128,7 @@ if choose_zi_flag
   relerr = (Delta_c(indices_patch)-odnum).^2/stdDc^2 + (Vcb(indices_patch)-Vcbnum).^2/rmsVcb^2;
   [minrelerr, indmin] = min(relerr);
   ind_patch = indices_patch(indmin);
-  disp(['Wanted Delta_c = ' num2str(odnum*stdDc) '; Selected patch''s Delta_c = ' num2str(Delta_c(ind_patch))]);
+  disp(['Wanted Delta_c = ' num2str(odnum) '; Selected patch''s Delta_c = ' num2str(Delta_c(ind_patch))]);
   disp(['Wanted Vcb = ' num2str(Vcbnum*MpcMyr_2_kms) ' km/s; Selected patch''s Vcb = ' num2str(Vcb(ind_patch)*MpcMyr_2_kms) ' km/s']);
   %% When azend values are used: --------------------------------------------- end
 else
@@ -140,8 +150,9 @@ else
   else
     disp('Wrong choice.');
     return;
+    returnflag=true;
   end
-  disp(['CDM overdensity chosen: Delta_c = ' num2str(odnum) '*sDc = ' num2str(odnum*sDc_azend)]);
+  disp(['CDM overdensity chosen: Delta_c = ' num2str(odnum/sDc_azend) '*sDc = ' num2str(odnum)]);
   disp('---------------------------------------');
 
   disp(['RMS of Vbc (rmsV) at z = ' num2str(zzend) ' is ' num2str(rmsVcb_azend*MpcMyr_2_kms) ' km/s']);
@@ -171,6 +182,7 @@ else
       disp('No such patch exists. Note that Vcb=0 case is very rare by nature!!');
       disp('Also check whether Vcb is in km/s and not like 6 sigma away from zero.');
       return;  
+      returnflag=true;
     end
   end
 
@@ -179,7 +191,7 @@ else
   relerr = (Dc3D_azend(indices_patch)-odnum).^2/sDc_azend^2 + (Vcb_azend(indices_patch)-Vcbnum).^2/rmsVcb_azend^2;
   [minrelerr, indmin] = min(relerr);
   ind_patch = indices_patch(indmin);
-  disp(['Wanted Delta_c = ' num2str(odnum*sDc_azend) '; Selected patch''s Delta_c = ' num2str(Dc3D_azend(ind_patch))]);
+  disp(['Wanted Delta_c = ' num2str(odnum) '; Selected patch''s Delta_c = ' num2str(Dc3D_azend(ind_patch))]);
   disp(['Wanted Vcb = ' num2str(Vcbnum*MpcMyr_2_kms) ' km/s; Selected patch''s Vcb = ' num2str(Vcb_azend(ind_patch)*MpcMyr_2_kms) ' km/s']);
   %% When azend values are used: --------------------------------------------- end
 end
@@ -194,11 +206,25 @@ if exist([outputdir '/icc.dat'], 'file')
   if ismember(icc,icc_read)
     disp('The patch has already been selected. Quitting');
     return;
+    returnflag=true;
   end
 end
 
 fout=fopen([outputdir '/icc.dat'],'a');
 fprintf(fout,'%i %i %i\n',icc');
+fclose(fout);
+
+daticc(1) = Delta_c(icc1,icc2,icc3);
+daticc(2) = Delta_b(icc1,icc2,icc3);
+daticc(3) = Theta_c(icc1,icc2,icc3);
+daticc(4) = Theta_b(icc1,icc2,icc3);
+daticc(5) = V_cb_1 (icc1,icc2,icc3)*MpcMyr_2_kms;
+daticc(6) = V_cb_2 (icc1,icc2,icc3)*MpcMyr_2_kms;
+daticc(7) = V_cb_3 (icc1,icc2,icc3)*MpcMyr_2_kms;
+daticc(8) = sqrt(daticc(5).^2 + daticc(6).^2 + daticc(7).^2);
+daticc(9) = Delta_T(icc1,icc2,icc3);
+fout=fopen([outputdir '/zi_icc_Dc_Db_Thc_Thb_Vcb1_Vcb2_Vcb3_Vcb_DT.dat'],'a');
+fprintf(fout,'%i %i %i %e %e %e %e %e %e %e %e %e\n',[icc daticc]');
 fclose(fout);
 
 daticc(1) = Dc3D_azend  (icc1,icc2,icc3);
@@ -210,7 +236,7 @@ daticc(6) = V_cb_2_azend(icc1,icc2,icc3)*MpcMyr_2_kms;
 daticc(7) = V_cb_3_azend(icc1,icc2,icc3)*MpcMyr_2_kms;
 daticc(8) = sqrt(daticc(5).^2 + daticc(6).^2 + daticc(7).^2);
 daticc(9) = DT3D_azend  (icc1,icc2,icc3);
-fout=fopen([outputdir '/icc_Dc_Db_Thc_Thb_Vcb1_Vcb2_Vcb3_Vcb_DT.dat'],'a');
+fout=fopen([outputdir '/zend_icc_Dc_Db_Thc_Thb_Vcb1_Vcb2_Vcb3_Vcb_DT.dat'],'a');
 fprintf(fout,'%i %i %i %e %e %e %e %e %e %e %e %e\n',[icc daticc]');
 fclose(fout);
 

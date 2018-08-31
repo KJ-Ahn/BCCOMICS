@@ -9,10 +9,15 @@
 %% free to modify it or port it into other languages. BCCOMICS is under
 %% an absolutely no-warranty condition. It is assumed that you consent
 %% to one condition: when you get scientific results using BCCOMICS
-%% and publish them, you need to cite these two papers:
+%% and publish them, in your paper you need to cite this paper
+%% (please use journal-provided id after publication),
 %% ---------
-%% Ahn 2016, ApJ 830:68 (A16)
-%% Ahn & Smith 2018, arXiv:1807.04063 (AS18, to be replaced if published)
+%% Ahn & Smith 2018, arXiv:1807.04063 (AS18).
+%% ---------
+%% For detailed theoretical background, please cite this paper
+%% (not a requirement for using this code though)
+%% ---------
+%% Ahn 2016, ApJ 830:68 (A16).
 %% ---------
 %%
 %% Other references:
@@ -78,6 +83,7 @@
 %%
 
 more off; %% enables to see progress
+returnflag = false; %% main program need to stop when script stops.
 
 %% Detect which is running: octave or matlab?
 if (exist('OCTAVE_VERSION','builtin'))
@@ -241,6 +247,9 @@ Get_growth;  %%==== script ==================
 
 %%%%%%%% mode extraction and, if wanted, some plotting ----------------------- begin
 Extract_modes;  %%==== script ==================
+if returnflag %% inherit scriptwise return
+  return;  
+end
 
 %% --- plot ---
 if plotflag
@@ -304,6 +313,9 @@ Get_patches_3D_zend;  %%==== script ==================
 %% Choose a patch at z=zi=1000. Cherry picking!! 
 %% Right now, variances in (1) CDM density, (2) V_cb.
 Choose_patch;  %%==== script ==================
+if returnflag  %% inherit scriptwise return
+  return;
+end
 
 %% master equation for high k modes:
 %% *_p are the 4 modes at a chosen patch

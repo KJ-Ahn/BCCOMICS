@@ -65,10 +65,10 @@ if THflag
 end
 
 if (~exist(stroutD) || OWRTflag)  %% big if beginning
-  Deltagro_p   = Deltagro(ic, jc, kc);
-  Deltadec_p   = Deltadec(ic, jc, kc);
-  Deltacom_p   = Deltacom(ic, jc, kc);
-  Deltastr_p   = Deltastr(ic, jc, kc);
+  Deltagro_p    = Deltagro(ic, jc, kc);
+  Deltadec_p    = Deltadec(ic, jc, kc);
+  Deltacom_p    = Deltacom(ic, jc, kc);
+  Deltastr_p    = Deltastr(ic, jc, kc);
   Thc_i         = Theta_c (ic, jc, kc);
   Thb_i         = Theta_b (ic, jc, kc);
   signDT        = sign(DTA3D(ic, jc, kc));
