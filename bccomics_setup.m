@@ -5,7 +5,7 @@
 %%
 %% Author: Kyungjin Ahn
 %%
-%% This MATLAB(c) / GNU Octave code is freely distributed, and you are
+%% This MATLAB(R) / GNU Octave code is freely distributed, and you are
 %% free to modify it or port it into other languages. BCCOMICS is under
 %% an absolutely no-warranty condition. It is assumed that you consent
 %% to one condition: when you get scientific results using BCCOMICS
@@ -78,6 +78,14 @@
 %%
 
 more off; %% enables to see progress
+
+%% Detect which is running: octave or matlab?
+if (exist('OCTAVE_VERSION','builtin'))
+  matlabflag=false;
+else
+  matlabflag=true;
+end
+
 disp('----------------Initializing----------------');
 %% Read in essential parameters
 params;  %%==== script ==================

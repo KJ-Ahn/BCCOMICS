@@ -7,7 +7,6 @@ TFstr2     = '_out.dat';                                  %% CAMB TF output stri
 zxestr     = 'output_recfast'; %% redshift-(ionized fraction) data; recfast preferred
 Cosmology  = 'LCDM.m'; %% '*.m' file containing cosmological parameters that were used as inputs for CAMB
 plotflag   = false     %% true if plots wanted, or false
-matlabflag = false     %% true if using MATLAB, false if using gnu octave
 THflag     = false     %% true if formalism by Tseliakhovich & Hirata and its output are ALSO wanted
 OWRTflag   = true      %% true if to overwrite existing data output (under outputdir/deltas and outputdir/deltasTH) wanted.
 
