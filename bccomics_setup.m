@@ -34,7 +34,7 @@
 %%               you are free to change this size depending on the physics
 %%               you are interested in.
 %%
-%%               User is needed to supply parameters in params.m,
+%%               User is needed to supply parameters in params_setup.m,
 %%               CAMB transfer function outputs, and recfast output.
 %%               CAMB parameters should be reflected in a .m file, as in
 %%               LCDM.m. The source code comes with pre-calculated CAMB
@@ -94,11 +94,12 @@ end
 
 disp('----------------Initializing----------------');
 %% Read in essential parameters
-params;  %%==== script ==================
+params_setup;  %%==== script ==================
 %% Define some box-related quantities
 box_init;  %%==== script ==================
 if (mod(Ncell,2)==0)
   disp('Choose an odd number to make a patch 4 Mpc in size');
+  clear; %% clearing workspace (memory)
   return;
 end
 if (Lcell ~= 4)
@@ -112,7 +113,7 @@ end
 %% octave version older than 4.0.1, just use working one under the provided
 %% directory. In case statistics package (for raylrnd) is not installed,
 %% use provided statistics package. In case ode45 is not available, use
-%% provided ODE package. All this can be avoided by upgrading to recent
+%% provided ODE package. All this can be avoided by upgrading to most recent
 %% octave version and installing octave-statistics package.
 if ~matlabflag
   if compare_versions(OCTAVE_VERSION,'4.0.1','<')
@@ -208,11 +209,13 @@ zrecf1 = zrecf(1);
 %% a bit of safeguard for non-uniform-z recfast table
 if (dzrecf ~= zrecf(9)-zrecf(10))
   disp('Recfast output is not uniform in z. Quitting.');
+  clear;
   return;
 end
 %% table should be in descending order in z
 if (zrecf(1) < zrecf(2))
   disp('z-xe table should have decreasing z');
+  clear;
   return;
 end
 
@@ -248,6 +251,7 @@ Get_growth;  %%==== script ==================
 %%%%%%%% mode extraction and, if wanted, some plotting ----------------------- begin
 Extract_modes;  %%==== script ==================
 if returnflag %% inherit scriptwise return
+  clear;
   return;  
 end
 
@@ -314,6 +318,7 @@ Get_patches_3D_zend;  %%==== script ==================
 %% Right now, variances in (1) CDM density, (2) V_cb.
 Choose_patch;  %%==== script ==================
 if returnflag  %% inherit scriptwise return
+  clear;
   return;
 end
 

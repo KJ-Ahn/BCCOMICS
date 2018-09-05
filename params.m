@@ -1,10 +1,6 @@
-%% parameter file for bccomics
-%% DO NOT CHANGE 
+%% parameter file for bccomics.m
+%% "Cosmology" and "zzend" should be inherited from params_setup.m.
 
-outputdir  = 'setup_output';  %% output directory name
-TFstr1     = 'CAMB_for_mode_finding/bccomics_transfer_z'; %% CAMB TF output string (head)
-TFstr2     = '_out.dat';                                  %% CAMB TF output string (tail)
-zxestr     = 'output_recfast'; %% redshift-(ionized fraction) data; recfast preferred
 Cosmology  = 'LCDM.m'; %% '*.m' file containing cosmological parameters that were used as inputs for CAMB
 plotflag   = false     %% true if plots wanted, or false
 THflag     = false     %% true if formalism by Tseliakhovich & Hirata and its output are ALSO wanted
@@ -12,8 +8,10 @@ OWRTflag   = true      %% true if to overwrite existing data output (under outpu
 
 zzend      = 200;    %% Redshift at which you want to have initial condition.
 
-%% Box configuration for patches. Ncell being an odd number makes FFTing
-%% intuitively easier because k runs from -floor(Ncell/2) to floor(Ncell/2),
-%% in a symmetric way.
-Lbox    = 604;         %% in Mpc unit; let it be (odd number)*4
-Ncell   = 151;         %% # of cells along one axis: make it an odd number
+%% Configuration for patch (as a new box). Ncell_p need to be even numbered.
+%% enzo, for example, does not allow odd numbered grid.
+%% Lbox_p should be smaller than Lcell in box_init.m.
+%% Grid resolution = # of CDM particles = Ncell_p^3
+
+Lbox_p    = 1/h;         %% in Mpc unit; let it be (odd number)*4
+Ncell_p   = 512;         %% # of cells along one axis: make it an even number
