@@ -44,8 +44,7 @@ jc = icc2;
 kc = icc3;
 
 %% Main output: fluctuation at zzend as a function of k.
-stroutD   = [TFdir '/Deltas_1Dmu_ic' num2str(ic) '_jc' num2str(jc) '_kc' num2str(kc) '-muhalf.matbin'];
-strouth5D = [TFdir '/Deltas_1Dmu_ic' num2str(ic) '_jc' num2str(jc) '_kc' num2str(kc) '-muhalf.h5'];
+stroutD = [TFdir '/Deltas_1Dmu_ic' num2str(ic) '_jc' num2str(jc) '_kc' num2str(kc) '-muhalf.h5'];
 
 %% These are complex values.
 %% for a given patch(icc).
@@ -56,8 +55,7 @@ deltasThb = zeros(Nsample, Nmu);
 deltasT   = zeros(Nsample, Nmu);
 
 if THflag
-  strTHoutD   = [TFTHdir '/Deltas_TH_1Dmu_ic' num2str(ic) '_jc' num2str(jc) '_kc' num2str(kc) '-muhalf.matbin'];
-  strTHouth5D = [TFTHdir '/Deltas_TH_1Dmu_ic' num2str(ic) '_jc' num2str(jc) '_kc' num2str(kc) '-muhalf.h5'];
+  strTHoutD = [TFTHdir '/Deltas_TH_1Dmu_ic' num2str(ic) '_jc' num2str(jc) '_kc' num2str(kc) '-muhalf.h5'];
 
   deltasc_TH    = zeros(Nsample, Nmu);
   deltasb_TH    = zeros(Nsample, Nmu); 
@@ -86,7 +84,7 @@ if (~exist(stroutD) || OWRTflag)  %% big if beginning
     x0 = [delta_c_k(isample); theta_c_k(isample); delta_b_k(isample); theta_b_k(isample); delta_c_k(isample); theta_c_k(isample); delta_b_k(isample); theta_b_k(isample); delta_T_k(isample); delta_T_k(isample)]/sqrt(2);
 
     for imu=1:Nmu
-      disp(['* ' num2str(imu) 'th angle otta ' num2str(Nmu) ' is being handled.']);
+      disp(['* ' num2str(imu) 'th angle outta ' num2str(Nmu) ' is being handled.']);
       costh = mu(imu);
 
       %% A16 ================
@@ -116,25 +114,21 @@ if (~exist(stroutD) || OWRTflag)  %% big if beginning
   end 
   
   %% Save files: Similar to transfer function output from CAMB.
-  %% Try also saving in hdf5, to make bccomics.m ported to other
-  %% language & optimized & improved.
+  %% Save in hdf5, to make bccomics.m ported to other language 
+  %% & optimized & improved.
   %% '-v7.3' makes simple hdf5 file in Matlab, and compressed.
   %% '-hdf5' makes simple hdf5 file in octave, likely uncompressed.
   %% As intended hdf5 file generated either way contains identical
   %% information and is portable. Size may differ (compressed or not).
   if matlabflag
-    save(stroutD,   'ksampletab', 'deltasc',    'deltasb',    'deltasThc',    'deltasThb',    'deltasT',    '-v6');
-    save(strouth5D, 'ksampletab', 'deltasc',    'deltasb',    'deltasThc',    'deltasThb',    'deltasT',    '-v7.3');
+    save(stroutD,     'ksampletab', 'deltasc',    'deltasb',    'deltasThc',    'deltasThb',    'deltasT',    '-v7.3');
     if THflag
-      save(strTHoutD,   'ksampletab', 'deltasc_TH', 'deltasb_TH', 'deltasThc_TH', 'deltasThb_TH', 'deltasT_TH', '-v6');
-      save(strTHouth5D, 'ksampletab', 'deltasc_TH', 'deltasb_TH', 'deltasThc_TH', 'deltasThb_TH', 'deltasT_TH', '-v7.3');
+      save(strTHoutD, 'ksampletab', 'deltasc_TH', 'deltasb_TH', 'deltasThc_TH', 'deltasThb_TH', 'deltasT_TH', '-v7.3');
     end
   else
-    save('-mat-binary', stroutD,   'ksampletab', 'deltasc',    'deltasb',    'deltasThc',    'deltasThb',    'deltasT'   );
-    save('-hdf5',       strouth5D, 'ksampletab', 'deltasc',    'deltasb',    'deltasThc',    'deltasThb',    'deltasT'   );
+    save('-hdf5',   stroutD,   'ksampletab', 'deltasc',    'deltasb',    'deltasThc',    'deltasThb',    'deltasT'   );
     if THflag
-      save('-mat-binary', strTHoutD,   'ksampletab', 'deltasc_TH', 'deltasb_TH', 'deltasThc_TH', 'deltasThb_TH', 'deltasT_TH');
-      save('-hdf5',       strTHouth5D, 'ksampletab', 'deltasc_TH', 'deltasb_TH', 'deltasThc_TH', 'deltasThb_TH', 'deltasT_TH');
+      save('-hdf5', strTHoutD, 'ksampletab', 'deltasc_TH', 'deltasb_TH', 'deltasThc_TH', 'deltasThb_TH', 'deltasT_TH');
     end
   end
 end  %% big if end
