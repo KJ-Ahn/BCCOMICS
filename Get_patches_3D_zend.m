@@ -16,7 +16,19 @@ THb3D_azend = -aH*(Deltagro*dDpg_da + Deltadec*dDpd_da) +aH*fc*Deltastr*dDms_da;
 %% This also prepares for getting DeltaT at any a.
 Get_DeltaT_fit; %%==== script ==================
 
+%% See last comment in Integrate_evolODE.m why we save in two formats.
 if matlabflag
+  %% to matlab binary format
+  save([outputdir '/V_cb_1_azend.matbin'], 'V_cb_1_azend', '-v6'); % @ azend
+  save([outputdir '/V_cb_2_azend.matbin'], 'V_cb_2_azend', '-v6'); % @ azend
+  save([outputdir '/V_cb_3_azend.matbin'], 'V_cb_3_azend', '-v6'); % @ azend
+  save([outputdir '/Dc3D_azend.matbin'],   'Dc3D_azend',   '-v6'); % @ azend
+  save([outputdir '/Db3D_azend.matbin'],   'Db3D_azend',   '-v6'); % @ azend
+  save([outputdir '/THc3D_azend.matbin'],  'THc3D_azend',  '-v6'); % @ azend
+  save([outputdir '/THb3D_azend.matbin'],  'THb3D_azend',  '-v6'); % @ azend
+  save([outputdir '/DT_azend.matbin'],     'DT3D_azend',   '-v6'); % @ azend
+
+  %% to hdf5 format
   save([outputdir '/V_cb_1_azend.h5'], 'V_cb_1_azend', '-v7.3'); % @ azend
   save([outputdir '/V_cb_2_azend.h5'], 'V_cb_2_azend', '-v7.3'); % @ azend
   save([outputdir '/V_cb_3_azend.h5'], 'V_cb_3_azend', '-v7.3'); % @ azend
@@ -26,6 +38,17 @@ if matlabflag
   save([outputdir '/THb3D_azend.h5'],  'THb3D_azend',  '-v7.3'); % @ azend
   save([outputdir '/DT_azend.h5'],     'DT3D_azend',   '-v7.3'); % @ azend
 else
+  %% to matlab binary format
+  save('-mat-binary', [outputdir '/V_cb_1_azend.matbin'], 'V_cb_1_azend'); % @ azend
+  save('-mat-binary', [outputdir '/V_cb_2_azend.matbin'], 'V_cb_2_azend'); % @ azend
+  save('-mat-binary', [outputdir '/V_cb_3_azend.matbin'], 'V_cb_3_azend'); % @ azend
+  save('-mat-binary', [outputdir '/Dc3D_azend.matbin'],   'Dc3D_azend'  ); % @ azend
+  save('-mat-binary', [outputdir '/Db3D_azend.matbin'],   'Db3D_azend'  ); % @ azend
+  save('-mat-binary', [outputdir '/THc3D_azend.matbin'],  'THc3D_azend' ); % @ azend
+  save('-mat-binary', [outputdir '/THb3D_azend.matbin'],  'THb3D_azend' ); % @ azend
+  save('-mat-binary', [outputdir '/DT_azend.matbin'],     'DT3D_azend'  ); % @ azend
+
+  %% to hdf5 format
   save('-hdf5', [outputdir '/V_cb_1_azend.h5'], 'V_cb_1_azend'); % @ azend
   save('-hdf5', [outputdir '/V_cb_2_azend.h5'], 'V_cb_2_azend'); % @ azend
   save('-hdf5', [outputdir '/V_cb_3_azend.h5'], 'V_cb_3_azend'); % @ azend

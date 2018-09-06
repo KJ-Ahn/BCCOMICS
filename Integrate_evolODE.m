@@ -44,7 +44,8 @@ jc = icc2;
 kc = icc3;
 
 %% Main output: fluctuation at zzend as a function of k.
-stroutD = [TFdir '/Deltas_1Dmu_ic' num2str(ic) '_jc' num2str(jc) '_kc' num2str(kc) '-muhalf.h5'];
+stroutD =   [TFdir '/Deltas_1Dmu_ic' num2str(ic) '_jc' num2str(jc) '_kc' num2str(kc) '-muhalf.matbin'];
+strouth5D = [TFdir '/Deltas_1Dmu_ic' num2str(ic) '_jc' num2str(jc) '_kc' num2str(kc) '-muhalf.h5'];
 
 %% These are complex values.
 %% for a given patch(icc).
@@ -55,7 +56,8 @@ deltasThb = zeros(Nsample, Nmu);
 deltasT   = zeros(Nsample, Nmu);
 
 if THflag
-  strTHoutD = [TFTHdir '/Deltas_TH_1Dmu_ic' num2str(ic) '_jc' num2str(jc) '_kc' num2str(kc) '-muhalf.h5'];
+  strTHoutD   = [TFTHdir '/Deltas_TH_1Dmu_ic' num2str(ic) '_jc' num2str(jc) '_kc' num2str(kc) '-muhalf.matbin'];
+  strTHouth5D = [TFTHdir '/Deltas_TH_1Dmu_ic' num2str(ic) '_jc' num2str(jc) '_kc' num2str(kc) '-muhalf.h5'];
 
   deltasc_TH    = zeros(Nsample, Nmu);
   deltasb_TH    = zeros(Nsample, Nmu); 
@@ -114,21 +116,48 @@ if (~exist(stroutD) || OWRTflag)  %% big if beginning
   end 
   
   %% Save files: Similar to transfer function output from CAMB.
-  %% Save in hdf5, to make bccomics.m ported to other language 
+  %% Save also in hdf5, to make bccomics.m ported to other language 
   %% & optimized & improved.
   %% '-v7.3' makes simple hdf5 file in Matlab, and compressed.
   %% '-hdf5' makes simple hdf5 file in octave, likely uncompressed.
   %% As intended hdf5 file generated either way contains identical
-  %% information and is portable. Size may differ (compressed or not).
+  %% information and is portable.
+  %% Attributes are different, so loading hdf5 file gets messier for
+  %% coding and matlab binary is preferred.
+  %%
+  %% When loading hdf5 file in Matlab:
+  %%  (1) Matlab-saved hdf5: kdata  = h5read(strouth5D, '/ksampletab');
+  %%                         dcdata = h5read(strouth5D, '/deltasc');
+  %%                         ...
+  %%  (2) Octave-saved hdf5: kdata =  h5read(strouth5D, '/ksampletab/value');
+  %%                         dcdata = h5read(strouth5D, '/deltasc/value');
+  %%                         ...
+  %% When loading hdf5 file in Octave:
+  %%  (1) Matlab-saved hdf5: load('-hdf5', strouth5D, 'ksampletab', 'deltasc', ...);
+  %%  (2) Octave-saved hdf5: load('-hdf5', strouth5D, 'ksampletab', 'deltasc', ...);
   if matlabflag
-    save(stroutD,     'ksampletab', 'deltasc',    'deltasb',    'deltasThc',    'deltasThb',    'deltasT',    '-v7.3');
+    %% to matlab binary format
+    save(stroutD,     'ksampletab', 'deltasc',    'deltasb',    'deltasThc',    'deltasThb',    'deltasT',    '-v6');
     if THflag
-      save(strTHoutD, 'ksampletab', 'deltasc_TH', 'deltasb_TH', 'deltasThc_TH', 'deltasThb_TH', 'deltasT_TH', '-v7.3');
+      save(strTHoutD, 'ksampletab', 'deltasc_TH', 'deltasb_TH', 'deltasThc_TH', 'deltasThb_TH', 'deltasT_TH', '-v6');
+    end
+
+    %% to hdf5 format
+    save(strouth5D,     'ksampletab', 'deltasc',    'deltasb',    'deltasThc',    'deltasThb',    'deltasT',    '-v7.3');
+    if THflag
+      save(strTHouth5D, 'ksampletab', 'deltasc_TH', 'deltasb_TH', 'deltasThc_TH', 'deltasThb_TH', 'deltasT_TH', '-v7.3');
     end
   else
-    save('-hdf5',   stroutD,   'ksampletab', 'deltasc',    'deltasb',    'deltasThc',    'deltasThb',    'deltasT'   );
+    %% to matlab binary format
+    save('-mat-binary',   stroutD,   'ksampletab', 'deltasc',    'deltasb',    'deltasThc',    'deltasThb',    'deltasT'   );
     if THflag
-      save('-hdf5', strTHoutD, 'ksampletab', 'deltasc_TH', 'deltasb_TH', 'deltasThc_TH', 'deltasThb_TH', 'deltasT_TH');
+      save('-mat-binary', strTHoutD, 'ksampletab', 'deltasc_TH', 'deltasb_TH', 'deltasThc_TH', 'deltasThb_TH', 'deltasT_TH');
+    end
+
+    %% to hdf5 format
+    save('-hdf5',   strouth5D,   'ksampletab', 'deltasc',    'deltasb',    'deltasThc',    'deltasThb',    'deltasT'   );
+    if THflag
+      save('-hdf5', strTHouth5D, 'ksampletab', 'deltasc_TH', 'deltasb_TH', 'deltasThc_TH', 'deltasThb_TH', 'deltasT_TH');
     end
   end
 end  %% big if end
