@@ -121,20 +121,26 @@ if (~exist(stroutD) || OWRTflag)  %% big if beginning
   %% '-v7.3' makes simple hdf5 file in Matlab, and compressed.
   %% '-hdf5' makes simple hdf5 file in octave, likely uncompressed.
   %% As intended hdf5 file generated either way contains identical
-  %% information and is portable.
-  %% Attributes are different, so loading hdf5 file gets messier for
-  %% coding and matlab binary is preferred.
+  %% data and is portable. 
+  %% BUT,...,
+  %% attributes are different, so loading hdf5 file gets sligtly messy for
+  %% coding and matlab binary is thus preferred for matlab/octave code.
   %%
   %% When loading hdf5 file in Matlab:
-  %%  (1) Matlab-saved hdf5: kdata  = h5read(strouth5D, '/ksampletab');
-  %%                         dcdata = h5read(strouth5D, '/deltasc');
+  %%  (1) Matlab-saved hdf5: ksampletab=h5read(strouth5D, '/ksampletab');
+  %%                         deltasc   =h5read(strouth5D, '/deltasc');
   %%                         ...
-  %%  (2) Octave-saved hdf5: kdata =  h5read(strouth5D, '/ksampletab/value');
-  %%                         dcdata = h5read(strouth5D, '/deltasc/value');
+  %%  (2) Octave-saved hdf5: ksampletab=h5read(strouth5D, '/ksampletab/value');
+  %%                         deltasc   =h5read(strouth5D, '/deltasc/value');
   %%                         ...
   %% When loading hdf5 file in Octave:
   %%  (1) Matlab-saved hdf5: load('-hdf5', strouth5D, 'ksampletab', 'deltasc', ...);
   %%  (2) Octave-saved hdf5: load('-hdf5', strouth5D, 'ksampletab', 'deltasc', ...);
+  %%
+  %% So, loading from Matlab (or other language) needs to detect whether the
+  %% hdf5 file was made by Octave or Matlab, to handle the slightly different
+  %% attribute conventions. Loading from Octave gets much simpler: idential
+  %% syntax is needed. 
   if matlabflag
     %% to matlab binary format
     save(stroutD,     'ksampletab', 'deltasc',    'deltasb',    'deltasThc',    'deltasThb',    'deltasT',    '-v6');
