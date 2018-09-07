@@ -1,3 +1,5 @@
+%% Touched a bit by Kyungjin Ahn to allow Matlab compatibility. ---
+
 %% Copyright (C) 2000 Paul Kienzle
 %%
 %% This program is free software; you can redistribute it and/or modify
@@ -47,7 +49,7 @@
 %% TODO: Clearly, search is asymptotically better than sort, but sort
 %% TODO: is compiled and search is not.  Could support both, or recode
 %% TODO: search in C++, or assume things are good enough as they stand.
-function idx=lookup(table,xi)
+function idx=lookUP(table,xi)
   if isempty (table)
     idx = zeros(size(xi));
   elseif isvector(table)
@@ -66,7 +68,7 @@ function idx=lookup(table,xi)
     end
     idx = reshape (idx, nr, nc);
   else
-    error ("lookup: table must be a vector");
+    error ('lookUP: table must be a vector');
   end
 end
   
