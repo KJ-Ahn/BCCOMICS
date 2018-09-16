@@ -1,3 +1,4 @@
-bccomics_setup_details.m
-*~
+src/bccomics_setup_details.m
+src/*~
+ICs
 setup_output
