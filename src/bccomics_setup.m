@@ -34,7 +34,7 @@
 %%               you are free to change this size depending on the physics
 %%               you are interested in.
 %%
-%%               User is needed to supply parameters in params_setup.m,
+%%               User is needed to supply parameters in params.m,
 %%               CAMB transfer function outputs, and recfast output.
 %%               CAMB parameters should be reflected in a .m file, as in
 %%               'sample/LCDM.m'. The source code comes with pre-calculated CAMB
@@ -75,8 +75,10 @@
 %% The long-term advection is ignored: the growth is calculated but the Eulerian
 %% grid is treated as if it is Lagrangian.
 %%
-%% Radiation fluctuation after z=1000 is NOT considered for evolution of
-%% Delta_T. Delta_T uses the fitting formula (eq. 30 of A16), which is
+%% Initial Delta_T at z=1000 considers radiation fluctuation by
+%% the scheme of NB (eq. 13 of A16). Radiation fluctuation after z=1000 is
+%% NOT considered for evolution of Delta_T though. Instead, 
+%% evolution of Delta_T uses the fitting formula (eq. 30 of A16), which is
 %% a sort of adiabatically determined one. This is OK because when radiation
 %% fluctuation is important, Delta_T is quite small. Nevertheless, we may get 
 %% a more accurate result if radiation fluctuation is carefully considered.
@@ -95,7 +97,7 @@ end
 
 disp('----------------Initializing----------------');
 %% Read in essential parameters
-params_setup;  %%==== script ==================
+run('../parameters/params');  %%==== script ==================
 %% Define some box-related quantities
 box_init;  %%==== script ==================
 if (mod(Ncell,2)==0)
