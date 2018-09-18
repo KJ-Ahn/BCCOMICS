@@ -149,8 +149,17 @@ else
 end
 
 %% choose cell whose small scale fluctuations to calculate
-icc = load([setupdir 'icc.dat']);
-Ncc = length(icc(:,1)) %% # of chosen cells
+cellspec = load([setupdir 'zi_icc_Dc_Db_Thc_Thb_Vcb1_Vcb2_Vcb3_Vcb_DT.dat']);
+Ncc = length(icc(:,1)); %% # of chosen patchess
+
+disp('Patches ordered in calculation time, from oldest(top) to newest(bottom)');
+disp('-----------------------------------------------------------------------');
+disp('Patch #  ix  iy  iz  Deltac/sigma(Deltac)  V_cb(km/s)  at z=1000');
+for ip=1:Ncc
+  AA = [ip icc(ip,1) icc(ip,2) icc(ip,3) 
+end
+disp('Choose a patch of your interest. ');
+idxcc = Ncc; %% By default choose the patch most recently calculated
 
 %% prepare for initial conditions for enzo
 zf = zzend;  %% redshift for initial condition
