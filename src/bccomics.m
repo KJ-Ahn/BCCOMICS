@@ -150,16 +150,28 @@ end
 
 %% choose cell whose small scale fluctuations to calculate
 cellspec = load([setupdir 'zi_icc_Dc_Db_Thc_Thb_Vcb1_Vcb2_Vcb3_Vcb_DT.dat']);
-Ncc = length(icc(:,1)); %% # of chosen patchess
+Ncc = length(cellspec(:,1)); %% # of chosen patchess
 
+%% read in z=zi=1000 statistics
+fin=fopen('stats_zi.dat');
+fgets(fin); %% skip a line
+fgets(fin); %% skip another line
+statszi = fscanf(fin, '%e %e %e %e %e %e %e %e %e');
+fclose(fin);
+
+%% Let user choose a patch
 disp('Patches ordered in calculation time, from oldest(top) to newest(bottom)');
 disp('-----------------------------------------------------------------------');
 disp('Patch #  ix  iy  iz  Deltac/sigma(Deltac)  V_cb(km/s)  at z=1000');
 for ip=1:Ncc
-  AA = [ip icc(ip,1) icc(ip,2) icc(ip,3) 
+  AA = [ip cellspec(ip,1) cellspec(ip,2) cellspec(ip,3) cellspec(ip,4)/statszi(1) cellspec(ip,11)];
+  fprintf('%3i     %3i %3i %3i     %10.3e         %10.3e\n',AA);
 end
-disp('Choose a patch of your interest. ');
-idxcc = Ncc; %% By default choose the patch most recently calculated
+disp(['Choose a patch of your interest; default is [' num2str(Ncc) '] if you just hit Enter below.']);
+idxcc = input('Enter your choice (patch #):');
+if isempty(idxcc)
+  idxcc=Ncc;
+end
 
 %% prepare for initial conditions for enzo
 zf = zzend;  %% redshift for initial condition
