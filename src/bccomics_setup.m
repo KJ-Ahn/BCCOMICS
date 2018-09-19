@@ -127,8 +127,8 @@ if ~matlabflag
 end
 
 %% Create directory to dump outputs
-if ~exist(outputdir)
-  mkdir(outputdir);
+if ~exist(setupdir)
+  mkdir(setupdir);
 end
 
 %% constants
@@ -240,7 +240,7 @@ end
 %% Normalization convention follows that of A16: D=1 @ z=1000 
 %% (see Appendix A of A16).
 %%
-%% Resulting tables are saved in [outputdir '/a_growth.dat'] for record keeping.
+%% Resulting tables are saved in [setupdir '/a_growth.dat'] for record keeping.
 global Dplus_grow Dplus_decay Dminus_stream dDplus_grow_da dDplus_decay_da dDminus_stream_da azz log10az_min dlog10az;
 
 Get_growth;  %%==== script ==================
@@ -259,7 +259,7 @@ if plotflag
 end
 
 %% dump modes
-fout  = fopen([outputdir '/k_gro_dec_com_str.dat'],'w');
+fout  = fopen([setupdir '/k_gro_dec_com_str.dat'],'w');
 mdata = [kktab Deltagro_k Deltadec_k Deltacom_k Deltastr_k];
 fprintf(fout,'%14.7e %14.7e %14.7e %14.7e %14.7e\n', mdata'); %%'
 fclose(fout);
@@ -273,7 +273,7 @@ pause(1);
 %%%%%% Get 3D spatial fluctuatons in the big box ------------------------------ begin
 %% 2 Gaussian random number sets into a complex number field.
 %% Generate AND use file only when there does NOT exist the randome seed file.
-fgaussstr = [outputdir '/gaussseed.matbin'];
+fgaussstr = [setupdir '/gaussseed.matbin'];
 if (~exist(fgaussstr))
   Nreallization = 12000000;
 
@@ -330,9 +330,9 @@ mu  = 0:dmu:1; %% Use symmetry of P(k,mu) about mu=0 to save calculation time.
 Nmu = length(mu);
 
 if matlabflag
-  save([outputdir '/mu.dat'],'mu','-ascii');
+  save([setupdir '/mu.dat'],'mu','-ascii');
 else
-  save('-ascii',[outputdir '/mu.dat'],'mu');
+  save('-ascii',[setupdir '/mu.dat'],'mu');
 end
 
 disp('----------------Integrating----------------');

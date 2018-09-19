@@ -40,7 +40,7 @@
 %% ----------
 %% Just uniform-grid initial condition only. No nested grid IC yet.
 %% Binary files from bccomics_setup.m is also in hdf5 format, so
-%% porting bccomics.m into other languages & improving it is also welcomed.
+%% porting bccomics.m into other languages & improving it are welcomed.
 
 more off; %% enables to see progress
 returnflag = false; %% main program need to stop when script stops.
@@ -61,19 +61,21 @@ end
 if ~matlabflag
   if compare_versions(OCTAVE_VERSION,'4.0.1','<')
     %% Messages "warning: function * shadows ..." should be welcomed.
-    addpath('mfiles_for_octave'); 
+    addpath('../mfiles_for_octave'); 
   end
   if ~exist('raylrnd')
-    addpath('statistics-1.3.0/inst');
+    addpath('../statistics-1.3.0/inst');
   end
 end
 
 %% Read in constants in cgs unit and conversion factors.
 Consts_Conversions;  %%==== script ==================
+%% Read in parameters
+run('../parameters/params.m');  %%==== script ==================
 %% Read in cosmology
 run(Cosmology);  %%==== script ==================
 %% Read in parameters
-run('../parameters/params');  %%==== script ==================
+run('../parameters/params_patch.m');  %%==== script ==================
 if (mod(Ncell_p,2)==1)
   disp('Choose an even number for Ncell_p');
   clear;
@@ -123,37 +125,37 @@ ksq_p     = k1_3D_p.^2 +k2_3D_p.^2 +k3_3D_p.^2;
 %%r3 = k3_3D_p/kunit_p;
 
 %% read in mu info
-mu  = load('mu.dat');
+mu  = load([setupdir '/mu.dat']);
 dmu = mu(2)-mu(1);
 Nmu = length(mu);
 
 %% read in V_cb field: V_cb = Vc-Vb
 if matlabflag
-  load([setupdir 'V_cb_1_azend.dat'], '-mat', 'V_cb_1_azend');  
-  load([setupdir 'V_cb_2_azend.dat'], '-mat', 'V_cb_2_azend');
-  load([setupdir 'V_cb_3_azend.dat'], '-mat', 'V_cb_3_azend');
-  load([setupdir 'DT_azend.dat'],     '-mat'  'DT3D_azend');
-  load([setupdir 'Dc3D_azend.dat'],   '-mat', 'Dc3D_azend');
-  load([setupdir 'Db3D_azend.dat'],   '-mat', 'Db3D_azend');
-  load([setupdir 'THc3D_azend.dat'],  '-mat', 'THc3D_azend');
-  load([setupdir 'THb3D_azend.dat'],  '-mat', 'THb3D_azend');
+  load([setupdir '/V_cb_1_azend.dat'], '-mat', 'V_cb_1_azend');  
+  load([setupdir '/V_cb_2_azend.dat'], '-mat', 'V_cb_2_azend');
+  load([setupdir '/V_cb_3_azend.dat'], '-mat', 'V_cb_3_azend');
+  load([setupdir '/DT_azend.dat'],     '-mat', 'DT3D_azend');
+  load([setupdir '/Dc3D_azend.dat'],   '-mat', 'Dc3D_azend');
+  load([setupdir '/Db3D_azend.dat'],   '-mat', 'Db3D_azend');
+  load([setupdir '/THc3D_azend.dat'],  '-mat', 'THc3D_azend');
+  load([setupdir '/THb3D_azend.dat'],  '-mat', 'THb3D_azend');
 else
-  load('-mat-binary', [setupdir 'V_cb_1_azend.dat'], 'V_cb_1_azend');
-  load('-mat-binary', [setupdir 'V_cb_2_azend.dat'], 'V_cb_2_azend');
-  load('-mat-binary', [setupdir 'V_cb_3_azend.dat'], 'V_cb_3_azend');
-  load('-mat-binary', [setupdir 'DT_azend.dat'],     'DT3D_azend');
-  load('-mat-binary', [setupdir 'Dc3D_azend.dat'],   'Dc3D_azend');
-  load('-mat-binary', [setupdir 'Db3D_azend.dat'],   'Db3D_azend');
-  load('-mat-binary', [setupdir 'THc3D_azend.dat'],  'THc3D_azend');
-  load('-mat-binary', [setupdir 'THb3D_azend.dat'],  'THb3D_azend');
+  load('-mat-binary', [setupdir '/V_cb_1_azend.dat'], 'V_cb_1_azend');
+  load('-mat-binary', [setupdir '/V_cb_2_azend.dat'], 'V_cb_2_azend');
+  load('-mat-binary', [setupdir '/V_cb_3_azend.dat'], 'V_cb_3_azend');
+  load('-mat-binary', [setupdir '/DT_azend.dat'],     'DT3D_azend');
+  load('-mat-binary', [setupdir '/Dc3D_azend.dat'],   'Dc3D_azend');
+  load('-mat-binary', [setupdir '/Db3D_azend.dat'],   'Db3D_azend');
+  load('-mat-binary', [setupdir '/THc3D_azend.dat'],  'THc3D_azend');
+  load('-mat-binary', [setupdir '/THb3D_azend.dat'],  'THb3D_azend');
 end
 
 %% choose cell whose small scale fluctuations to calculate
-cellspec = load([setupdir 'zi_icc_Dc_Db_Thc_Thb_Vcb1_Vcb2_Vcb3_Vcb_DT.dat']);
+cellspec = load([setupdir '/zi_icc_Dc_Db_Thc_Thb_Vcb1_Vcb2_Vcb3_Vcb_DT.dat']);
 Ncc = length(cellspec(:,1)); %% # of chosen patchess
 
 %% read in z=zi=1000 statistics
-fin=fopen('stats_zi.dat');
+fin=fopen([setupdir '/stats_zi.dat']);
 fgets(fin); %% skip a line
 fgets(fin); %% skip another line
 statszi = fscanf(fin, '%e %e %e %e %e %e %e %e %e');
@@ -167,10 +169,22 @@ for ip=1:Ncc
   AA = [ip cellspec(ip,1) cellspec(ip,2) cellspec(ip,3) cellspec(ip,4)/statszi(1) cellspec(ip,11)];
   fprintf('%3i     %3i %3i %3i     %10.3e         %10.3e\n',AA);
 end
-disp(['Choose a patch of your interest; default is [' num2str(Ncc) '] if you just hit Enter below.']);
+disp(['Choose a patch of your interest; default is ' num2str(Ncc) ' if you just hit Enter below.']);
 idxcc = input('Enter your choice (patch #):');
-if isempty(idxcc)
+if isempty(idxcc)  %% default to the last patch calculated
   idxcc=Ncc;
+end
+disp(['Patch # ' num2str(idxcc) ' chosen.']);
+
+%% open transfer function file for given patch
+ic   = cellspec(idxcc,1);
+jc   = cellspec(idxcc,2);
+kc   = cellspec(idxcc,3);
+strD = [setupdir '/deltas/Deltas_1Dmu_ic' num2str(ic) '_jc' num2str(jc) '_kc' num2str(kc) '-muhalf.matbin'];
+if matlabflag
+  load(strD, '-mat', 'ksampletab', 'deltasc', 'deltasb', 'deltasThc', 'deltasThb', 'deltasT');
+else
+  load('-mat-binary', stroutD, 'ksampletab', 'deltasc', 'deltasb', 'deltasThc', 'deltasThb', 'deltasT');
 end
 
 %% prepare for initial conditions for enzo
@@ -183,45 +197,33 @@ DensityUnits  = 1.8788e-29*Om0*h^2*(1+zf)^3;
 VelocityUnits = 1.22475e7*Lbox_p_inMpch*sqrt(Om0)*sqrt(1+zf);
 SpecificEnergyUnits = VelocityUnits^2; %% specific energy = energy/mass 
 
-fout = fopen('Units.txt','w');
+%% Generate initial condition directory
+if ~exist(ICdir)
+  mkdir(ICdir);
+end
+ICsubdir = [ICdir '/' num2str(Lbox_p_inMpch,'%.2f') 'Mpch_' num2str(Ncell_p) '_ic' num2str(ic) '_jc' num2str(jc) '_kc' num2str(kc)];
+if ~exist(ICsubdir)
+  mkdir(ICsubdir); 
+end
+
+fout = fopen([ICsubdir '/Units.txt'],'w');
 fprintf(fout,'%s\n', '## density units; velocity units; specific energy units -- for enzo');
 fprintf(fout,'%e %e %e\n', DensityUnits, VelocityUnits, SpecificEnergyUnits);
 fclose(fout);
 
 
 %% keep phases, which has been inherited from the initial(z=1000) transfer function
-%% Treat deltas*_Ahn_cell_mu as the transfer function with the correct relative phases.
-%%$$
-%%$$ 1:cdm-density; 2:baryon-density; 3: cdm-vel-divergence; 4:baryon-vel-divergence;
-%%$$ 5: baryon-temperature
-%%deltas_mu             = zeros(Ncc, Nsample, Nmu, 5); %%$$  -- LATER
+%% Treat deltas*_cell_mu as the transfer function with the correct relative phases.
 deltasc_cell_mu   = zeros(Nsample, Nmu);
 deltasb_cell_mu   = zeros(Nsample, Nmu);
 deltasThc_cell_mu = zeros(Nsample, Nmu);
 deltasThb_cell_mu = zeros(Nsample, Nmu);
 deltasT_cell_mu   = zeros(Nsample, Nmu);
 
+Nsample = length(ksampletab);
 for isample=1:Nsample
   ksample = ksampletab(isample);
   %% load calculated deltas
-  ic = icc(idxcc,1);
-  jc = icc(idxcc,2);
-  kc = icc(idxcc,3);
-
-  strD = [setupdir '/deltas/Deltas_1Dmu_ic' num2str(ic) '_jc' num2str(jc) '_kc' num2str(kc) '-muhalf.matbin'];
-
-  if matlabflag
-    load(strD, '-mat', 'ksampletab', 'deltasc', 'deltasb', 'deltasThc', 'deltasThb', 'deltasT');
-  else
-    load('-mat-binary', stroutD, 'ksampletab', 'deltasc', 'deltasb', 'deltasThc', 'deltasThb', 'deltasT');
-  end
-
-  deltasc   = DDAhn.deltasc;
-  deltasb   = DDAhn.deltasb;
-  deltasThc = DDAhn.deltasThc;
-  deltasThb = DDAhn.deltasThb;
-  deltasT   = DDAhn.deltasT;
-    
   %% for given cell (index for chosen cell: icc)
   %% cos(angle), where angle is that between k-vector and V_cb vector.
   %% OK to use initial V_cb fields, because the V_cb vector does not change
@@ -229,11 +231,11 @@ for isample=1:Nsample
   ic=icc(idxcc,1);
   jc=icc(idxcc,2);
   kc=icc(idxcc,3);
-  deltasc_cell_mu(idxcc, isample, :)   = reshape(deltasc,1,1,Nmu);
-  deltasb_cell_mu(idxcc, isample, :)   = reshape(deltasb,1,1,Nmu);
-  deltasThc_cell_mu(idxcc, isample, :) = reshape(deltasThc,1,1,Nmu);
-  deltasThb_cell_mu(idxcc, isample, :) = reshape(deltasThb,1,1,Nmu);
-  deltasT_cell_mu(idxcc, isample, :)   = reshape(deltasT,1,1,Nmu);
+  deltasc_cell_mu  (isample, :) = reshape(deltasc,1,Nmu);
+  deltasb_cell_mu  (isample, :) = reshape(deltasb,1,1,Nmu);
+  deltasThc_cell_mu(isample, :) = reshape(deltasThc,1,1,Nmu);
+  deltasThb_cell_mu(isample, :) = reshape(deltasThb,1,1,Nmu);
+  deltasT_cell_mu  (isample, :) = reshape(deltasT,1,1,Nmu);
 end
 
 %% some check

@@ -1,4 +1,5 @@
 src/bccomics_setup_details.m
 src/*~
+octave-workspace
 ICs
 setup_output

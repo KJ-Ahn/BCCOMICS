@@ -19,7 +19,3 @@ zzend      = 200;    %% Redshift at which you want to have initial condition.
 %% in a symmetric way.
 Lbox    = 604;         %% in Mpc unit; let it be (odd number)*4
 Ncell   = 151;         %% # of cells along one axis: make it an odd number
-
-%% Initial condition configuration inside a chosen patch
-Lbox_p    = 1/h;         %% box size in Mpc unit; Should be <= Lbox/Ncell
-Ncell_p   = 512;         %% # of cells & particles along one axis: make it an even number
