@@ -76,8 +76,8 @@ run('../parameters/params.m');  %%==== script ==================
 run(Cosmology);  %%==== script ==================
 %% Read in parameters
 run('../parameters/params_patch.m');  %%==== script ==================
-if (mod(Ncell_p,2)==1)
-  disp('Choose an even number for Ncell_p');
+if (mod(Ncell_p,4)~=0)
+  disp('Choose a number which is multiple of 4 for Ncell_p');
   clear;
   return;
 end
