@@ -212,32 +212,6 @@ fprintf(fout,'%e %e %e\n', DensityUnits, VelocityUnits, SpecificEnergyUnits);
 fclose(fout);
 
 
-%% keep phases, which has been inherited from the initial(z=1000) transfer function
-%% Treat deltas*_cell_mu as the transfer function with the correct relative phases.
-deltasc_cell_mu   = zeros(Nsample, Nmu);
-deltasb_cell_mu   = zeros(Nsample, Nmu);
-deltasThc_cell_mu = zeros(Nsample, Nmu);
-deltasThb_cell_mu = zeros(Nsample, Nmu);
-deltasT_cell_mu   = zeros(Nsample, Nmu);
-
-Nsample = length(ksampletab);
-for isample=1:Nsample
-  ksample = ksampletab(isample);
-  %% load calculated deltas
-  %% for given cell (index for chosen cell: icc)
-  %% cos(angle), where angle is that between k-vector and V_cb vector.
-  %% OK to use initial V_cb fields, because the V_cb vector does not change
-  %% direction over time.
-  ic=icc(idxcc,1);
-  jc=icc(idxcc,2);
-  kc=icc(idxcc,3);
-  deltasc_cell_mu  (isample, :) = reshape(deltasc,1,Nmu);
-  deltasb_cell_mu  (isample, :) = reshape(deltasb,1,1,Nmu);
-  deltasThc_cell_mu(isample, :) = reshape(deltasThc,1,1,Nmu);
-  deltasThb_cell_mu(isample, :) = reshape(deltasThb,1,1,Nmu);
-  deltasT_cell_mu  (isample, :) = reshape(deltasT,1,1,Nmu);
-end
-
 %% some check
 dsc10=reshape(deltasc_cell_mu(1,:,1),Nsample,1); %% for mu=0 and under 1nd cell environment
 dsb10=reshape(deltasb_cell_mu(1,:,1),Nsample,1); %% for mu=0 and under 1nd cell environment
@@ -300,6 +274,7 @@ loglog(ksampletab,abs(dsc10), testk, testdsc)
 %%  end
 %%end
 
+Set_gaussrand;
 %% Above random seed reading does not generate the low-res version of the
 %% high-res random seed. So, here read in the 512x512x127 random seed and
 %% make correspondence.
