@@ -42,6 +42,7 @@
 %% Binary files from bccomics_setup.m is also in hdf5 format, so
 %% porting bccomics.m into other languages & improving it are welcomed.
 
+clear;
 more off; %% enables to see progress
 returnflag = false; %% main program need to stop when script stops.
 
@@ -76,6 +77,7 @@ run('../parameters/params.m');  %%==== script ==================
 run(Cosmology);  %%==== script ==================
 %% Read in parameters
 run('../parameters/params_patch.m');  %%==== script ==================
+%% Requires mod(Ncell_p,4)=0 to properly use file512seed when Nmode_p \neq 512.
 if (mod(Ncell_p,4)~=0)
   disp('Choose a number which is multiple of 4 for Ncell_p');
   clear;

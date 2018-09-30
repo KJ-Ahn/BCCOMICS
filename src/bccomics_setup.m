@@ -85,6 +85,7 @@
 %% Evolve_DeltaT_accurate.m shows how one can (in principle) do this.
 %%
 
+clear;
 more off; %% enables to see progress
 returnflag = false; %% main program need to stop when script stops.
 
