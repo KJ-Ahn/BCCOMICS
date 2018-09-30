@@ -215,85 +215,44 @@ fclose(fout);
 
 
 %% some check
-dsc10=reshape(deltasc_cell_mu(1,:,1),Nsample,1); %% for mu=0 and under 1nd cell environment
-dsb10=reshape(deltasb_cell_mu(1,:,1),Nsample,1); %% for mu=0 and under 1nd cell environment
-dsThc10=reshape(deltasThc_cell_mu(1,:,1),Nsample,1); %% for mu=0 and under 1nd cell environment
-dsThb10=reshape(deltasThb_cell_mu(1,:,1),Nsample,1); %% for mu=0 and under 1nd cell environment
-
-dsc20=reshape(deltasc_cell_mu(2,:,1),Nsample,1); %% for mu=0 and under 2nd cell environment
-dsb20=reshape(deltasb_cell_mu(2,:,1),Nsample,1); %% for mu=0 and under 2nd cell environment
-dsThc20=reshape(deltasThc_cell_mu(2,:,1),Nsample,1); %% for mu=0 and under 2nd cell environment
-dsThb20=reshape(deltasThb_cell_mu(2,:,1),Nsample,1); %% for mu=0 and under 2nd cell environment
-
-dsc11=reshape(deltasc_cell_mu(1,:,Nmu),Nsample,1); %% for mu=0 and under 1nd cell environment
-dsb11=reshape(deltasb_cell_mu(1,:,Nmu),Nsample,1); %% for mu=0 and under 1nd cell environment
-dsThc11=reshape(deltasThc_cell_mu(1,:,Nmu),Nsample,1); %% for mu=0 and under 1nd cell environment
-dsThb11=reshape(deltasThb_cell_mu(1,:,Nmu),Nsample,1); %% for mu=0 and under 1nd cell environment
-
-dsc21=reshape(deltasc_cell_mu(2,:,Nmu),Nsample,1); %% for mu=0 and under 2nd cell environment
-dsb21=reshape(deltasb_cell_mu(2,:,Nmu),Nsample,1); %% for mu=0 and under 2nd cell environment
-dsThc21=reshape(deltasThc_cell_mu(2,:,Nmu),Nsample,1); %% for mu=0 and under 2nd cell environment
-dsThb21=reshape(deltasThb_cell_mu(2,:,Nmu),Nsample,1); %% for mu=0 and under 2nd cell environment
-
-loglog(ksampletab,abs(dsc20), ksampletab,abs(dsb20))
-loglog(ksampletab,abs(dsThc20), ksampletab,abs(dsThb20))
-loglog(ksampletab,abs(dsc20), ksampletab,abs(dsThc20),'.')
-loglog(ksampletab,real(dsc20), ksampletab,-real(dsThc20),'.')
-
-plot(log10(ksampletab),abs(fc*dsc10+fb*dsb10).^2.*ksampletab.^3/(2*pi^2),log10(ksampletab),abs(fc*dsc11+fb*dsb11).^2.*ksampletab.^3/(2*pi^2),log10(ksampletab),abs(fc*dsc20+fb*dsb20).^2.*ksampletab.^3/(2*pi^2),log10(ksampletab),abs(fc*dsc21+fb*dsb21).^2.*ksampletab.^3/(2*pi^2))
-
-plot(log10(ksampletab),abs(dsc10)./abs(dsc20))
-plot(log10(ksampletab),abs(dsThc10)./abs(dsThc20))
-plot(log10(ksampletab),abs(dsc11)./abs(dsc21))
-plot(log10(ksampletab),abs(dsThc11)./abs(dsThc21))
-
-testk   = [1.3; 1.6; 1.8; 3.5; 7.5; 43.5; 56.7];
-testdsc = interp1(log10(ksampletab), abs(dsc10), log10(testk), 'cubic');
-plot(log10(ksampletab),abs(dsc10), log10(testk), abs(testdsc))
-loglog(ksampletab,abs(dsc10), testk, testdsc)
-
-
-%% # of random numbers for amplitude and phase, for lower half of k space including center plane
-%%if (~exist('subgaussseed.matbin'))
-%%  Nrandamp = Nmode_p*Nmode_p*Nc_p;
-%%  Nrandphs = Nrandamp;
-%%
-%%  randamp = raylrnd(1,     [Nrandamp,1]);
-%%  randphs = unifrnd(0,2*pi,[Nrandphs,1]);
-%%  save('-mat-binary', 'subgaussseed.matbin', 'randamp', 'randphs') %% octave
-%%  %%save('subgaussseed.matbin', 'randamp', 'randphs', '-v6') %% matlab
-%%else
-%%  load '-mat-binary' 'subgaussseed.matbin' 'randamp' 'randphs' %% octave
-%%  %%load 'subgaussseed.matbin' '-mat' 'randamp' 'randphs' %% matlab
-%%  if (length(randamp) ~= Nmode_p*Nmode_p*Nc_p)
-%%    Nrandamp = Nmode_p*Nmode_p*Nc_p;
-%%    Nrandphs = Nrandamp;
-%%
-%%    randamp = raylrnd(1,     [Nrandamp,1]);
-%%    randphs = unifrnd(0,2*pi,[Nrandphs,1]);
-%%    save('-mat-binary', 'subgaussseed.matbin', 'randamp', 'randphs') %% octave
-%%    %%save('subgaussseed.matbin', 'randamp', 'randphs', '-v6') %% matlab
-%%  end
-%%end
+% $$$ dsc10=reshape(deltasc_cell_mu(1,:,1),Nsample,1); %% for mu=0 and under 1nd cell environment
+% $$$ dsb10=reshape(deltasb_cell_mu(1,:,1),Nsample,1); %% for mu=0 and under 1nd cell environment
+% $$$ dsThc10=reshape(deltasThc_cell_mu(1,:,1),Nsample,1); %% for mu=0 and under 1nd cell environment
+% $$$ dsThb10=reshape(deltasThb_cell_mu(1,:,1),Nsample,1); %% for mu=0 and under 1nd cell environment
+% $$$ 
+% $$$ dsc20=reshape(deltasc_cell_mu(2,:,1),Nsample,1); %% for mu=0 and under 2nd cell environment
+% $$$ dsb20=reshape(deltasb_cell_mu(2,:,1),Nsample,1); %% for mu=0 and under 2nd cell environment
+% $$$ dsThc20=reshape(deltasThc_cell_mu(2,:,1),Nsample,1); %% for mu=0 and under 2nd cell environment
+% $$$ dsThb20=reshape(deltasThb_cell_mu(2,:,1),Nsample,1); %% for mu=0 and under 2nd cell environment
+% $$$ 
+% $$$ dsc11=reshape(deltasc_cell_mu(1,:,Nmu),Nsample,1); %% for mu=0 and under 1nd cell environment
+% $$$ dsb11=reshape(deltasb_cell_mu(1,:,Nmu),Nsample,1); %% for mu=0 and under 1nd cell environment
+% $$$ dsThc11=reshape(deltasThc_cell_mu(1,:,Nmu),Nsample,1); %% for mu=0 and under 1nd cell environment
+% $$$ dsThb11=reshape(deltasThb_cell_mu(1,:,Nmu),Nsample,1); %% for mu=0 and under 1nd cell environment
+% $$$ 
+% $$$ dsc21=reshape(deltasc_cell_mu(2,:,Nmu),Nsample,1); %% for mu=0 and under 2nd cell environment
+% $$$ dsb21=reshape(deltasb_cell_mu(2,:,Nmu),Nsample,1); %% for mu=0 and under 2nd cell environment
+% $$$ dsThc21=reshape(deltasThc_cell_mu(2,:,Nmu),Nsample,1); %% for mu=0 and under 2nd cell environment
+% $$$ dsThb21=reshape(deltasThb_cell_mu(2,:,Nmu),Nsample,1); %% for mu=0 and under 2nd cell environment
+% $$$ 
+% $$$ loglog(ksampletab,abs(dsc20), ksampletab,abs(dsb20))
+% $$$ loglog(ksampletab,abs(dsThc20), ksampletab,abs(dsThb20))
+% $$$ loglog(ksampletab,abs(dsc20), ksampletab,abs(dsThc20),'.')
+% $$$ loglog(ksampletab,real(dsc20), ksampletab,-real(dsThc20),'.')
+% $$$ 
+% $$$ plot(log10(ksampletab),abs(fc*dsc10+fb*dsb10).^2.*ksampletab.^3/(2*pi^2),log10(ksampletab),abs(fc*dsc11+fb*dsb11).^2.*ksampletab.^3/(2*pi^2),log10(ksampletab),abs(fc*dsc20+fb*dsb20).^2.*ksampletab.^3/(2*pi^2),log10(ksampletab),abs(fc*dsc21+fb*dsb21).^2.*ksampletab.^3/(2*pi^2))
+% $$$ 
+% $$$ plot(log10(ksampletab),abs(dsc10)./abs(dsc20))
+% $$$ plot(log10(ksampletab),abs(dsThc10)./abs(dsThc20))
+% $$$ plot(log10(ksampletab),abs(dsc11)./abs(dsc21))
+% $$$ plot(log10(ksampletab),abs(dsThc11)./abs(dsThc21))
+% $$$ 
+% $$$ testk   = [1.3; 1.6; 1.8; 3.5; 7.5; 43.5; 56.7];
+% $$$ testdsc = interp1(log10(ksampletab), abs(dsc10), log10(testk), 'cubic');
+% $$$ plot(log10(ksampletab),abs(dsc10), log10(testk), abs(testdsc))
+% $$$ loglog(ksampletab,abs(dsc10), testk, testdsc)
 
 Set_gaussrand;
-%% Above random seed reading does not generate the low-res version of the
-%% high-res random seed. So, here read in the 512x512x127 random seed and
-%% make correspondence.
-load '-mat-binary' 'subgaussseed512.matbin' 'randamp' 'randphs' %% octave
-%%load 'subgaussseed512.matbin' '-mat' 'randamp' 'randphs' %% matlab
-randamp  = reshape(randamp, 512, 512, 257);
-randphs  = reshape(randphs, 512, 512, 257);
-Ncoarse  = 512/Nmode_p;
-Nstart   = -256/Ncoarse+257
-Nend     = Nstart + Nmode_p -1
-randamp_ = randamp(Nstart:Nend, Nstart:Nend, 257-Nc_p+1:257);
-randphs_ = randphs(Nstart:Nend, Nstart:Nend, 257-Nc_p+1:257);
-
-clear subgaussseed512.matbin randamp randphs;
-randamp = reshape(randamp_, Nmode_p*Nmode_p*Nc_p, 1);
-randphs = reshape(randphs_, Nmode_p*Nmode_p*Nc_p, 1);
-clear randamp_ randphs_;
 
 %% for given cell (index for chosen cell: icc)
 %%for idxcc = 1:Ncc
