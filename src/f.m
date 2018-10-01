@@ -93,6 +93,7 @@ function dxda = f(a,x)
   %% A16, Eq. 11, but with real and complex numbers for small-scale k-space 
   %% fluctuation variables, such as delta_c.
   %% rV = -V_bc = V_cb = V_c - V_b. 
+  %% costh = cosine(angle between V_cb and k).
 
   dxda(1) = (                           -(1+Delta_c)*x(2)        -Theta_c*x(1)) /aH;
   dxda(2) = (                           -1.5*Hz^2*Omz*(fc*x(1)+fb*x(3)) -2*Hz*x(2)) /aH;

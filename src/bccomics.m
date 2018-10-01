@@ -254,61 +254,40 @@ fclose(fout);
 
 Set_gaussrand;
 
-%% for given cell (index for chosen cell: icc)
-%%for idxcc = 1:Ncc
-for idxcc = 1:1
+fileNseed = [ICsubdir '/subgaussseed' num2str(Nmode_p) '.matbin'];
+if recordseedflag
+  if matlabflag
+    save(fileNseed, 'randamp', 'randphs', '-v6');
+  else
+    save('-mat-binary', fileNseed, 'randamp', 'randphs');
+  end
+end
 
-  ic=icc(idxcc,1);
-  jc=icc(idxcc,2);
-  kc=icc(idxcc,3);
-  
-  ddir = ['ic' num2str(ic) '_jc' num2str(jc) '_kc' num2str(kc)]; 
-  mkdir(ddir);
 
-  %% Prepare base table for interpolation
-  dc_mu_box  = reshape(deltasc_cell_mu(idxcc,:,:),  Nsample,Nmu);
-  db_mu_box  = reshape(deltasb_cell_mu(idxcc,:,:),  Nsample,Nmu);
-  Thc_mu_box = reshape(deltasThc_cell_mu(idxcc,:,:),Nsample,Nmu);
-  Thb_mu_box = reshape(deltasThb_cell_mu(idxcc,:,:),Nsample,Nmu);
-  T_mu_box   = reshape(deltasT_cell_mu(idxcc,:,:),  Nsample,Nmu);
-
-  %% For a given k, -mu case has its Real same as Imag of mu case,
-  %%                         and its Imag same as Real of mu case.
-  %% Switching Real and Imag is done easily by i*conj(complex_number).
-  %% -- First, shift mu=[0,...,1] values to right.
-  dc_mu_box (:,Nmu:2*Nmu-1) = dc_mu_box (:,:);
-  db_mu_box (:,Nmu:2*Nmu-1) = db_mu_box (:,:);
-  Thc_mu_box(:,Nmu:2*Nmu-1) = Thc_mu_box(:,:);
-  Thb_mu_box(:,Nmu:2*Nmu-1) = Thb_mu_box(:,:);
-  T_mu_box  (:,Nmu:2*Nmu-1) = T_mu_box  (:,:);
+%% For a given k, -mu case has its Real same as Imag of mu case,
+%%                         and its Imag same as Real of mu case.
+%% Switching Real and Imag is done easily by i*conj(complex_number).
+%% -- First, shift mu=[0,...,1] values to right (matrices increase in size).
+  deltasc  (:,Nmu:2*Nmu-1) = deltasc  (:,:);
+  deltasb  (:,Nmu:2*Nmu-1) = deltasb  (:,:);
+  deltasThc(:,Nmu:2*Nmu-1) = deltasThc(:,:);
+  deltasThb(:,Nmu:2*Nmu-1) = deltasThb(:,:);
+  deltasT  (:,Nmu:2*Nmu-1) = deltasT  (:,:);
   %% -- Then, generate mu=[-1,...,0) values
-  dc_mu_box (:,Nmu-1:-1:1) = conj(dc_mu_box (:,Nmu+1:2*Nmu-1))*i;
-  db_mu_box (:,Nmu-1:-1:1) = conj(db_mu_box (:,Nmu+1:2*Nmu-1))*i;
-  Thc_mu_box(:,Nmu-1:-1:1) = conj(Thc_mu_box(:,Nmu+1:2*Nmu-1))*i;
-  Thb_mu_box(:,Nmu-1:-1:1) = conj(Thb_mu_box(:,Nmu+1:2*Nmu-1))*i;
-  T_mu_box  (:,Nmu-1:-1:1) = conj(T_mu_box  (:,Nmu+1:2*Nmu-1))*i;
+  deltasc  (:,Nmu-1:-1:1) = conj(deltasc  (:,Nmu+1:2*Nmu-1))*i;
+  deltasb  (:,Nmu-1:-1:1) = conj(deltasb  (:,Nmu+1:2*Nmu-1))*i;
+  deltasThc(:,Nmu-1:-1:1) = conj(deltasThc(:,Nmu+1:2*Nmu-1))*i;
+  deltasThb(:,Nmu-1:-1:1) = conj(deltasThb(:,Nmu+1:2*Nmu-1))*i;
+  deltasT  (:,Nmu-1:-1:1) = conj(deltasT  (:,Nmu+1:2*Nmu-1))*i;
   
   %% Extend mu to cover full angle accordingly: muext=[-1,...,0,...,1]
   muext              = zeros(1,2*Nmu-1);
   muext(Nmu:2*Nmu-1) =  mu(1:Nmu);
   muext(Nmu-1:-1:1)  = -mu(2:Nmu);
 
-  %% cosine(angle between k vector and V_cb=V_c-V_b).
-  %% V_cb in this code is defined as "-V_bc=V_c-V_b" of Ahn (2016), unfortunately.
-  %% Of course, transfer functions follow this (not Ahn 2016's) convention.
-  %% See below for vb* fields to see how streaming terms are added.
+  %% mu = cosine(angle between k vector and V_cb=V_c-V_b).
+  %% The mu convention is consistent with f.m.
   costh_k_V = (V_cb_1_azend(ic,jc,kc)*k1_3D_p + V_cb_2_azend(ic,jc,kc)*k2_3D_p + V_cb_3_azend(ic,jc,kc)*k3_3D_p) /norm([V_cb_1_azend(ic,jc,kc) V_cb_2_azend(ic,jc,kc) V_cb_3_azend(ic,jc,kc)]) ./sqrt(ksq_p);
-
-
-  %% Remark on ifftshif & ifftn ----------------------------------------------
-  %% For odd #, ifftshift just works. The first array element in x direction 
-  %% should correspond to axis monopole (kx=0), which ifftshift does.
-  %% For even #, I have defined the domain as [-N/2,..,N/2-1] to use ifftshift.
-  %% Example: a=[-3 -2 -1 0 1 2] --> ifftshift(a)=[0 1 2 -3 -2 -1] 
-  %% Definition of ifftn clearly shows using the first element as the monopole.
-  %% Next, the real-space fields on a cell!!! (ifftn)
-  %% -------------------------------------------------------------------------
-
 
 
   %% =========== CDM density and position ======================== begin
@@ -321,7 +300,7 @@ for idxcc = 1:1
   %% This is linear logarithmic interpolation along k, so the monopole
   %% term (k=0) may obtain inf or nan due to 0.5*log(ksq_p). 
   %% We will cure this by nullifying monopole anyway down below (**).
-  dc  = interp2(muext,log(ksampletab), dc_mu_box,  costh_k_V,0.5*log(ksq_p),interp2opt);  %% dc still k-space values here.
+  dc  = interp2(muext,log(ksampletab), deltasc,  costh_k_V,0.5*log(ksq_p),interp2opt);  %% dc still k-space values here.
 
   %% randomize, apply reality, and normalize
   dc = rand_real_norm(dc,Nmode_p,Nc_p,randamp,randphs,Vbox_p);
@@ -374,7 +353,7 @@ for idxcc = 1:1
 
   %% =========== baryon density ================================== begin
   %% Matlab & Octave 2D interpolation!! --> generating k-space deltas 
-  db  = interp2(muext,log(ksampletab), db_mu_box,  costh_k_V,0.5*log(ksq_p),interp2opt);
+  db  = interp2(muext,log(ksampletab), deltasb,  costh_k_V,0.5*log(ksq_p),interp2opt);
 
   %% randomize, apply reality, and normalize
   db = rand_real_norm(db,Nmode_p,Nc_p,randamp,randphs,Vbox_p);
@@ -433,7 +412,7 @@ for idxcc = 1:1
 
   %% =========== CDM velocity ==================================== begin
   %% Matlab & Octave 2D interpolation!! --> generating k-space deltas 
-  Thc = interp2(muext,log(ksampletab), Thc_mu_box, costh_k_V,0.5*log(ksq_p),interp2opt);
+  Thc = interp2(muext,log(ksampletab), deltasThc, costh_k_V,0.5*log(ksq_p),interp2opt);
 
   %% randomize, apply reality, and normalize
   Thc = rand_real_norm(Thc,Nmode_p,Nc_p,randamp,randphs,Vbox_p);
@@ -480,7 +459,7 @@ for idxcc = 1:1
 
   %% =========== baryon velocity ==================================== begin
   %% Matlab & Octave 2D interpolation!! --> generating k-space deltas 
-  Thb = interp2(muext,log(ksampletab), Thb_mu_box, costh_k_V,0.5*log(ksq_p),interp2opt);
+  Thb = interp2(muext,log(ksampletab), deltasThb, costh_k_V,0.5*log(ksq_p),interp2opt);
 
   %% randomize, apply reality, and normalize
   Thb = rand_real_norm(Thb,Nmode_p,Nc_p,randamp,randphs,Vbox_p);
@@ -545,7 +524,7 @@ for idxcc = 1:1
 
   %% =========== baryon temperature, energies ======================= begin
   %% Matlab & Octave 2D interpolation!! --> generating k-space deltas 
-  dT  = interp2(muext,log(ksampletab), T_mu_box,  costh_k_V,0.5*log(ksq_p),interp2opt);
+  dT  = interp2(muext,log(ksampletab), deltasT,  costh_k_V,0.5*log(ksq_p),interp2opt);
 
   %% randomize, apply reality, and normalize
   dT = rand_real_norm(dT,Nmode_p,Nc_p,randamp,randphs,Vbox_p);
