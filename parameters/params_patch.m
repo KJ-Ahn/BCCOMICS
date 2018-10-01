@@ -4,7 +4,7 @@ Ncell_p   = 508;         %% # of cells & particles along one axis: make it an ev
 
 ICdir     = '../ICs';  %% directory to place initial condition outputs
 
-%% Nseed    denotes [setupdir '/subgaussseed' num2str(Nmode_p) '.matbin'].
+%% Nseed    denotes [setupdir '/subgaussseed' num2str(Nmode_p)  '.matbin'].
 %% Noldseed denotes [setupdir '/subgaussseed' num2str(Noldseed) '.matbin'].
 oldseedflag    = true;   %% if true, use old seed
 %% Following two parameters needed only when oldseedflag = true
