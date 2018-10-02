@@ -1,5 +1,8 @@
+*~
 src/bccomics_setup_details.m
 src/*~
+parameters/*~
+sample/*~
 octave-workspace
 ICs
 setup_output

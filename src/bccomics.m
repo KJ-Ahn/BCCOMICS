@@ -186,7 +186,7 @@ strD = [setupdir '/deltas/Deltas_1Dmu_ic' num2str(ic) '_jc' num2str(jc) '_kc' nu
 if matlabflag
   load(strD, '-mat', 'ksampletab', 'deltasc', 'deltasb', 'deltasThc', 'deltasThb', 'deltasT');
 else
-  load('-mat-binary', stroutD, 'ksampletab', 'deltasc', 'deltasb', 'deltasThc', 'deltasThb', 'deltasT');
+  load('-mat-binary', strD, 'ksampletab', 'deltasc', 'deltasb', 'deltasThc', 'deltasThb', 'deltasT');
 end
 
 %% prepare for initial conditions for enzo
@@ -268,39 +268,39 @@ end
 %%                         and its Imag same as Real of mu case.
 %% Switching Real and Imag is done easily by i*conj(complex_number).
 %% -- First, shift mu=[0,...,1] values to right (matrices increase in size).
-  deltasc  (:,Nmu:2*Nmu-1) = deltasc  (:,:);
-  deltasb  (:,Nmu:2*Nmu-1) = deltasb  (:,:);
-  deltasThc(:,Nmu:2*Nmu-1) = deltasThc(:,:);
-  deltasThb(:,Nmu:2*Nmu-1) = deltasThb(:,:);
-  deltasT  (:,Nmu:2*Nmu-1) = deltasT  (:,:);
-  %% -- Then, generate mu=[-1,...,0) values
-  deltasc  (:,Nmu-1:-1:1) = conj(deltasc  (:,Nmu+1:2*Nmu-1))*i;
-  deltasb  (:,Nmu-1:-1:1) = conj(deltasb  (:,Nmu+1:2*Nmu-1))*i;
-  deltasThc(:,Nmu-1:-1:1) = conj(deltasThc(:,Nmu+1:2*Nmu-1))*i;
-  deltasThb(:,Nmu-1:-1:1) = conj(deltasThb(:,Nmu+1:2*Nmu-1))*i;
-  deltasT  (:,Nmu-1:-1:1) = conj(deltasT  (:,Nmu+1:2*Nmu-1))*i;
+deltasc  (:,Nmu:2*Nmu-1) = deltasc  (:,:);
+deltasb  (:,Nmu:2*Nmu-1) = deltasb  (:,:);
+deltasThc(:,Nmu:2*Nmu-1) = deltasThc(:,:);
+deltasThb(:,Nmu:2*Nmu-1) = deltasThb(:,:);
+deltasT  (:,Nmu:2*Nmu-1) = deltasT  (:,:);
+%% -- Then, generate mu=[-1,...,0) values
+deltasc  (:,Nmu-1:-1:1) = conj(deltasc  (:,Nmu+1:2*Nmu-1))*i;
+deltasb  (:,Nmu-1:-1:1) = conj(deltasb  (:,Nmu+1:2*Nmu-1))*i;
+deltasThc(:,Nmu-1:-1:1) = conj(deltasThc(:,Nmu+1:2*Nmu-1))*i;
+deltasThb(:,Nmu-1:-1:1) = conj(deltasThb(:,Nmu+1:2*Nmu-1))*i;
+deltasT  (:,Nmu-1:-1:1) = conj(deltasT  (:,Nmu+1:2*Nmu-1))*i;
   
-  %% Extend mu to cover full angle accordingly: muext=[-1,...,0,...,1]
-  muext              = zeros(1,2*Nmu-1);
-  muext(Nmu:2*Nmu-1) =  mu(1:Nmu);
-  muext(Nmu-1:-1:1)  = -mu(2:Nmu);
+%% Extend mu to cover full angle accordingly: muext=[-1,...,0,...,1]
+muext              = zeros(1,2*Nmu-1);
+muext(Nmu:2*Nmu-1) =  mu(1:Nmu);
+muext(Nmu-1:-1:1)  = -mu(2:Nmu);
 
-  %% mu = cosine(angle between k vector and V_cb=V_c-V_b).
-  %% The mu convention is consistent with f.m.
-  costh_k_V = (V_cb_1_azend(ic,jc,kc)*k1_3D_p + V_cb_2_azend(ic,jc,kc)*k2_3D_p + V_cb_3_azend(ic,jc,kc)*k3_3D_p) /norm([V_cb_1_azend(ic,jc,kc) V_cb_2_azend(ic,jc,kc) V_cb_3_azend(ic,jc,kc)]) ./sqrt(ksq_p);
+%% mu = cosine(angle between k vector and V_cb=V_c-V_b).
+%% The mu convention is consistent with f.m.
+costh_k_V = (V_cb_1_azend(ic,jc,kc)*k1_3D_p + V_cb_2_azend(ic,jc,kc)*k2_3D_p + V_cb_3_azend(ic,jc,kc)*k3_3D_p) /norm([V_cb_1_azend(ic,jc,kc) V_cb_2_azend(ic,jc,kc) V_cb_3_azend(ic,jc,kc)]) ./sqrt(ksq_p);
 
 
-  %% =========== CDM density and position ======================== begin
+%% =========== CDM density and position ======================== begin
 
-  %% Matlab & Octave 2D interpolation!! --> generating k-space deltas 
-  %% with array size Nmode_p, Nmode_p, Nmode_p.
-  %% Matlab allows extrapolation only for 'spline' method.
-  %% (costh_k_V and ksq_p have same array dimension, so interp2 
-  %%  interprets these as scattered data points: see interp2 instruction)
-  %% This is linear logarithmic interpolation along k, so the monopole
-  %% term (k=0) may obtain inf or nan due to 0.5*log(ksq_p). 
-  %% We will cure this by nullifying monopole anyway down below (**).
-  dc  = interp2(muext,log(ksampletab), deltasc,  costh_k_V,0.5*log(ksq_p),interp2opt);  %% dc still k-space values here.
+%% Matlab & Octave 2D interpolation!! --> generating k-space deltas 
+%% with array size Nmode_p, Nmode_p, Nmode_p.
+%% Matlab allows extrapolation only for 'spline' method.
+%% (costh_k_V and ksq_p have same array dimension, so interp2 
+%%  interprets these as scattered data points: see interp2 instruction)
+%% This is linear logarithmic interpolation along k, so the monopole
+%% term (k=0) may obtain inf or nan due to 0.5*log(ksq_p). 
+%% We will cure this by nullifying monopole anyway down below (**).
+dc  = interp2(muext,log(ksampletab), deltasc,  costh_k_V,0.5*log(ksq_p),interp2opt);  %% dc still k-space values here.
 
   %% randomize, apply reality, and normalize
   dc = rand_real_norm(dc,Nmode_p,Nc_p,randamp,randphs,Vbox_p);
