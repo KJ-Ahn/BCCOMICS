@@ -1,4 +1,4 @@
-## Copyright (C) 2000-2015 Kai Habel
+## Copyright (C) 2000-2017 Kai Habel
 ## Copyright (C) 2009 Jaroslav Hajek
 ##
 ## This file is part of Octave.
@@ -18,12 +18,12 @@
 ## <http://www.gnu.org/licenses/>.
 
 ## -*- texinfo -*-
-## @deftypefn  {Function File} {@var{zi} =} interp2 (@var{x}, @var{y}, @var{z}, @var{xi}, @var{yi})
-## @deftypefnx {Function File} {@var{zi} =} interp2 (@var{z}, @var{xi}, @var{yi})
-## @deftypefnx {Function File} {@var{zi} =} interp2 (@var{z}, @var{n})
-## @deftypefnx {Function File} {@var{zi} =} interp2 (@var{z})
-## @deftypefnx {Function File} {@var{zi} =} interp2 (@dots{}, @var{method})
-## @deftypefnx {Function File} {@var{zi} =} interp2 (@dots{}, @var{method}, @var{extrap})
+## @deftypefn  {} {@var{zi} =} interp2 (@var{x}, @var{y}, @var{z}, @var{xi}, @var{yi})
+## @deftypefnx {} {@var{zi} =} interp2 (@var{z}, @var{xi}, @var{yi})
+## @deftypefnx {} {@var{zi} =} interp2 (@var{z}, @var{n})
+## @deftypefnx {} {@var{zi} =} interp2 (@var{z})
+## @deftypefnx {} {@var{zi} =} interp2 (@dots{}, @var{method})
+## @deftypefnx {} {@var{zi} =} interp2 (@dots{}, @var{method}, @var{extrap})
 ##
 ## Two-dimensional interpolation.
 ##
@@ -98,14 +98,14 @@ function ZI = interp2 (varargin)
     nargs -= 2;
   elseif (ischar (varargin{end}))
     method = varargin{end};
-    nargs--;
+    nargs -= 1;
   endif
   if (method(1) == "*")
     warning ("interp2: ignoring unsupported '*' flag to METHOD");
     method(1) = [];
   endif
   method = validatestring (method, ...
-    {"nearest", "linear", "pchip", "cubic", "spline"});
+                           {"nearest", "linear", "pchip", "cubic", "spline"});
 
   ## Read numeric input
   switch (nargs)
@@ -123,7 +123,7 @@ function ZI = interp2 (varargin)
   endswitch
 
   ## Type checking
-  if (! isnumeric (Z) || isscalar (Z) || ! ismatrix (Z) || ndims (Z) != 2)
+  if (! isnumeric (Z) || isscalar (Z) || ! ismatrix (Z))
     error ("interp2: Z must be a 2-D matrix");
   endif
   if (! isempty (n) && ! (isscalar (n) && n >= 0 && n == fix (n)))
@@ -221,11 +221,17 @@ function ZI = interp2 (varargin)
 
       ## Get 2D index.
       idx = sub2ind (size (a), yidx, xidx);
-      ## We can dispose of the 1D indices at this point to save memory.
+      ## Dispose of the 1D indices at this point to save memory.
       clear xidx yidx;
 
-      ## apply plane equation
-      ZI = a(idx) + b(idx).*Xsc + c(idx).*Ysc + d(idx).*Xsc.*Ysc;
+      ## Apply plane equation
+      ## Handle case where idx and coefficients are both vectors and resulting
+      ## coeff(idx) follows orientation of coeff, rather than that of idx.
+      forient = @(x) reshape (x, size (idx));
+      ZI =   forient (a(idx))        ...
+           + forient (b(idx)) .* Xsc ...
+           + forient (c(idx)) .* Ysc ...
+           + forient (d(idx)) .* Xsc.*Ysc;
 
     elseif (strcmp (method, "nearest"))
       ii = (XI - X(xidx) >= X(xidx + 1) - XI);
@@ -345,7 +351,7 @@ function o = bc (x)
   x = abs (x);
   o = zeros (size (x));
   idx1 = (x < 1);
-  idx2 = !idx1 & (x < 2);
+  idx2 = ! idx1 & (x < 2);
   o(idx1) = 1 - 2.*x(idx1).^2 + x(idx1).^3;
   o(idx2) = 4 - 8.*x(idx2) + 5.*x(idx2).^2 - x(idx2).^3;
 endfunction
@@ -527,7 +533,6 @@ endfunction
 %! assert (interp2 (x,y,orig, xi, yi,"linear", 0+1i), [0+1i,0+1i;0+1i,0+1i]);
 %! assert (interp2 (x,y,orig, xi, yi,"spline"), [27,43;512,528]);
 
-
 %!test  # for values at boundaries
 %! A = [1,2;3,4];
 %! x = [0,1];
@@ -539,9 +544,12 @@ endfunction
 %! X = meshgrid (1:4);
 %! assert (interp2 (X, 2.5, 2.5, "nearest"), 3);
 
-## re-order monotonically decreasing (bug #41838).
-%!assert (interp2 ([1 2 3], [3 2 1], magic (3), 2.5, 3), 3.5);
-%!assert (interp2 ([3 2 1], [1 2 3], magic (3), 1.5, 1), 3.5);
+## re-order monotonically decreasing
+%!assert <41838> (interp2 ([1 2 3], [3 2 1], magic (3), 2.5, 3), 3.5)
+%!assert <41838> (interp2 ([3 2 1], [1 2 3], magic (3), 1.5, 1), 3.5)
+
+## Linear interpretation with vector XI doesn't lead to matrix output
+%!assert <49506> (interp2 ([2 3], [2 3 4], [1 2; 3 4; 5 6], [2 3], 3, "linear"), [3 4])
 
 %!shared z, zout, tol
 %! z = [1 3 5; 3 5 7; 5 7 9];
@@ -563,8 +571,8 @@ endfunction
 %!assert (interp2 (z, [2 3 1], [2 2 2], "spline"), [5 7 3], tol)
 
 ## Test input validation
-%!error interp2 (1, 1, 1, 1, 1, 2)    #only 5 numeric inputs
-%!error interp2 (1, 1, 1, 1, 1, 2, 2) #only 5 numeric inputs
+%!error interp2 (1, 1, 1, 1, 1, 2)    # only 5 numeric inputs
+%!error interp2 (1, 1, 1, 1, 1, 2, 2) # only 5 numeric inputs
 %!error <Z must be a 2-D matrix> interp2 ({1})
 %!error <Z must be a 2-D matrix> interp2 (1,1,1)
 %!error <Z must be a 2-D matrix> interp2 (ones (2,2,2))
@@ -591,4 +599,3 @@ endfunction
 %!error <XI, YI must have uniform spacing> interp2 (1:2, 1:2, ones (2), [1 2 4], [1 2 3], "spline")
 %!error <XI, YI must have uniform spacing> interp2 (1:2, 1:2, ones (2), [1 2 3], [1 2 4], "spline")
 %!error interp2 (1, 1, 1, 1, 1, "foobar")
-

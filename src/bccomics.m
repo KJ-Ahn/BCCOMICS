@@ -57,11 +57,45 @@ end
 %% octave version older than 4.0.1, just use working one under the provided
 %% directory. In case statistics package (for raylrnd) is not installed,
 %% use provided statistics package.
+%%
+%% Also, interp2 is used for interpolating the transfer function, and 
+%% some old version of octave interpn either requires meshgrid data for X & Y 
+%% in interp2(X,Y,Z,x,y,interp2opt), or 'cubic' is not allowed as interpopt, 
+%% or even octave does not have interpn function. ('cubic'='pchip').
+%% Test this and if this is the case use the working interp2.m.
+%%
+%% interpn is used for 3D interpolation when particlevelocity_accuracyflag
+%% is true. Again, test this ('cubic' is not implemented yet, so use 'linear'
+%% or 'spline' for interpolation method) and if error occurs let bccomics
+%% use working interpn.m. For safety 'linear' is preferred: not smooth but
+%% does not have some unlucky weird behavior of 'spline' method, and still
+%% this is better than 1st order LPT that uses Eulerian time derivative for
+%% velocity.
+%%
 %% All this can be avoided by upgrading to most recent
 %% octave version and installing octave-statistics package.
 if ~matlabflag
   if compare_versions(OCTAVE_VERSION,'4.0.1','<')
     %% Messages "warning: function * shadows ..." should be welcomed.
+    addpath('../mfiles_for_octave'); 
+  end
+  try  %% test system interp2
+    a=[1:3]';
+    b=1:2;
+    c=a*b;
+    d=interp2(b,a,c,1.5,1.5,'cubic');
+  catch  %% when error occurs in interp2 use working interp2 instead 
+    addpath('../mfiles_for_octave'); 
+  end
+  try  %% test system interpn
+    x = y = z = -1:1;
+    f = @(x,y,z) x.^2 - y - z.^2;
+    [xx, yy, zz] = meshgrid (x, y, z);
+    v = f (xx,yy,zz);
+    xi = yi = zi = -1:0.1:1;
+    [xxi, yyi, zzi] = ndgrid (xi, yi, zi);
+    vi = interpn (x, y, z, v, xxi, yyi, zzi, "spline");
+  catch  %% when error occurs in interpn use working interpn instead 
     addpath('../mfiles_for_octave'); 
   end
   if ~exist('raylrnd')
@@ -92,34 +126,22 @@ end
 %% of Matlab and Octave for even numbered case.
 patch_init;  %%==== script ==================
 
-interp2opt = 'cubic'
+interp2opt = 'cubic'  %% identical to 'pchip'
+%% May choose 'pchip' for Matlab below, but for consistency with Octave
+%% just use 'linear'. 'spline' is somewhat dangerous.
+interpnopt = 'linear' 
 
-k1_3D_p = zeros(Nmode_p,Nmode_p,Nmode_p);
-k2_3D_p = zeros(Nmode_p,Nmode_p,Nmode_p);
-k3_3D_p = zeros(Nmode_p,Nmode_p,Nmode_p);
-
-%%%%%% Below can be replaced by (shifted meshgrid)*coeff.
 %% For assigning k, see p.69 of "DFT..." by W. Briggs.
-%% k1 component on each (k1,k2,k3) point, as a 3D matrix
-for ik=-Nhalf_p:Nhalf_p-1
-  k1                 = kunit_p*ik;
-  iksft              = ik + Nhalf_p+1;
-  k1_3D_p(iksft,:,:) = k1;
-end
-%% k2 component on each (k1,k2,k3) point, as a 3D matrix
-for jk=-Nhalf_p:Nhalf_p-1
-  k2                 = kunit_p*jk;
-  jksft              = jk + Nhalf_p+1;
-  k2_3D_p(:,jksft,:) = k2;
-end
-%% k3 component on each (k1,k2,k3) point, as a 3D matrix
-for kk=-Nhalf_p:Nhalf_p-1
-  k3                 = kunit_p*kk;
-  kksft              = kk + Nhalf_p+1;
-  k3_3D_p(:,:,kksft) = k3;
-end
+%% The convention below has [-Nhalf_p:Nhalf_p-1], different
+%% from Briggs convention [-Nhalf_p+1:Nhalf_p], but this is
+%% to par with Matlab and Octave FFT convention.
 
-ksq_p     = k1_3D_p.^2 +k2_3D_p.^2 +k3_3D_p.^2;
+%% k1 component on each (k1,k2,k3) point, etc.
+[k1_3D_p, k2_3D_p, k3_3D_p] = ndgrid(-Nhalf_p:Nhalf_p-1);
+k1_3D_p = kunit_p * k1_3D_p;
+k2_3D_p = kunit_p * k2_3D_p;
+k3_3D_p = kunit_p * k3_3D_p;
+ksq_p   = k1_3D_p.^2 +k2_3D_p.^2 +k3_3D_p.^2; %% |k|^2
 
 %% utilize above for rvector too, but just in memory saving way (****)
 %%r1 = k1_3D_p/kunit_p;
@@ -213,49 +235,12 @@ fprintf(fout,'%s\n', '## density units; velocity units; specific energy units --
 fprintf(fout,'%e %e %e\n', DensityUnits, VelocityUnits, SpecificEnergyUnits);
 fclose(fout);
 
-
-%% some check
-% $$$ dsc10=reshape(deltasc_cell_mu(1,:,1),Nsample,1); %% for mu=0 and under 1nd cell environment
-% $$$ dsb10=reshape(deltasb_cell_mu(1,:,1),Nsample,1); %% for mu=0 and under 1nd cell environment
-% $$$ dsThc10=reshape(deltasThc_cell_mu(1,:,1),Nsample,1); %% for mu=0 and under 1nd cell environment
-% $$$ dsThb10=reshape(deltasThb_cell_mu(1,:,1),Nsample,1); %% for mu=0 and under 1nd cell environment
-% $$$ 
-% $$$ dsc20=reshape(deltasc_cell_mu(2,:,1),Nsample,1); %% for mu=0 and under 2nd cell environment
-% $$$ dsb20=reshape(deltasb_cell_mu(2,:,1),Nsample,1); %% for mu=0 and under 2nd cell environment
-% $$$ dsThc20=reshape(deltasThc_cell_mu(2,:,1),Nsample,1); %% for mu=0 and under 2nd cell environment
-% $$$ dsThb20=reshape(deltasThb_cell_mu(2,:,1),Nsample,1); %% for mu=0 and under 2nd cell environment
-% $$$ 
-% $$$ dsc11=reshape(deltasc_cell_mu(1,:,Nmu),Nsample,1); %% for mu=0 and under 1nd cell environment
-% $$$ dsb11=reshape(deltasb_cell_mu(1,:,Nmu),Nsample,1); %% for mu=0 and under 1nd cell environment
-% $$$ dsThc11=reshape(deltasThc_cell_mu(1,:,Nmu),Nsample,1); %% for mu=0 and under 1nd cell environment
-% $$$ dsThb11=reshape(deltasThb_cell_mu(1,:,Nmu),Nsample,1); %% for mu=0 and under 1nd cell environment
-% $$$ 
-% $$$ dsc21=reshape(deltasc_cell_mu(2,:,Nmu),Nsample,1); %% for mu=0 and under 2nd cell environment
-% $$$ dsb21=reshape(deltasb_cell_mu(2,:,Nmu),Nsample,1); %% for mu=0 and under 2nd cell environment
-% $$$ dsThc21=reshape(deltasThc_cell_mu(2,:,Nmu),Nsample,1); %% for mu=0 and under 2nd cell environment
-% $$$ dsThb21=reshape(deltasThb_cell_mu(2,:,Nmu),Nsample,1); %% for mu=0 and under 2nd cell environment
-% $$$ 
-% $$$ loglog(ksampletab,abs(dsc20), ksampletab,abs(dsb20))
-% $$$ loglog(ksampletab,abs(dsThc20), ksampletab,abs(dsThb20))
-% $$$ loglog(ksampletab,abs(dsc20), ksampletab,abs(dsThc20),'.')
-% $$$ loglog(ksampletab,real(dsc20), ksampletab,-real(dsThc20),'.')
-% $$$ 
-% $$$ plot(log10(ksampletab),abs(fc*dsc10+fb*dsb10).^2.*ksampletab.^3/(2*pi^2),log10(ksampletab),abs(fc*dsc11+fb*dsb11).^2.*ksampletab.^3/(2*pi^2),log10(ksampletab),abs(fc*dsc20+fb*dsb20).^2.*ksampletab.^3/(2*pi^2),log10(ksampletab),abs(fc*dsc21+fb*dsb21).^2.*ksampletab.^3/(2*pi^2))
-% $$$ 
-% $$$ plot(log10(ksampletab),abs(dsc10)./abs(dsc20))
-% $$$ plot(log10(ksampletab),abs(dsThc10)./abs(dsThc20))
-% $$$ plot(log10(ksampletab),abs(dsc11)./abs(dsc21))
-% $$$ plot(log10(ksampletab),abs(dsThc11)./abs(dsThc21))
-% $$$ 
-% $$$ testk   = [1.3; 1.6; 1.8; 3.5; 7.5; 43.5; 56.7];
-% $$$ testdsc = interp1(log10(ksampletab), abs(dsc10), log10(testk), 'cubic');
-% $$$ plot(log10(ksampletab),abs(dsc10), log10(testk), abs(testdsc))
-% $$$ loglog(ksampletab,abs(dsc10), testk, testdsc)
-
+%% Set gaussian random seed
 Set_gaussrand;
 
-fileNseed = [ICsubdir '/subgaussseed' num2str(Nmode_p) '.matbin'];
+%% record random seed
 if recordseedflag
+  fileNseed = [ICsubdir '/subgaussseed' num2str(Nmode_p) '.matbin'];
   if matlabflag
     save(fileNseed, 'randamp', 'randphs', '-v6');
   else
@@ -302,84 +287,145 @@ costh_k_V = (V_cb_1_azend(ic,jc,kc)*k1_3D_p + V_cb_2_azend(ic,jc,kc)*k2_3D_p + V
 %% We will cure this by nullifying monopole anyway down below (**).
 dc  = interp2(muext,log(ksampletab), deltasc,  costh_k_V,0.5*log(ksq_p),interp2opt);  %% dc still k-space values here.
 
-  %% randomize, apply reality, and normalize
-  dc = rand_real_norm(dc,Nmode_p,Nc_p,randamp,randphs,Vbox_p);
-  %% CDM displacement vector, related to CDM density at 1st order.
-  %% No need for above normalization because this is
-  %% derived after above normalization on dc.
-  %% ------------- cpos1 ----------------------
-  Psi1                 = i*k1_3D_p./ksq_p.*dc;
-  Psi1(Nc_p,Nc_p,Nc_p) = complex(0);  %% fixing nan or inf monopole
-  Psi1                 = real(ifftn(ifftshift(Psi1)));
-  %% enzo position output is the combiation of the following steps:
-  %%xCDM       = Psi1 + k1_3D_p/kunit_p*Lcell_p;                     %%(1)
-  %%xCDM_enzo  = (xCDM + Lbox_p/2)/Lbox_p;                               %%(2)
-  %%xCDM_enzo  = (Psi1 + k1_3D_p/kunit_p*Lcell_p + Lbox_p/2)/Lbox_p; %%(3)
-  fout = fopen([ddir '/cpos1'], 'w');
-  fwrite(fout, mod((Psi1 + (k1_3D_p/kunit_p+0.5)*Lcell_p + Lbox_p/2)/Lbox_p, 1), 'double');
-  fclose(fout);
-  xCDM_plane    =   Psi1(:,:,1) + k1_3D_p(:,:,1)/kunit_p*Lcell_p + Lbox_p/2; %% for figure
-  xCDM_ex_plane = 5*Psi1(:,:,1) + k1_3D_p(:,:,1)/kunit_p*Lcell_p + Lbox_p/2; %% for figure, NOT REAL but to make more contrast in CDM position
+%% randomize, apply reality, and normalize
+dc = rand_real_norm(dc,Nmode_p,Nc_p,randamp,randphs,Vbox_p);
+%% CDM displacement vector, related to CDM density at 1st order.
+%% No need for above normalization because this is
+%% derived after above normalization on dc.
+%% ------------- cpos1 ----------------------
+Psi1                 = i*k1_3D_p./ksq_p.*dc;
+Psi1(Nc_p,Nc_p,Nc_p) = complex(0);  %% fixing nan or inf monopole
+Psi1                 = real(ifftn(ifftshift(Psi1)));
+%% Normalized position of particles in domain [0,1).
+%% enzo position output is the combiation of the following steps:
+%% xCDM       = Psi1 + k1_3D_p/kunit_p*Lcell_p;                      %%(1)
+%% xCDM_enzo  = (xCDM + Lbox_p/2)/Lbox_p;                            %%(2)
+%% xCDM_enzo  = (Psi1 + k1_3D_p/kunit_p*Lcell_p + Lbox_p/2)/Lbox_p;  %%(3)
+%% wrapping needed when xCDM_enzo above is out of the domain [0, 1). %%(4)
+fout = fopen([ICsubdir '/cpos1'], 'w');
+fwrite(fout, mod((Psi1 + (k1_3D_p/kunit_p+0.5)*Lcell_p + Lbox_p/2)/Lbox_p, 1), 'double');
+fclose(fout);
+xCDM_plane    =   Psi1(:,:,1) + k1_3D_p(:,:,1)/kunit_p*Lcell_p + Lbox_p/2; %% for figure
+xCDM_ex_plane = 5*Psi1(:,:,1) + k1_3D_p(:,:,1)/kunit_p*Lcell_p + Lbox_p/2; %% for figure, NOT REAL but to make more contrast in CDM position
+if particlevelocity_accuracyflag  %% prepare for interpn on the domain grid [1, Nmode_p]
+  Psi1 = mod((Psi1 + (k1_3D_p/kunit_p+  1)*Lcell_p + Lbox_p/2)/Lbox_p, 1)*Lbox_p
+else
   clear Psi1  %% save memory
+end
 
-  %% ------------- cpos2 ----------------------
-  Psi2                 = i*k2_3D_p./ksq_p.*dc;
-  Psi2(Nc_p,Nc_p,Nc_p) = complex(0);  %% fixing nan or inf monopole
-  Psi2                 = real(ifftn(ifftshift(Psi2)));
-  fout = fopen([ddir '/cpos2'], 'w');
-  fwrite(fout, mod((Psi2 + (k2_3D_p/kunit_p+0.5)*Lcell_p + Lbox_p/2)/Lbox_p, 1), 'double');
-  fclose(fout);
-  yCDM_plane    =   Psi2(:,:,1) + k2_3D_p(:,:,1)/kunit_p*Lcell_p + Lbox_p/2; %% for figure
-  yCDM_ex_plane = 5*Psi2(:,:,1) + k2_3D_p(:,:,1)/kunit_p*Lcell_p + Lbox_p/2; %% for figure, NOT REAL but to make more contrast in CDM position
+%% ------------- cpos2 ----------------------
+Psi2                 = i*k2_3D_p./ksq_p.*dc;
+Psi2(Nc_p,Nc_p,Nc_p) = complex(0);  %% fixing nan or inf monopole
+Psi2                 = real(ifftn(ifftshift(Psi2)));
+fout = fopen([ICsubdir '/cpos2'], 'w');
+fwrite(fout, mod((Psi2 + (k2_3D_p/kunit_p+0.5)*Lcell_p + Lbox_p/2)/Lbox_p, 1), 'double');
+fclose(fout);
+if particlevelocity_accuracyflag
+else
   clear Psi2  %% save memory
+end
 
-  %% ------------- cpos3 ----------------------
-  Psi3                 = i*k3_3D_p./ksq_p.*dc;
-  Psi3(Nc_p,Nc_p,Nc_p) = complex(0);  %% fixing nan or inf monopole
-  Psi3                 = real(ifftn(ifftshift(Psi3)));
-  fout = fopen([ddir '/cpos3'], 'w');
-  fwrite(fout, mod((Psi3 + (k3_3D_p/kunit_p+0.5)*Lcell_p + Lbox_p/2)/Lbox_p, 1), 'double');
-  fclose(fout);
+%% ------------- cpos3 ----------------------
+Psi3                 = i*k3_3D_p./ksq_p.*dc;
+Psi3(Nc_p,Nc_p,Nc_p) = complex(0);  %% fixing nan or inf monopole
+Psi3                 = real(ifftn(ifftshift(Psi3)));
+fout = fopen([ICsubdir '/cpos3'], 'w');
+fwrite(fout, mod((Psi3 + (k3_3D_p/kunit_p+0.5)*Lcell_p + Lbox_p/2)/Lbox_p, 1), 'double');
+fclose(fout);
+if particlevelocity_accuracyflag
+else
   clear Psi3  %% save memory
+end
 
-  %% ------------- density ---------------------
-  dc = real(ifftn(ifftshift(dc)));  %% just for debugging
+%% ------------- density ---------------------
+dc = real(ifftn(ifftshift(dc)));  %% just for debugging
 
-  Zc    = reshape(dc(:,:,1),Nmode_p,Nmode_p); %% for figure
-  clear dc  %% save memory
-  %% =========== CDM density and position ======================== end
+Zc    = reshape(dc(:,:,1),Nmode_p,Nmode_p); %% for figure
+clear dc  %% save memory
+%% =========== CDM density and position ======================== end
+
+
+
+%% =========== CDM velocity ==================================== begin
+%% Matlab & Octave 2D interpolation!! --> generating k-space deltas 
+Thc = interp2(muext,log(ksampletab), deltasThc, costh_k_V,0.5*log(ksq_p),interp2opt);
+
+%% randomize, apply reality, and normalize
+Thc = rand_real_norm(Thc,Nmode_p,Nc_p,randamp,randphs,Vbox_p);
+
+%% ------------- vc1 ----------------------
+vc1(:,:,:)          = -i*af*k1_3D_p./ksq_p.*Thc(:,:,:);
+vc1(Nc_p,Nc_p,Nc_p) = complex(0);  %% fixing nan or inf monopole
+vc1                 = real(ifftn(ifftshift(vc1)));
+if particlevelocity_accuracyflag
+  interpn(vc1, 
+end
+%% enzo velocity output is the following:
+%%vc1_enzo = vc1 * MpcMyr_2_kms * 1e5 /VelocityUnits;
+fout = fopen([ICsubdir '/vc1'], 'w');
+fwrite(fout, vc1*MpcMyr_2_kms*1e5/VelocityUnits, 'double');
+fclose(fout);
+Vc1 = reshape(vc1(:,:,1) *MpcMyr_2_kms, Nmode_p, Nmode_p); %% for figure
+clear vc1  %% save memory
+
+%% ------------- vc2 ----------------------
+vc2(:,:,:)          = -i*af*k2_3D_p./ksq_p.*Thc(:,:,:);
+vc2(Nc_p,Nc_p,Nc_p) = complex(0);  %% fixing nan or inf monopole
+vc2                 = real(ifftn(ifftshift(vc2)));
+fout = fopen([ICsubdir '/vc2'], 'w');
+fwrite(fout, vc2*MpcMyr_2_kms*1e5/VelocityUnits, 'double');
+fclose(fout);
+Vc2 = reshape(vc2(:,:,1) *MpcMyr_2_kms, Nmode_p, Nmode_p); %% for figure
+clear vc2  %% save memory
+
+%% ------------- vc3 ----------------------
+vc3(:,:,:)          = -i*af*k3_3D_p./ksq_p.*Thc(:,:,:);
+vc3(Nc_p,Nc_p,Nc_p) = complex(0);  %% fixing nan or inf monopole
+vc3                 = real(ifftn(ifftshift(vc3)));
+fout = fopen([ICsubdir '/vc3'], 'w');
+fwrite(fout, vc3*MpcMyr_2_kms*1e5/VelocityUnits, 'double');
+fclose(fout);
+Vc3 = reshape(vc3(:,:,1) *MpcMyr_2_kms, Nmode_p, Nmode_p); %% for figure
+clear vc3  %% save memory
+
+%% ------------- velocity divergence ---------------------
+Thc = real(ifftn(ifftshift(Thc)));  
+
+ZThc = reshape(Thc(:,:,1),Nmode_p,Nmode_p); %% for figure
+clear Thc  %% save memory
+%% =========== CDM velocity ==================================== end
 
 
 
   %% =========== baryon density ================================== begin
-  %% Matlab & Octave 2D interpolation!! --> generating k-space deltas 
-  db  = interp2(muext,log(ksampletab), deltasb,  costh_k_V,0.5*log(ksq_p),interp2opt);
+%% Matlab & Octave 2D interpolation!! --> generating k-space deltas 
+db  = interp2(muext,log(ksampletab), deltasb,  costh_k_V,0.5*log(ksq_p),interp2opt);
 
-  %% randomize, apply reality, and normalize
-  db = rand_real_norm(db,Nmode_p,Nc_p,randamp,randphs,Vbox_p);
+%% randomize, apply reality, and normalize
+db = rand_real_norm(db,Nmode_p,Nc_p,randamp,randphs,Vbox_p);
 
-  %%%% If SPH particle is used, one can here get the particle positions 
-  %%%% just the way CDM positions are calculated here.
-  %% ------------- bpos1 ----------------------
-  Psi1                 = i*k1_3D_p./ksq_p.*db;
-  Psi1(Nc_p,Nc_p,Nc_p) = complex(0);  %% fixing nan or inf monopole
-  Psi1                 = real(ifftn(ifftshift(Psi1)));
-  %% enzo position output is the combiation of the following steps:
-  %%xCDM       = Psi1 + k1_3D_p/kunit_p*Lcell_p;                     %%(1)
-  %%xCDM_enzo  = (xCDM + Lbox_p/2)/Lbox_p;                               %%(2)
-  %%xCDM_enzo  = (Psi1 + k1_3D_p/kunit_p*Lcell_p + Lbox_p/2)/Lbox_p; %%(3)
-  fout = fopen([ddir '/bpos1'], 'w');
-  fwrite(fout, mod((Psi1 + (k1_3D_p/kunit_p+0.5)*Lcell_p + Lbox_p/2)/Lbox_p, 1), 'double');
-  fclose(fout);
-  xbar_plane    =   Psi1(:,:,1) + k1_3D_p(:,:,1)/kunit_p*Lcell_p + Lbox_p/2; %% for figure
-  xbar_ex_plane = 5*Psi1(:,:,1) + k1_3D_p(:,:,1)/kunit_p*Lcell_p + Lbox_p/2; %% for figure, NOT REAL but to make more contrast in CDM position
-  clear Psi1  %% save memory
+%%%% If SPH particle is used, one can here get the particle positions 
+%%%% just the way CDM positions are calculated here.
+%% ------------- bpos1 ----------------------
+Psi1                 = i*k1_3D_p./ksq_p.*db;
+Psi1(Nc_p,Nc_p,Nc_p) = complex(0);  %% fixing nan or inf monopole
+Psi1                 = real(ifftn(ifftshift(Psi1)));
+%% enzo position output is the combiation of the following steps:
+%%xCDM       = Psi1 + k1_3D_p/kunit_p*Lcell_p;                     %%(1)
+%%xCDM_enzo  = (xCDM + Lbox_p/2)/Lbox_p;                           %%(2)
+%%xCDM_enzo  = (Psi1 + k1_3D_p/kunit_p*Lcell_p + Lbox_p/2)/Lbox_p; %%(3)
+fout = fopen([ICsubdir '/bpos1'], 'w');
+fwrite(fout, mod((Psi1 + (k1_3D_p/kunit_p+0.5)*Lcell_p + Lbox_p/2)/Lbox_p, 1), 'double');
+fclose(fout);
+xbar_plane    =   Psi1(:,:,1) + k1_3D_p(:,:,1)/kunit_p*Lcell_p + Lbox_p/2; %% for figure
+xbar_ex_plane = 5*Psi1(:,:,1) + k1_3D_p(:,:,1)/kunit_p*Lcell_p + Lbox_p/2; %% for figure, NOT REAL but to make more contrast in CDM position
+clear Psi1  %% save memory
 
   %% ------------- bpos2 ----------------------
   Psi2                 = i*k2_3D_p./ksq_p.*db;
   Psi2(Nc_p,Nc_p,Nc_p) = complex(0);  %% fixing nan or inf monopole
   Psi2                 = real(ifftn(ifftshift(Psi2)));
-  fout = fopen([ddir '/bpos2'], 'w');
+  fout = fopen([ICsubdir '/bpos2'], 'w');
   fwrite(fout, mod((Psi2 + (k2_3D_p/kunit_p+0.5)*Lcell_p + Lbox_p/2)/Lbox_p, 1), 'double');
   fclose(fout);
   ybar_plane    =   Psi2(:,:,1) + k2_3D_p(:,:,1)/kunit_p*Lcell_p + Lbox_p/2; %% for figure
@@ -390,7 +436,7 @@ dc  = interp2(muext,log(ksampletab), deltasc,  costh_k_V,0.5*log(ksq_p),interp2o
   Psi3                 = i*k3_3D_p./ksq_p.*db;
   Psi3(Nc_p,Nc_p,Nc_p) = complex(0);  %% fixing nan or inf monopole
   Psi3                 = real(ifftn(ifftshift(Psi3)));
-  fout = fopen([ddir '/bpos3'], 'w');
+  fout = fopen([ICsubdir '/bpos3'], 'w');
   fwrite(fout, mod((Psi3 + (k3_3D_p/kunit_p+0.5)*Lcell_p + Lbox_p/2)/Lbox_p, 1), 'double');
   fclose(fout);
   clear Psi3  %% save memory
@@ -400,7 +446,7 @@ dc  = interp2(muext,log(ksampletab), deltasc,  costh_k_V,0.5*log(ksq_p),interp2o
 
   %% enzo baryon density output is the following:
   %%  db_enzo    = (db+1)*fb
-  fout = fopen([ddir '/db'], 'w');
+  fout = fopen([ICsubdir '/db'], 'w');
   fwrite(fout, (db+1)*fb, 'double');
   fclose(fout);
 
@@ -408,53 +454,6 @@ dc  = interp2(muext,log(ksampletab), deltasc,  costh_k_V,0.5*log(ksq_p),interp2o
   clear db  %% save memory
   %% =========== baryon density ================================== end
 
-
-
-  %% =========== CDM velocity ==================================== begin
-  %% Matlab & Octave 2D interpolation!! --> generating k-space deltas 
-  Thc = interp2(muext,log(ksampletab), deltasThc, costh_k_V,0.5*log(ksq_p),interp2opt);
-
-  %% randomize, apply reality, and normalize
-  Thc = rand_real_norm(Thc,Nmode_p,Nc_p,randamp,randphs,Vbox_p);
-
-  %% ------------- vc1 ----------------------
-  vc1(:,:,:)          = -i*af*k1_3D_p./ksq_p.*Thc(:,:,:);
-  vc1(Nc_p,Nc_p,Nc_p) = complex(0);  %% fixing nan or inf monopole
-  vc1                 = real(ifftn(ifftshift(vc1)));
-  %% enzo velocity output is the following:
-  %%vc1_enzo = vc1 * MpcMyr_2_kms * 1e5 /VelocityUnits;
-  fout = fopen([ddir '/vc1'], 'w');
-  fwrite(fout, vc1*MpcMyr_2_kms*1e5/VelocityUnits, 'double');
-  fclose(fout);
-  Vc1 = reshape(vc1(:,:,1) *MpcMyr_2_kms, Nmode_p, Nmode_p); %% for figure
-  clear vc1  %% save memory
-
-  %% ------------- vc2 ----------------------
-  vc2(:,:,:)          = -i*af*k2_3D_p./ksq_p.*Thc(:,:,:);
-  vc2(Nc_p,Nc_p,Nc_p) = complex(0);  %% fixing nan or inf monopole
-  vc2                 = real(ifftn(ifftshift(vc2)));
-  fout = fopen([ddir '/vc2'], 'w');
-  fwrite(fout, vc2*MpcMyr_2_kms*1e5/VelocityUnits, 'double');
-  fclose(fout);
-  Vc2 = reshape(vc2(:,:,1) *MpcMyr_2_kms, Nmode_p, Nmode_p); %% for figure
-  clear vc2  %% save memory
-
-  %% ------------- vc3 ----------------------
-  vc3(:,:,:)          = -i*af*k3_3D_p./ksq_p.*Thc(:,:,:);
-  vc3(Nc_p,Nc_p,Nc_p) = complex(0);  %% fixing nan or inf monopole
-  vc3                 = real(ifftn(ifftshift(vc3)));
-  fout = fopen([ddir '/vc3'], 'w');
-  fwrite(fout, vc3*MpcMyr_2_kms*1e5/VelocityUnits, 'double');
-  fclose(fout);
-  Vc3 = reshape(vc3(:,:,1) *MpcMyr_2_kms, Nmode_p, Nmode_p); %% for figure
-  clear vc3  %% save memory
-
-  %% ------------- velocity divergence ---------------------
-  Thc = real(ifftn(ifftshift(Thc)));  
-
-  ZThc = reshape(Thc(:,:,1),Nmode_p,Nmode_p); %% for figure
-  clear Thc  %% save memory
-  %% =========== CDM velocity ==================================== end
 
 
   %% =========== baryon velocity ==================================== begin
@@ -472,7 +471,7 @@ dc  = interp2(muext,log(ksampletab), deltasc,  costh_k_V,0.5*log(ksq_p),interp2o
   vb1                 = vb1 - V_cb_1_azend(ic,jc,kc); 
   %% enzo velocity output is the following:
   %%vb1_enzo = vb1 * MpcMyr_2_kms * 1e5 /VelocityUnits;
-  fout = fopen([ddir '/vb1'], 'w');
+  fout = fopen([ICsubdir '/vb1'], 'w');
   fwrite(fout, vb1*MpcMyr_2_kms*1e5/VelocityUnits, 'double');
   fclose(fout);
 
@@ -488,7 +487,7 @@ dc  = interp2(muext,log(ksampletab), deltasc,  costh_k_V,0.5*log(ksq_p),interp2o
   vb2                 = real(ifftn(ifftshift(vb2)));
   %% add streaming velocity (V_cb = Vc - Vb)
   vb2                 = vb2 - V_cb_2_azend(ic,jc,kc); 
-  fout = fopen([ddir '/vb2'], 'w');
+  fout = fopen([ICsubdir '/vb2'], 'w');
   fwrite(fout, vb2*MpcMyr_2_kms*1e5/VelocityUnits, 'double');
   fclose(fout);
 
@@ -504,7 +503,7 @@ dc  = interp2(muext,log(ksampletab), deltasc,  costh_k_V,0.5*log(ksq_p),interp2o
   vb3                 = real(ifftn(ifftshift(vb3)));
   %% add streaming velocity (V_cb = Vc - Vb)
   vb3                 = vb3 - V_cb_3_azend(ic,jc,kc); 
-  fout = fopen([ddir '/vb3'], 'w');
+  fout = fopen([ICsubdir '/vb3'], 'w');
   fwrite(fout, vb3*MpcMyr_2_kms*1e5/VelocityUnits, 'double');
   fclose(fout);
 
@@ -542,7 +541,7 @@ dc  = interp2(muext,log(ksampletab), deltasc,  costh_k_V,0.5*log(ksq_p),interp2o
   %% specific thermal energy for monatomic gas (H+He), in units of VelocityUnits^2 : sp_Eth_enzo
   %%Tcell = (dT+1)*Tz;  %% in K
   %%sp_Eth_enzo  = 3/2*kb*Tcell /(mmw*mH) /VelocityUnits^2;  %% see Enzo paper(2014) eq. 7.
-  fout = fopen([ddir '/etherm'], 'w');
+  fout = fopen([ICsubdir '/etherm'], 'w');
   fwrite(fout, 3/2*kb*(dT+1)*Tz /(mmw*mH) /VelocityUnits^2, 'double');
   fclose(fout);
 
@@ -558,7 +557,7 @@ dc  = interp2(muext,log(ksampletab), deltasc,  costh_k_V,0.5*log(ksq_p),interp2o
   %% memory-saving way of calculating sp_Etot_enzo (**--4--**)
   sp_Etot_enzo = sp_Etot_enzo + 3/2*kb*(dT+1)*Tz /(mmw*mH) /VelocityUnits^2;
   
-  fout = fopen([ddir '/etot'], 'w');
+  fout = fopen([ICsubdir '/etot'], 'w');
   fwrite(fout, sp_Etot_enzo, 'double');
   fclose(fout);
 
@@ -573,8 +572,8 @@ dc  = interp2(muext,log(ksampletab), deltasc,  costh_k_V,0.5*log(ksq_p),interp2o
   %clear randamp randphs k1_3D_p k2_3D_p k3_3D_p ksq_p
 
   %% To run on HPC, just dump figure-useful data and skip the following.
-  save('-mat-binary', [ddir '/4fig.matbin'], 'xCDM_plane', 'xCDM_ex_plane', 'yCDM_plane', 'yCDM_ex_plane', 'Zc', 'xbar_plane', 'xbar_ex_plane', 'ybar_plane', 'ybar_ex_plane', 'Zb', 'Vc1', 'Vc2', 'Vc3', 'ZThc', 'Vb1', 'Vb2', 'Vb3', 'ZThb', 'Zeth', 'Ztemp', 'Zetot') %%octave
-  %%save([ddir '/4fig.matbin'], 'xCDM_plane', 'xCDM_ex_plane', 'yCDM_plane', 'yCDM_ex_plane', 'Zc', 'xbar_plane', 'xbar_ex_plane', 'ybar_plane', 'ybar_ex_plane', 'Zb', 'Vc1', 'Vc2', 'Vc3', 'ZThc', 'Vb1', 'Vb2', 'Vb3', 'ZThb', 'Zeth', 'Ztemp', 'Zetot', '-v6') %%matlab
+  save('-mat-binary', [ICsubdir '/4fig.matbin'], 'xCDM_plane', 'xCDM_ex_plane', 'yCDM_plane', 'yCDM_ex_plane', 'Zc', 'xbar_plane', 'xbar_ex_plane', 'ybar_plane', 'ybar_ex_plane', 'Zb', 'Vc1', 'Vc2', 'Vc3', 'ZThc', 'Vb1', 'Vb2', 'Vb3', 'ZThb', 'Zeth', 'Ztemp', 'Zetot') %%octave
+  %%save([ICsubdir '/4fig.matbin'], 'xCDM_plane', 'xCDM_ex_plane', 'yCDM_plane', 'yCDM_ex_plane', 'Zc', 'xbar_plane', 'xbar_ex_plane', 'ybar_plane', 'ybar_ex_plane', 'Zb', 'Vc1', 'Vc2', 'Vc3', 'ZThc', 'Vb1', 'Vb2', 'Vb3', 'ZThb', 'Zeth', 'Ztemp', 'Zetot', '-v6') %%matlab
 
 end
 
