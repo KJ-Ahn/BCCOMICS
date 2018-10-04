@@ -17,12 +17,16 @@ Noldseed       = 512     %% seed to use has Noldseed*Noldseed*(Noldseed/2+1) ele
 
 %% name of old seed file = ['subgaussseed' num2str(Noldseed) '.matbin']
 
+baryonparticleflag = true; %% if true, record baryon particle data (position & velocity).
 recordseedflag = true;   %% if true, record the used seed with right dimension
 %% If following flag is true, Eulerian velocity field is interpolated at 
 %% displaced particle positions for particle velocity, surpassing accuracy of 
-%% 1st-order Lagrangian perturbation to some extent. 
-%% If following flag is true memory usage will increase quite significantly.
-particlevelocity_accuracyflag = true;  
+%% 1st-order Lagrangian perturbation theory (1LPT) to some extent. 1LPT just
+%% uses initial Eulerian density to get velocity field, so 1LPT makes particle
+%% (displaced from cell center) velocity equal to cell velocity, which is obviously 
+%% poor in accuracy.
+%% If following flag is true memory usage will increase though.
+particlevelocity_accuracyflag = true;
 
 
 
