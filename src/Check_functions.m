@@ -1,0 +1,66 @@
+%% Some old versions of gnu octave has buggy ifftshift routine, so for
+%% octave version older than 4.0.1, just use working one under the provided
+%% directory. In case statistics package (for raylrnd) is not installed,
+%% use provided statistics package.
+%%
+%% Also, interp2 is used for interpolating the transfer function, and 
+%% some old version of octave interpn either requires meshgrid data for X & Y 
+%% in interp2(X,Y,Z,x,y,interp2opt), or 'pchip' is not allowed as interpopt, 
+%% or even octave does not have interpn function. 
+%% Test this and if this is the case use the working interp2.m.
+%%
+%% interpn is used for 3D interpolation when particlevelocity_accuracyflag
+%% is true. Again, test this ('pchip' is not implemented yet, so use 'linear'
+%% or 'spline' for interpolation method) and if error occurs let bccomics
+%% use working interpn.m. For safety 'linear' is preferred: not smooth but
+%% does not have some unlucky weird behavior of 'spline' method, and still
+%% this is better than 1st order LPT that uses Eulerian time derivative for
+%% velocity.
+%%
+%% All this can be avoided by upgrading to most recent
+%% octave version and installing octave-statistics package.
+if ~matlabflag
+  if compare_versions(OCTAVE_VERSION,'4.0.1','<')
+    %% Messages "warning: function * shadows ..." should be welcomed.
+    addpath('../mfiles_for_octave'); 
+  end
+  try  %% test system interp2
+    a=[1:3]';
+    b=1:2;
+    c=a*b;
+    d=interp2(b,a,c,1.5,1.5,interp2opt);
+  catch  %% when error occurs in interp2 use working interp2 instead 
+    addpath('../mfiles_for_octave'); 
+  end
+  try  %% test system interpn
+    x = y = z = -1:1;
+    f = @(x,y,z) x.^2 - y - z.^2;
+    [xx, yy, zz] = meshgrid (x, y, z);
+    v = f (xx,yy,zz);
+    xi = yi = zi = -1:0.1:1;
+    [xxi, yyi, zzi] = ndgrid (xi, yi, zi);
+    vi = interpn (x, y, z, v, xxi, yyi, zzi, interpnopt);
+  catch  %% when error occurs in interpn use working interpn instead 
+    addpath('../mfiles_for_octave'); 
+  end
+  try  %% test if padarray exists
+    a=[1 2;3 4];
+    aa=padarray(a,[1 1],'circular','post');
+  catch  %% when error occurs guide for installation
+    disp('octave-image package need be installed. Rerun after installation.');
+    returnflag = true;
+    return;
+  end
+  if ~exist('raylrnd')
+    addpath('../statistics-1.3.0/inst');
+  end
+else
+  try  %% test if padarray exists
+    a=[1 2;3 4];
+    aa=padarray(a,[1 1],'circular','post');
+  catch  %% when error occurs guide for installation
+    disp('Image Processing Toolbox need be installed. Rerun after installation.');
+    returnflag = true;
+    return;
+  end
+end

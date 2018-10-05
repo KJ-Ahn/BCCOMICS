@@ -53,64 +53,11 @@ else
   matlabflag=true;
 end
 
-%% Some old versions of gnu octave has buggy ifftshift routine, so for
-%% octave version older than 4.0.1, just use working one under the provided
-%% directory. In case statistics package (for raylrnd) is not installed,
-%% use provided statistics package.
-%%
-%% Also, interp2 is used for interpolating the transfer function, and 
-%% some old version of octave interpn either requires meshgrid data for X & Y 
-%% in interp2(X,Y,Z,x,y,interp2opt), or 'pchip' is not allowed as interpopt, 
-%% or even octave does not have interpn function. 
-%% Test this and if this is the case use the working interp2.m.
-%%
-%% interpn is used for 3D interpolation when particlevelocity_accuracyflag
-%% is true. Again, test this ('pchip' is not implemented yet, so use 'linear'
-%% or 'spline' for interpolation method) and if error occurs let bccomics
-%% use working interpn.m. For safety 'linear' is preferred: not smooth but
-%% does not have some unlucky weird behavior of 'spline' method, and still
-%% this is better than 1st order LPT that uses Eulerian time derivative for
-%% velocity.
-%%
-%% All this can be avoided by upgrading to most recent
-%% octave version and installing octave-statistics package.
-if ~matlabflag
-  if compare_versions(OCTAVE_VERSION,'4.0.1','<')
-    %% Messages "warning: function * shadows ..." should be welcomed.
-    addpath('../mfiles_for_octave'); 
-  end
-  try  %% test system interp2
-    a=[1:3]';
-    b=1:2;
-    c=a*b;
-    d=interp2(b,a,c,1.5,1.5,'pchip');
-  catch  %% when error occurs in interp2 use working interp2 instead 
-    addpath('../mfiles_for_octave'); 
-  end
-  try  %% test system interpn
-    x = y = z = -1:1;
-    f = @(x,y,z) x.^2 - y - z.^2;
-    [xx, yy, zz] = meshgrid (x, y, z);
-    v = f (xx,yy,zz);
-    xi = yi = zi = -1:0.1:1;
-    [xxi, yyi, zzi] = ndgrid (xi, yi, zi);
-    vi = interpn (x, y, z, v, xxi, yyi, zzi, "spline");
-  catch  %% when error occurs in interpn use working interpn instead 
-    addpath('../mfiles_for_octave'); 
-  end
-  try  %% test if padarray exists
-    a=[1 2;3 4];
-    aa=padarray(a,[1 1],'circular','post');
-  catch  %% when error occurs guide for installation
-    if matlabflag
-      disp('Image Processing Toolbox need be installed. Rerun after installation.');
-    else
-      disp('octave-image package need be installed. Rerun after installation.');
-    end
-  end
-  if ~exist('raylrnd')
-    addpath('../statistics-1.3.0/inst');
-  end
+%% Check function availability and provide cure
+Check_functions;  %%==== script ==================
+if returnflag
+  clear;
+  return;
 end
 
 %% Read in constants in cgs unit and conversion factors.
@@ -131,14 +78,17 @@ end
 %% index for center of k-space (e.g. if 6 sample points exist, 4th is the
 %% center, not 3rd). This convention for even number is different from that
 %% in p.69 of "DFT: An Owner Manual ..." by W. Briggs.
-%% k index runs from -N/2 to N/2-1 in this code, but DFT book uses
+%% k index runs from -N/2 to N/2-1 in this code, but Briggs uses
 %% -N/2+1 to N/2. Had to choose the former convention due to FFT convention
-%% of Matlab and Octave for even numbered case.
+%% of Matlab and Octave for even numbered cases.
+
+%% Read in parameters for initial condition
 patch_init;  %%==== script ==================
 
 interp2opt = 'pchip'
 %% May choose 'pchip' for Matlab below, but for consistency with Octave
-%% just use 'linear'. 'spline' is somewhat dangerous.
+%% just use 'linear'. Octave interpn does not have 'pchip' implemented yet.
+%% 'spline' is somewhat dangerous.
 interpnopt = 'linear' 
 
 %% For assigning k, see p.69 of "DFT..." by W. Briggs.
@@ -163,52 +113,12 @@ mu  = load([setupdir '/mu.dat']);
 dmu = mu(2)-mu(1);
 Nmu = length(mu);
 
-%% read in V_cb field: V_cb = Vc-Vb
-if matlabflag
-  load([setupdir '/V_cb_1_azend.dat'], '-mat', 'V_cb_1_azend');  
-  load([setupdir '/V_cb_2_azend.dat'], '-mat', 'V_cb_2_azend');
-  load([setupdir '/V_cb_3_azend.dat'], '-mat', 'V_cb_3_azend');
-  load([setupdir '/DT_azend.dat'],     '-mat', 'DT3D_azend');
-  load([setupdir '/Dc3D_azend.dat'],   '-mat', 'Dc3D_azend');
-  load([setupdir '/Db3D_azend.dat'],   '-mat', 'Db3D_azend');
-  load([setupdir '/THc3D_azend.dat'],  '-mat', 'THc3D_azend');
-  load([setupdir '/THb3D_azend.dat'],  '-mat', 'THb3D_azend');
-else
-  load('-mat-binary', [setupdir '/V_cb_1_azend.dat'], 'V_cb_1_azend');
-  load('-mat-binary', [setupdir '/V_cb_2_azend.dat'], 'V_cb_2_azend');
-  load('-mat-binary', [setupdir '/V_cb_3_azend.dat'], 'V_cb_3_azend');
-  load('-mat-binary', [setupdir '/DT_azend.dat'],     'DT3D_azend');
-  load('-mat-binary', [setupdir '/Dc3D_azend.dat'],   'Dc3D_azend');
-  load('-mat-binary', [setupdir '/Db3D_azend.dat'],   'Db3D_azend');
-  load('-mat-binary', [setupdir '/THc3D_azend.dat'],  'THc3D_azend');
-  load('-mat-binary', [setupdir '/THb3D_azend.dat'],  'THb3D_azend');
+%% choose patch to generate initial condition on
+Choose_finalpatch;  %%==== script ==================
+if returnflag
+  clear;
+  return;
 end
-
-%% choose cell whose small scale fluctuations to calculate
-cellspec = load([setupdir '/zi_icc_Dc_Db_Thc_Thb_Vcb1_Vcb2_Vcb3_Vcb_DT.dat']);
-Ncc = length(cellspec(:,1)); %% # of chosen patchess
-
-%% read in z=zi=1000 statistics
-fin=fopen([setupdir '/stats_zi.dat']);
-fgets(fin); %% skip a line
-fgets(fin); %% skip another line
-statszi = fscanf(fin, '%e %e %e %e %e %e %e %e %e');
-fclose(fin);
-
-%% Let user choose a patch
-disp('Patches ordered in calculation time, from oldest(top) to newest(bottom)');
-disp('-----------------------------------------------------------------------');
-disp('Patch #  ix  iy  iz  Deltac/sigma(Deltac)  V_cb(km/s)  at z=1000');
-for ip=1:Ncc
-  AA = [ip cellspec(ip,1) cellspec(ip,2) cellspec(ip,3) cellspec(ip,4)/statszi(1) cellspec(ip,11)];
-  fprintf('%3i     %3i %3i %3i     %10.3e         %10.3e\n',AA);
-end
-disp(['Choose a patch of your interest; default is ' num2str(Ncc) ' if you just hit Enter below.']);
-idxcc = input('Enter your choice (patch #):');
-if isempty(idxcc)  %% default to the last patch calculated
-  idxcc=Ncc;
-end
-disp(['Patch # ' num2str(idxcc) ' chosen.']);
 
 %% open transfer function file for given patch
 ic   = cellspec(idxcc,1);
@@ -221,16 +131,6 @@ else
   load('-mat-binary', strD, 'ksampletab', 'deltasc', 'deltasb', 'deltasThc', 'deltasThb', 'deltasT');
 end
 
-%% prepare for initial conditions for enzo
-zf = zzend;  %% redshift for initial condition
-af = 1/(1+zf);  %% scale factor for initial condition
-%% units are all in cgs (from enzo CosmologyGetUnits.C)
-Lbox_p_inMpch = Lbox_p*h;  %% enzo uses 'ComovingBoxSize' in units of Mpc/h
-%% enzo length unit is for anything in proper distance centimeter. So if one has something in comoving distance Mpc, one just needs to divide it by box size in units of comoving Mpc.
-DensityUnits  = 1.8788e-29*Om0*h^2*(1+zf)^3;
-VelocityUnits = 1.22475e7*Lbox_p_inMpch*sqrt(Om0)*sqrt(1+zf);
-SpecificEnergyUnits = VelocityUnits^2; %% specific energy = energy/mass 
-
 %% Generate initial condition directory
 if ~exist(ICdir)
   mkdir(ICdir);
@@ -240,15 +140,16 @@ if ~exist(ICsubdir)
   mkdir(ICsubdir); 
 end
 
-fout = fopen([ICsubdir '/Units.txt'],'w');
-fprintf(fout,'%s\n', '## density units; velocity units; specific energy units -- for enzo');
-fprintf(fout,'%e %e %e\n', DensityUnits, VelocityUnits, SpecificEnergyUnits);
-fclose(fout);
+zf = zzend;  %% redshift for initial condition
+af = 1/(1+zf);  %% scale factor for initial condition
+
+%% prepare for initial conditions for enzo (set units)
+Prepare_enzoIC;  %%==== script ==================
 
 %% Set gaussian random seed
-Set_gaussrand;
+Set_gaussrand;  %%==== script ==================
 
-%% record random seed
+%% record random seed if wanted
 if recordseedflag
   fileNseed = [ICsubdir '/subgaussseed' num2str(Nmode_p) '.matbin'];
   if matlabflag
@@ -284,342 +185,8 @@ muext(Nmu-1:-1:1)  = -mu(2:Nmu);
 %% The mu convention is consistent with f.m.
 costh_k_V = (V_cb_1_azend(ic,jc,kc)*k1_3D_p + V_cb_2_azend(ic,jc,kc)*k2_3D_p + V_cb_3_azend(ic,jc,kc)*k3_3D_p) /norm([V_cb_1_azend(ic,jc,kc) V_cb_2_azend(ic,jc,kc) V_cb_3_azend(ic,jc,kc)]) ./sqrt(ksq_p);
 
-
-%% =========== CDM density and position ======================== begin
-
-%% Matlab & Octave 2D interpolation!! --> generating k-space deltas 
-%% with array size Nmode_p, Nmode_p, Nmode_p.
-%% Matlab allows extrapolation only for 'spline' method.
-%% (costh_k_V and ksq_p have same array dimension, so interp2 
-%%  interprets these as scattered data points: see interp2 instruction)
-%% This is linear logarithmic interpolation along k, so the monopole
-%% term (k=0) may obtain inf or nan due to 0.5*log(ksq_p). 
-%% We will cure this by nullifying monopole anyway down below (**).
-dc  = interp2(muext,log(ksampletab), deltasc,  costh_k_V,0.5*log(ksq_p),interp2opt);  %% dc still k-space values here.
-
-%% randomize, apply reality, and normalize
-dc = rand_real_norm(dc,Nmode_p,Nc_p,randamp,randphs,Vbox_p);
-%% CDM displacement vector, related to CDM density at 1st order.
-%% No need for above normalization because this is
-%% derived after above normalization on dc.
-%% ------------- cpos1 ----------------------
-Psi1                 = i*k1_3D_p./ksq_p.*dc;
-Psi1(Nc_p,Nc_p,Nc_p) = complex(0);  %% fixing nan or inf monopole
-Psi1                 = real(ifftn(ifftshift(Psi1)));
-%% Normalized position of particles in domain [0,1), cell-centered way. (enzo)
-%% If unperturbed(Psi=0), it should run [0.5, 1.5, ...., Nmode_p-0.5]/Nmode_p,
-%% For enzo, wrapping needed if perturbed potition is out of the domain [0, 1).
-fout = fopen([ICsubdir '/cpos1'], 'w');
-fwrite(fout, mod((Psi1 + (k1_3D_p/kunit_p+0.5)*Lcell_p + Lbox_p/2)/Lbox_p, 1), 'double');
-fclose(fout);
-xCDM_plane    =   Psi1(:,:,1) + k1_3D_p(:,:,1)/kunit_p*Lcell_p + Lbox_p/2; %% for figure
-xCDM_ex_plane = 5*Psi1(:,:,1) + k1_3D_p(:,:,1)/kunit_p*Lcell_p + Lbox_p/2; %% for figure, NOT REAL but to make more contrast in CDM position
-%% Prepare for interpn, let positions run from 1:Nmode_p for unperturbed particles,
-%% to get more-accurate-than-1LPT velocity when particlevelocity_accuracyflag=true.
-%% Using mod function, the actual positions will run from 1 to Nmode_p+0.9999999...
-%% Interpolation basis will have domain 1:Nmode_p+1 for safe interpolation (see **).
-if particlevelocity_accuracyflag  
-  Psi1 = mod((Psi1 + (k1_3D_p/kunit_p)*Lcell_p + Lbox_p/2)/Lbox_p*Nmode_p, Nmode_p)+1;
-else
-  clear Psi1  %% save memory
-end
-
-%% ------------- cpos2 ----------------------
-Psi2                 = i*k2_3D_p./ksq_p.*dc;
-Psi2(Nc_p,Nc_p,Nc_p) = complex(0);  %% fixing nan or inf monopole
-Psi2                 = real(ifftn(ifftshift(Psi2)));
-fout = fopen([ICsubdir '/cpos2'], 'w');
-fwrite(fout, mod((Psi2 + (k2_3D_p/kunit_p+0.5)*Lcell_p + Lbox_p/2)/Lbox_p, 1), 'double');
-fclose(fout);
-if particlevelocity_accuracyflag
-  Psi2 = mod((Psi2 + (k2_3D_p/kunit_p)*Lcell_p + Lbox_p/2)/Lbox_p*Nmode_p, Nmode_p)+1;
-else
-  clear Psi2  %% save memory
-end
-
-%% ------------- cpos3 ----------------------
-Psi3                 = i*k3_3D_p./ksq_p.*dc;
-Psi3(Nc_p,Nc_p,Nc_p) = complex(0);  %% fixing nan or inf monopole
-Psi3                 = real(ifftn(ifftshift(Psi3)));
-fout = fopen([ICsubdir '/cpos3'], 'w');
-fwrite(fout, mod((Psi3 + (k3_3D_p/kunit_p+0.5)*Lcell_p + Lbox_p/2)/Lbox_p, 1), 'double');
-fclose(fout);
-if particlevelocity_accuracyflag
-  Psi3 = mod((Psi3 + (k3_3D_p/kunit_p)*Lcell_p + Lbox_p/2)/Lbox_p*Nmode_p, Nmode_p)+1;
-else
-  clear Psi3  %% save memory
-end
-
-%% ------------- density ---------------------
-dc = real(ifftn(ifftshift(dc)));  %% just for debugging
-
-Zc = reshape(dc(:,:,1),Nmode_p,Nmode_p); %% for figure
-clear dc  %% save memory
-%% =========== CDM density and position ======================== end
-
-
-
-%% =========== CDM velocity ==================================== begin
-%% Matlab & Octave 2D interpolation!! --> generating k-space deltas 
-Thc = interp2(muext,log(ksampletab), deltasThc, costh_k_V,0.5*log(ksq_p),interp2opt);
-
-%% randomize, apply reality, and normalize
-Thc = rand_real_norm(Thc,Nmode_p,Nc_p,randamp,randphs,Vbox_p);
-
-%% ------------- vc1 ----------------------
-vc1(:,:,:)          = -i*af*k1_3D_p./ksq_p.*Thc(:,:,:);
-vc1(Nc_p,Nc_p,Nc_p) = complex(0);  %% fixing nan or inf monopole
-vc1                 = real(ifftn(ifftshift(vc1)));
-if particlevelocity_accuracyflag
-  %% pad with periodic boundary condition, to provide 1:Nmode_p+1 domain. (**)
-  vc1 = padarray(vc1, [1 1 1], 'circular', 'post'); %% now (Nmode_p+1)^3 elements.
-  %% Find 
-  vc1 = interpn(vc1, Psi1, Psi2, Psi3, interpnopt); %% now Nmode_p^3 elements
-end
-%% enzo velocity output is the following:
-%%vc1_enzo = vc1 * MpcMyr_2_kms * 1e5 /VelocityUnits;
-fout = fopen([ICsubdir '/vc1'], 'w');
-fwrite(fout, vc1*MpcMyr_2_kms*1e5/VelocityUnits, 'double');
-fclose(fout);
-Vc1 = reshape(vc1(:,:,1) *MpcMyr_2_kms, Nmode_p, Nmode_p); %% for figure
-clear vc1  %% save memory
-
-%% ------------- vc2 ----------------------
-vc2(:,:,:)          = -i*af*k2_3D_p./ksq_p.*Thc(:,:,:);
-vc2(Nc_p,Nc_p,Nc_p) = complex(0);  %% fixing nan or inf monopole
-vc2                 = real(ifftn(ifftshift(vc2)));
-if particlevelocity_accuracyflag
-  %% pad with periodic boundary condition, to provide 1:Nmode_p+1 domain. (**)
-  vc2 = padarray(vc2, [1 1 1], 'circular', 'post'); %% now (Nmode_p+1)^3 elements.
-  %% Find 
-  vc2 = interpn(vc2, Psi1, Psi2, Psi3, interpnopt); %% now Nmode_p^3 elements
-end
-fout = fopen([ICsubdir '/vc2'], 'w');
-fwrite(fout, vc2*MpcMyr_2_kms*1e5/VelocityUnits, 'double');
-fclose(fout);
-Vc2 = reshape(vc2(:,:,1) *MpcMyr_2_kms, Nmode_p, Nmode_p); %% for figure
-clear vc2  %% save memory
-
-%% ------------- vc3 ----------------------
-vc3(:,:,:)          = -i*af*k3_3D_p./ksq_p.*Thc(:,:,:);
-vc3(Nc_p,Nc_p,Nc_p) = complex(0);  %% fixing nan or inf monopole
-vc3                 = real(ifftn(ifftshift(vc3)));
-if particlevelocity_accuracyflag
-  %% pad with periodic boundary condition, to provide 1:Nmode_p+1 domain. (**)
-  vc3 = padarray(vc3, [1 1 1], 'circular', 'post'); %% now (Nmode_p+1)^3 elements.
-  %% Find 
-  vc3 = interpn(vc3, Psi1, Psi2, Psi3, interpnopt); %% now Nmode_p^3 elements
-end
-fout = fopen([ICsubdir '/vc3'], 'w');
-fwrite(fout, vc3*MpcMyr_2_kms*1e5/VelocityUnits, 'double');
-fclose(fout);
-Vc3 = reshape(vc3(:,:,1) *MpcMyr_2_kms, Nmode_p, Nmode_p); %% for figure
-clear vc3  %% save memory
-
-%% ------------- velocity divergence ---------------------
-Thc = real(ifftn(ifftshift(Thc)));  
-
-ZThc = reshape(Thc(:,:,1),Nmode_p,Nmode_p); %% for figure
-clear Thc  %% save memory
-%% =========== CDM velocity ==================================== end
-
-
-
-%% =========== baryon density ================================== begin
-%% Matlab & Octave 2D interpolation!! --> generating k-space deltas 
-db  = interp2(muext,log(ksampletab), deltasb,  costh_k_V,0.5*log(ksq_p),interp2opt);
-
-%% randomize, apply reality, and normalize
-db = rand_real_norm(db,Nmode_p,Nc_p,randamp,randphs,Vbox_p);
-
-%%%% If SPH particle is used, one can here get the particle positions 
-%%%% just the way CDM positions are calculated.
-if baryonparticleflag
-  %% ------------- bpos1 ----------------------
-  Psi1                 = i*k1_3D_p./ksq_p.*db;
-  Psi1(Nc_p,Nc_p,Nc_p) = complex(0);  %% fixing nan or inf monopole
-  Psi1                 = real(ifftn(ifftshift(Psi1)));
-  fout = fopen([ICsubdir '/bpos1'], 'w');
-  fwrite(fout, mod((Psi1 + (k1_3D_p/kunit_p+0.5)*Lcell_p + Lbox_p/2)/Lbox_p, 1), 'double');
-  fclose(fout);
-  xbar_plane    =   Psi1(:,:,1) + k1_3D_p(:,:,1)/kunit_p*Lcell_p + Lbox_p/2; %% for figure
-  xbar_ex_plane = 5*Psi1(:,:,1) + k1_3D_p(:,:,1)/kunit_p*Lcell_p + Lbox_p/2; %% for figure, NOT REAL but to make more contrast in baryon position
-  if particlevelocity_accuracyflag  
-    Psi1 = mod((Psi1 + (k1_3D_p/kunit_p)*Lcell_p + Lbox_p/2)/Lbox_p*Nmode_p, Nmode_p)+1;
-  else
-    clear Psi1  %% save memory
-  end
-  
-  %% ------------- bpos2 ----------------------
-  Psi2                 = i*k2_3D_p./ksq_p.*db;
-  Psi2(Nc_p,Nc_p,Nc_p) = complex(0);  %% fixing nan or inf monopole
-  Psi2                 = real(ifftn(ifftshift(Psi2)));
-  fout = fopen([ICsubdir '/bpos2'], 'w');
-  fwrite(fout, mod((Psi2 + (k2_3D_p/kunit_p+0.5)*Lcell_p + Lbox_p/2)/Lbox_p, 1), 'double');
-  fclose(fout);
-  if particlevelocity_accuracyflag
-    Psi2 = mod((Psi2 + (k2_3D_p/kunit_p)*Lcell_p + Lbox_p/2)/Lbox_p*Nmode_p, Nmode_p)+1;
-  else
-    clear Psi2  %% save memory
-  end
-  
-  %% ------------- bpos3 ----------------------
-  Psi3                 = i*k3_3D_p./ksq_p.*db;
-  Psi3(Nc_p,Nc_p,Nc_p) = complex(0);  %% fixing nan or inf monopole
-  Psi3                 = real(ifftn(ifftshift(Psi3)));
-  fout = fopen([ICsubdir '/bpos3'], 'w');
-  fwrite(fout, mod((Psi3 + (k3_3D_p/kunit_p+0.5)*Lcell_p + Lbox_p/2)/Lbox_p, 1), 'double');
-  fclose(fout);
-  if particlevelocity_accuracyflag
-    Psi3 = mod((Psi3 + (k3_3D_p/kunit_p)*Lcell_p + Lbox_p/2)/Lbox_p*Nmode_p, Nmode_p)+1;
-  else
-    clear Psi3  %% save memory
-  end
-end
-%% ------------- density ---------------------
-db = real(ifftn(ifftshift(db)));  
-
-%% enzo baryon density output is the following:
-%%  db_enzo    = (db+1)*fb
-fout = fopen([ICsubdir '/db'], 'w');
-fwrite(fout, (db+1)*fb, 'double');
-fclose(fout);
-
-Zb    = reshape(db(:,:,1),Nmode_p,Nmode_p);
-clear db  %% save memory
-%% =========== baryon density ================================== end
-
-
-
-%% =========== baryon velocity ==================================== begin
-%% Matlab & Octave 2D interpolation!! --> generating k-space deltas 
-Thb = interp2(muext,log(ksampletab), deltasThb, costh_k_V,0.5*log(ksq_p),interp2opt);
-
-%% randomize, apply reality, and normalize
-Thb = rand_real_norm(Thb,Nmode_p,Nc_p,randamp,randphs,Vbox_p);
-
-%% ------------- vb1 ----------------------
-vb1(:,:,:)          = -i*af*k1_3D_p./ksq_p.*Thb(:,:,:);
-vb1(Nc_p,Nc_p,Nc_p) = complex(0);  %% fixing nan or inf monopole
-vb1                 = real(ifftn(ifftshift(vb1)));
-%% add streaming velocity (V_cb = Vc - Vb)
-vb1                 = vb1 - V_cb_1_azend(ic,jc,kc); 
-%% memory-saving way of calculating sp_Etot_enzo (**--1--**)
-sp_Etot_enzo = 1/2*(vb1*MpcMyr_2_kms*1e5/VelocityUnits).^2; 
-if (particlevelocity_accuracyflag & baryonparticleflag)
-  %% pad with periodic boundary condition, to provide 1:Nmode_p+1 domain. (**)
-  vb1 = padarray(vb1, [1 1 1], 'circular', 'post'); %% now (Nmode_p+1)^3 elements.
-  %% Find 
-  vb1 = interpn(vb1, Psi1, Psi2, Psi3, interpnopt); %% now Nmode_p^3 elements
-end
-%% enzo velocity output is the following:
-%%vb1_enzo = vb1 * MpcMyr_2_kms * 1e5 /VelocityUnits;
-fout = fopen([ICsubdir '/vb1'], 'w');
-fwrite(fout, vb1*MpcMyr_2_kms*1e5/VelocityUnits, 'double');
-fclose(fout);
-
-Vb1 = reshape(vb1(:,:,1) *MpcMyr_2_kms, Nmode_p, Nmode_p); %% for figure
-clear vb1  %% save memory
-
-%% ------------- vb2 ----------------------
-vb2(:,:,:)          = -i*af*k2_3D_p./ksq_p.*Thb(:,:,:);
-vb2(Nc_p,Nc_p,Nc_p) = complex(0);  %% fixing nan or inf monopole
-vb2                 = real(ifftn(ifftshift(vb2)));
-%% add streaming velocity (V_cb = Vc - Vb)
-vb2                 = vb2 - V_cb_2_azend(ic,jc,kc); 
-%% memory-saving way of calculating sp_Etot_enzo (**--2--**)
-sp_Etot_enzo = sp_Etot_enzo + 1/2*(vb2*MpcMyr_2_kms*1e5/VelocityUnits).^2; 
-if (particlevelocity_accuracyflag & baryonparticleflag)
-  %% pad with periodic boundary condition, to provide 1:Nmode_p+1 domain. (**)
-  vb2 = padarray(vb2, [1 1 1], 'circular', 'post'); %% now (Nmode_p+1)^3 elements.
-  %% Find 
-  vb2 = interpn(vb2, Psi1, Psi2, Psi3, interpnopt); %% now Nmode_p^3 elements
-end
-fout = fopen([ICsubdir '/vb2'], 'w');
-fwrite(fout, vb2*MpcMyr_2_kms*1e5/VelocityUnits, 'double');
-fclose(fout);
-
-Vb2 = reshape(vb2(:,:,1) *MpcMyr_2_kms, Nmode_p, Nmode_p); %% for figure
-clear vb2  %% save memory
-
-%% ------------- vb3 ----------------------
-vb3(:,:,:)          = -i*af*k3_3D_p./ksq_p.*Thb(:,:,:);
-vb3(Nc_p,Nc_p,Nc_p) = complex(0);  %% fixing nan or inf monopole
-vb3                 = real(ifftn(ifftshift(vb3)));
-%% add streaming velocity (V_cb = Vc - Vb)
-vb3                 = vb3 - V_cb_3_azend(ic,jc,kc); 
-%% memory-saving way of calculating sp_Etot_enzo (**--3--**)
-sp_Etot_enzo = sp_Etot_enzo + 1/2*(vb3*MpcMyr_2_kms*1e5/VelocityUnits).^2; 
-if (particlevelocity_accuracyflag & baryonparticleflag)
-  %% pad with periodic boundary condition, to provide 1:Nmode_p+1 domain. (**)
-  vb3 = padarray(vb3, [1 1 1], 'circular', 'post'); %% now (Nmode_p+1)^3 elements.
-  %% Find 
-  vb3 = interpn(vb3, Psi1, Psi2, Psi3, interpnopt); %% now Nmode_p^3 elements
-end
-fout = fopen([ICsubdir '/vb3'], 'w');
-fwrite(fout, vb3*MpcMyr_2_kms*1e5/VelocityUnits, 'double');
-fclose(fout);
-
-Vb3 = reshape(vb3(:,:,1) *MpcMyr_2_kms, Nmode_p, Nmode_p); %% for figure
-clear vb3  %% save memory
-
-%% ------------- velocity divergence ---------------------
-Thb = real(ifftn(ifftshift(Thb)));  
-
-ZThb = reshape(Thb(:,:,1),Nmode_p,Nmode_p); %% for figure
-clear Thb  %% save memory
-%% =========== baryon velocity ==================================== end
-
-
-%% =========== baryon temperature, energies ======================= begin
-%% Matlab & Octave 2D interpolation!! --> generating k-space deltas 
-dT  = interp2(muext,log(ksampletab), deltasT,  costh_k_V,0.5*log(ksq_p),interp2opt);
-
-%% randomize, apply reality, and normalize
-dT = rand_real_norm(dT,Nmode_p,Nc_p,randamp,randphs,Vbox_p);
-
-%% ------------- temperature, energies  ---------------------
-dT = real(ifftn(ifftshift(dT)));  
-
-
-%% Mean IGM temperature fit from Tseliakhovich & Hirata
-aa1  = 1/119
-aa2  = 1/115
-Tz    = TCMB0/af /(1+af/aa1/(1+(aa2/af)^1.5));  %% in K, global average temperature
-Tz    = Tz*(1+DT3D_azend(ic,jc,kc)); %% local(cell) average temperature
-  
-%% specific thermal energy for monatomic gas (H+He), in units of VelocityUnits^2 : sp_Eth_enzo
-%%Tcell = (dT+1)*Tz;  %% in K
-%%sp_Eth_enzo  = 3/2*kb*Tcell /(mmw*mH) /VelocityUnits^2;  %% see Enzo paper(2014) eq. 7.
-fout = fopen([ICsubdir '/etherm'], 'w');
-fwrite(fout, 3/2*kb*(dT+1)*Tz /(mmw*mH) /VelocityUnits^2, 'double');
-fclose(fout);
-
-%% Zeth in erg (thermal energy per baryon)
-Zeth = reshape(3/2*kb*(dT(:,:,1)+1)*Tz/(mmw*mH),Nmode_p,Nmode_p); %% for figure
-
-%% Ztemp in K
-Ztemp = reshape((dT(:,:,1)+1)*Tz,Nmode_p,Nmode_p); %% for figure
-
-
-%% specific total energy for monatomic gas (H+He), in units of VelocityUnits^2 :   sp_Etot_enzo
-%% Currently sp_Etot_enzo does not include magnetic contribution, but in principle it should.
-%% memory-saving way of calculating sp_Etot_enzo (**--4--**)
-sp_Etot_enzo = sp_Etot_enzo + 3/2*kb*(dT+1)*Tz /(mmw*mH) /VelocityUnits^2;
-  
-fout = fopen([ICsubdir '/etot'], 'w');
-fwrite(fout, sp_Etot_enzo, 'double');
-fclose(fout);
-
-%% Zetot in erg (total energy per baryon)
-Zetot = reshape(sp_Etot_enzo(:,:,1)*VelocityUnits^2,Nmode_p,Nmode_p); %% for figure
-
-clear dT sp_Etot_enzo
-%% =========== baryon temperature, energies ======================= begin
-
-%% Save some memory
-clear costh_k_V 
-%clear randamp randphs k1_3D_p k2_3D_p k3_3D_p ksq_p
+%% Generate and dump initial condition data for enzo.
+Generate_enzoIC;  %%==== script ==================
 
 %% Dump figure-useful data
 if matlabflag
