@@ -33,11 +33,15 @@ if ~matlabflag
     addpath('../mfiles_for_octave'); 
   end
   try  %% test system interpn
-    x = y = z = -1:1;
+    x = -1:1;
+    y = x;
+    z = x;
     f = @(x,y,z) x.^2 - y - z.^2;
     [xx, yy, zz] = meshgrid (x, y, z);
     v = f (xx,yy,zz);
-    xi = yi = zi = -1:0.1:1;
+    xi = -1:0.1:1;
+    yi = xi;
+    zi = xi;
     [xxi, yyi, zzi] = ndgrid (xi, yi, zi);
     vi = interpn (x, y, z, v, xxi, yyi, zzi, interpnopt);
   catch  %% when error occurs in interpn use working interpn instead 

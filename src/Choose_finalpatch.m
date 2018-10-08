@@ -56,8 +56,8 @@ ic   = cellspec(idxcc,1);
 jc   = cellspec(idxcc,2);
 kc   = cellspec(idxcc,3);
 
-vratio = norm([V_cb_1_azend(ic,jc,kc) V_cb_2_azend(ic,jc,kc) V_cb_3_azend(ic,jc,kc)])/cellspec_azend(idxcc,11);
-dratio = Dc3D_azend(ic,jc,kc)/cellspec_azend(ip,4)
+vratio = norm([V_cb_1_azend(ic,jc,kc) V_cb_2_azend(ic,jc,kc) V_cb_3_azend(ic,jc,kc)])*MpcMyr_2_kms/cellspec_azend(idxcc,11);
+dratio = Dc3D_azend(ic,jc,kc)/cellspec_azend(ip,4);
 if (vratio>1.01 | vratio <0.99)
   disp(['V_cb_*_azend.dat and ' setupdir '/zi_icc_Dc_Db_Thc_Thb_Vcb1_Vcb2_Vcb3_Vcb_DT.dat mismatch.']);
   disp('Rerun bccomics_setup, and pick the newly written files.');
