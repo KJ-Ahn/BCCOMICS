@@ -135,6 +135,9 @@ end
 if ~exist(ICdir)
   mkdir(ICdir);
 end
+
+Lbox_p_inMpch = Lbox_p*h;  %% enzo uses 'ComovingBoxSize' in units of Mpc/h
+
 ICsubdir = [ICdir '/' num2str(Lbox_p_inMpch,'%.2f') 'Mpch_' num2str(Ncell_p) '_ic' num2str(ic) '_jc' num2str(jc) '_kc' num2str(kc)];
 if ~exist(ICsubdir)
   mkdir(ICsubdir); 
