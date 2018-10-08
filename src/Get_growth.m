@@ -181,6 +181,6 @@ Fminus_stream_normed = Dminus_stream ./(azz/ai).^-0.5;
 %% Output growth factors. This makes Fig 8. of A16. Now with increased accuracy,
 %% F^d and D^d in Fig 8. of A16 has changed quantitatively.
 gdata = [azz(1:10:length(azz)) Dplus_grow(1:10:length(azz)) Dplus_decay(1:10:length(azz)) Dminus_stream(1:10:length(azz)) Fplus_grow_normed(1:10:length(azz)) Fplus_decay_normed(1:10:length(azz)) Fminus_stream_normed(1:10:length(azz))];
-fout = fopen([outputdir '/a_growth.dat'],'w');
+fout = fopen([setupdir '/a_growth.dat'],'w');
 fprintf(fout, '%e %e %e %e %e %e %e\n', gdata');
 fclose(fout);

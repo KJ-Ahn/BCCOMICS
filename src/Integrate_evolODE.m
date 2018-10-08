@@ -8,12 +8,12 @@ log10ksampletab = linspace(log10(1),log10(14000),Nsample)';
 ksampletab      = 10.^log10ksampletab;
 
 %% directory for main output (fluctuation)
-TFdir = [outputdir '/deltas'];
+TFdir = [setupdir '/deltas'];
 if ~exist(TFdir)
   mkdir(TFdir);
 end
 
-TFTHdir = [outputdir '/deltas_TH'];
+TFTHdir = [setupdir '/deltas_TH'];
 if THflag
   if ~exist(TFTHdir)
     mkdir(TFTHdir);
@@ -34,9 +34,9 @@ zzbegin = 1/azbegin-1;
 zzend   = 1/azend  -1;
 
 if matlabflag
-  save([outputdir '/zz.dat'], 'zzbegin','zzend', '-ascii');
+  save([setupdir '/zz.dat'], 'zzbegin','zzend', '-ascii');
 else
-  save('-ascii', [outputdir '/zz.dat'], 'zzbegin','zzend');
+  save('-ascii', [setupdir '/zz.dat'], 'zzbegin','zzend');
 end
 
 ic = icc1;

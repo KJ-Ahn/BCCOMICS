@@ -215,60 +215,60 @@ Vcb           = sqrt(V_cb_1.^2+V_cb_2.^2+V_cb_3.^2);
 %% See last comment in Integrate_evolODE.m why we save in two formats.
 if matlabflag
   %% to matlab binary format
-  save([outputdir '/Dc3D.matbin'],   'Delta_c', '-v6'); 
-  save([outputdir '/Db3D.matbin'],   'Delta_b', '-v6'); 
-  save([outputdir '/THc3D.matbin'],  'Theta_c', '-v6'); 
-  save([outputdir '/THb3D.matbin'],  'Theta_b', '-v6'); 
-  save([outputdir '/DT.matbin'],     'Delta_T', '-v6');
+  save([setupdir '/Dc3D.matbin'],   'Delta_c', '-v6'); 
+  save([setupdir '/Db3D.matbin'],   'Delta_b', '-v6'); 
+  save([setupdir '/THc3D.matbin'],  'Theta_c', '-v6'); 
+  save([setupdir '/THb3D.matbin'],  'Theta_b', '-v6'); 
+  save([setupdir '/DT.matbin'],     'Delta_T', '-v6');
 
-  save([outputdir '/V_cb_1.matbin'], 'V_cb_1',  '-v6'); 
-  save([outputdir '/V_cb_2.matbin'], 'V_cb_2',  '-v6'); 
-  save([outputdir '/V_cb_3.matbin'], 'V_cb_3',  '-v6'); 
-  save([outputdir '/V_c_1.matbin'],  'V_c_1',   '-v6'); 
-  save([outputdir '/V_c_2.matbin'],  'V_c_2',   '-v6'); 
-  save([outputdir '/V_c_3.matbin'],  'V_c_3',   '-v6'); 
+  save([setupdir '/V_cb_1.matbin'], 'V_cb_1',  '-v6'); 
+  save([setupdir '/V_cb_2.matbin'], 'V_cb_2',  '-v6'); 
+  save([setupdir '/V_cb_3.matbin'], 'V_cb_3',  '-v6'); 
+  save([setupdir '/V_c_1.matbin'],  'V_c_1',   '-v6'); 
+  save([setupdir '/V_c_2.matbin'],  'V_c_2',   '-v6'); 
+  save([setupdir '/V_c_3.matbin'],  'V_c_3',   '-v6'); 
 
   %% to hdf5 format
-  save([outputdir '/Dc3D.h5'],   'Delta_c', '-v7.3'); 
-  save([outputdir '/Db3D.h5'],   'Delta_b', '-v7.3'); 
-  save([outputdir '/THc3D.h5'],  'Theta_c', '-v7.3'); 
-  save([outputdir '/THb3D.h5'],  'Theta_b', '-v7.3'); 
-  save([outputdir '/DT.h5'],     'Delta_T', '-v7.3');
+  save([setupdir '/Dc3D.h5'],   'Delta_c', '-v7.3'); 
+  save([setupdir '/Db3D.h5'],   'Delta_b', '-v7.3'); 
+  save([setupdir '/THc3D.h5'],  'Theta_c', '-v7.3'); 
+  save([setupdir '/THb3D.h5'],  'Theta_b', '-v7.3'); 
+  save([setupdir '/DT.h5'],     'Delta_T', '-v7.3');
 
-  save([outputdir '/V_cb_1.h5'], 'V_cb_1',  '-v7.3'); 
-  save([outputdir '/V_cb_2.h5'], 'V_cb_2',  '-v7.3'); 
-  save([outputdir '/V_cb_3.h5'], 'V_cb_3',  '-v7.3'); 
-  save([outputdir '/V_c_1.h5'],  'V_c_1',   '-v7.3'); 
-  save([outputdir '/V_c_2.h5'],  'V_c_2',   '-v7.3'); 
-  save([outputdir '/V_c_3.h5'],  'V_c_3',   '-v7.3'); 
+  save([setupdir '/V_cb_1.h5'], 'V_cb_1',  '-v7.3'); 
+  save([setupdir '/V_cb_2.h5'], 'V_cb_2',  '-v7.3'); 
+  save([setupdir '/V_cb_3.h5'], 'V_cb_3',  '-v7.3'); 
+  save([setupdir '/V_c_1.h5'],  'V_c_1',   '-v7.3'); 
+  save([setupdir '/V_c_2.h5'],  'V_c_2',   '-v7.3'); 
+  save([setupdir '/V_c_3.h5'],  'V_c_3',   '-v7.3'); 
 else
   %% to matlab binary format
-  save('-mat-binary', [outputdir '/Dc3D.matbin'],   'Delta_c'); 
-  save('-mat-binary', [outputdir '/Db3D.matbin'],   'Delta_b'); 
-  save('-mat-binary', [outputdir '/THc3D.matbin'],  'Theta_c'); 
-  save('-mat-binary', [outputdir '/THb3D.matbin'],  'Theta_b'); 
-  save('-mat-binary', [outputdir '/DT.matbin'],     'Delta_T');
+  save('-mat-binary', [setupdir '/Dc3D.matbin'],   'Delta_c'); 
+  save('-mat-binary', [setupdir '/Db3D.matbin'],   'Delta_b'); 
+  save('-mat-binary', [setupdir '/THc3D.matbin'],  'Theta_c'); 
+  save('-mat-binary', [setupdir '/THb3D.matbin'],  'Theta_b'); 
+  save('-mat-binary', [setupdir '/DT.matbin'],     'Delta_T');
 
-  save('-mat-binary', [outputdir '/V_cb_1.matbin'], 'V_cb_1'); 
-  save('-mat-binary', [outputdir '/V_cb_2.matbin'], 'V_cb_2'); 
-  save('-mat-binary', [outputdir '/V_cb_3.matbin'], 'V_cb_3'); 
-  save('-mat-binary', [outputdir '/V_c_1.matbin'],  'V_c_1' ); 
-  save('-mat-binary', [outputdir '/V_c_2.matbin'],  'V_c_2' ); 
-  save('-mat-binary', [outputdir '/V_c_3.matbin'],  'V_c_3' ); 
+  save('-mat-binary', [setupdir '/V_cb_1.matbin'], 'V_cb_1'); 
+  save('-mat-binary', [setupdir '/V_cb_2.matbin'], 'V_cb_2'); 
+  save('-mat-binary', [setupdir '/V_cb_3.matbin'], 'V_cb_3'); 
+  save('-mat-binary', [setupdir '/V_c_1.matbin'],  'V_c_1' ); 
+  save('-mat-binary', [setupdir '/V_c_2.matbin'],  'V_c_2' ); 
+  save('-mat-binary', [setupdir '/V_c_3.matbin'],  'V_c_3' ); 
 
   %% to hdf5 format
-  save('-hdf5', [outputdir '/Dc3D.h5'],   'Delta_c'); 
-  save('-hdf5', [outputdir '/Db3D.h5'],   'Delta_b'); 
-  save('-hdf5', [outputdir '/THc3D.h5'],  'Theta_c'); 
-  save('-hdf5', [outputdir '/THb3D.h5'],  'Theta_b'); 
-  save('-hdf5', [outputdir '/DT.h5'],     'Delta_T');
+  save('-hdf5', [setupdir '/Dc3D.h5'],   'Delta_c'); 
+  save('-hdf5', [setupdir '/Db3D.h5'],   'Delta_b'); 
+  save('-hdf5', [setupdir '/THc3D.h5'],  'Theta_c'); 
+  save('-hdf5', [setupdir '/THb3D.h5'],  'Theta_b'); 
+  save('-hdf5', [setupdir '/DT.h5'],     'Delta_T');
 
-  save('-hdf5', [outputdir '/V_cb_1.h5'], 'V_cb_1'); 
-  save('-hdf5', [outputdir '/V_cb_2.h5'], 'V_cb_2'); 
-  save('-hdf5', [outputdir '/V_cb_3.h5'], 'V_cb_3'); 
-  save('-hdf5', [outputdir '/V_c_1.h5'],  'V_c_1' ); 
-  save('-hdf5', [outputdir '/V_c_2.h5'],  'V_c_2' ); 
-  save('-hdf5', [outputdir '/V_c_3.h5'],  'V_c_3' ); 
+  save('-hdf5', [setupdir '/V_cb_1.h5'], 'V_cb_1'); 
+  save('-hdf5', [setupdir '/V_cb_2.h5'], 'V_cb_2'); 
+  save('-hdf5', [setupdir '/V_cb_3.h5'], 'V_cb_3'); 
+  save('-hdf5', [setupdir '/V_c_1.h5'],  'V_c_1' ); 
+  save('-hdf5', [setupdir '/V_c_2.h5'],  'V_c_2' ); 
+  save('-hdf5', [setupdir '/V_c_3.h5'],  'V_c_3' ); 
 end
 
 if plotflag

@@ -19,44 +19,44 @@ Get_DeltaT_fit; %%==== script ==================
 %% See last comment in Integrate_evolODE.m why we save in two formats.
 if matlabflag
   %% to matlab binary format
-  save([outputdir '/V_cb_1_azend.matbin'], 'V_cb_1_azend', '-v6'); % @ azend
-  save([outputdir '/V_cb_2_azend.matbin'], 'V_cb_2_azend', '-v6'); % @ azend
-  save([outputdir '/V_cb_3_azend.matbin'], 'V_cb_3_azend', '-v6'); % @ azend
-  save([outputdir '/Dc3D_azend.matbin'],   'Dc3D_azend',   '-v6'); % @ azend
-  save([outputdir '/Db3D_azend.matbin'],   'Db3D_azend',   '-v6'); % @ azend
-  save([outputdir '/THc3D_azend.matbin'],  'THc3D_azend',  '-v6'); % @ azend
-  save([outputdir '/THb3D_azend.matbin'],  'THb3D_azend',  '-v6'); % @ azend
-  save([outputdir '/DT_azend.matbin'],     'DT3D_azend',   '-v6'); % @ azend
+  save([setupdir '/V_cb_1_azend.matbin'], 'V_cb_1_azend', '-v6'); % @ azend
+  save([setupdir '/V_cb_2_azend.matbin'], 'V_cb_2_azend', '-v6'); % @ azend
+  save([setupdir '/V_cb_3_azend.matbin'], 'V_cb_3_azend', '-v6'); % @ azend
+  save([setupdir '/Dc3D_azend.matbin'],   'Dc3D_azend',   '-v6'); % @ azend
+  save([setupdir '/Db3D_azend.matbin'],   'Db3D_azend',   '-v6'); % @ azend
+  save([setupdir '/THc3D_azend.matbin'],  'THc3D_azend',  '-v6'); % @ azend
+  save([setupdir '/THb3D_azend.matbin'],  'THb3D_azend',  '-v6'); % @ azend
+  save([setupdir '/DT_azend.matbin'],     'DT3D_azend',   '-v6'); % @ azend
 
   %% to hdf5 format
-  save([outputdir '/V_cb_1_azend.h5'], 'V_cb_1_azend', '-v7.3'); % @ azend
-  save([outputdir '/V_cb_2_azend.h5'], 'V_cb_2_azend', '-v7.3'); % @ azend
-  save([outputdir '/V_cb_3_azend.h5'], 'V_cb_3_azend', '-v7.3'); % @ azend
-  save([outputdir '/Dc3D_azend.h5'],   'Dc3D_azend',   '-v7.3'); % @ azend
-  save([outputdir '/Db3D_azend.h5'],   'Db3D_azend',   '-v7.3'); % @ azend
-  save([outputdir '/THc3D_azend.h5'],  'THc3D_azend',  '-v7.3'); % @ azend
-  save([outputdir '/THb3D_azend.h5'],  'THb3D_azend',  '-v7.3'); % @ azend
-  save([outputdir '/DT_azend.h5'],     'DT3D_azend',   '-v7.3'); % @ azend
+  save([setupdir '/V_cb_1_azend.h5'], 'V_cb_1_azend', '-v7.3'); % @ azend
+  save([setupdir '/V_cb_2_azend.h5'], 'V_cb_2_azend', '-v7.3'); % @ azend
+  save([setupdir '/V_cb_3_azend.h5'], 'V_cb_3_azend', '-v7.3'); % @ azend
+  save([setupdir '/Dc3D_azend.h5'],   'Dc3D_azend',   '-v7.3'); % @ azend
+  save([setupdir '/Db3D_azend.h5'],   'Db3D_azend',   '-v7.3'); % @ azend
+  save([setupdir '/THc3D_azend.h5'],  'THc3D_azend',  '-v7.3'); % @ azend
+  save([setupdir '/THb3D_azend.h5'],  'THb3D_azend',  '-v7.3'); % @ azend
+  save([setupdir '/DT_azend.h5'],     'DT3D_azend',   '-v7.3'); % @ azend
 else
   %% to matlab binary format
-  save('-mat-binary', [outputdir '/V_cb_1_azend.matbin'], 'V_cb_1_azend'); % @ azend
-  save('-mat-binary', [outputdir '/V_cb_2_azend.matbin'], 'V_cb_2_azend'); % @ azend
-  save('-mat-binary', [outputdir '/V_cb_3_azend.matbin'], 'V_cb_3_azend'); % @ azend
-  save('-mat-binary', [outputdir '/Dc3D_azend.matbin'],   'Dc3D_azend'  ); % @ azend
-  save('-mat-binary', [outputdir '/Db3D_azend.matbin'],   'Db3D_azend'  ); % @ azend
-  save('-mat-binary', [outputdir '/THc3D_azend.matbin'],  'THc3D_azend' ); % @ azend
-  save('-mat-binary', [outputdir '/THb3D_azend.matbin'],  'THb3D_azend' ); % @ azend
-  save('-mat-binary', [outputdir '/DT_azend.matbin'],     'DT3D_azend'  ); % @ azend
+  save('-mat-binary', [setupdir '/V_cb_1_azend.matbin'], 'V_cb_1_azend'); % @ azend
+  save('-mat-binary', [setupdir '/V_cb_2_azend.matbin'], 'V_cb_2_azend'); % @ azend
+  save('-mat-binary', [setupdir '/V_cb_3_azend.matbin'], 'V_cb_3_azend'); % @ azend
+  save('-mat-binary', [setupdir '/Dc3D_azend.matbin'],   'Dc3D_azend'  ); % @ azend
+  save('-mat-binary', [setupdir '/Db3D_azend.matbin'],   'Db3D_azend'  ); % @ azend
+  save('-mat-binary', [setupdir '/THc3D_azend.matbin'],  'THc3D_azend' ); % @ azend
+  save('-mat-binary', [setupdir '/THb3D_azend.matbin'],  'THb3D_azend' ); % @ azend
+  save('-mat-binary', [setupdir '/DT_azend.matbin'],     'DT3D_azend'  ); % @ azend
 
   %% to hdf5 format
-  save('-hdf5', [outputdir '/V_cb_1_azend.h5'], 'V_cb_1_azend'); % @ azend
-  save('-hdf5', [outputdir '/V_cb_2_azend.h5'], 'V_cb_2_azend'); % @ azend
-  save('-hdf5', [outputdir '/V_cb_3_azend.h5'], 'V_cb_3_azend'); % @ azend
-  save('-hdf5', [outputdir '/Dc3D_azend.h5'],   'Dc3D_azend'  ); % @ azend
-  save('-hdf5', [outputdir '/Db3D_azend.h5'],   'Db3D_azend'  ); % @ azend
-  save('-hdf5', [outputdir '/THc3D_azend.h5'],  'THc3D_azend' ); % @ azend
-  save('-hdf5', [outputdir '/THb3D_azend.h5'],  'THb3D_azend' ); % @ azend
-  save('-hdf5', [outputdir '/DT_azend.h5'],     'DT3D_azend'  ); % @ azend
+  save('-hdf5', [setupdir '/V_cb_1_azend.h5'], 'V_cb_1_azend'); % @ azend
+  save('-hdf5', [setupdir '/V_cb_2_azend.h5'], 'V_cb_2_azend'); % @ azend
+  save('-hdf5', [setupdir '/V_cb_3_azend.h5'], 'V_cb_3_azend'); % @ azend
+  save('-hdf5', [setupdir '/Dc3D_azend.h5'],   'Dc3D_azend'  ); % @ azend
+  save('-hdf5', [setupdir '/Db3D_azend.h5'],   'Db3D_azend'  ); % @ azend
+  save('-hdf5', [setupdir '/THc3D_azend.h5'],  'THc3D_azend' ); % @ azend
+  save('-hdf5', [setupdir '/THb3D_azend.h5'],  'THb3D_azend' ); % @ azend
+  save('-hdf5', [setupdir '/DT_azend.h5'],     'DT3D_azend'  ); % @ azend
 end
 
 if plotflag

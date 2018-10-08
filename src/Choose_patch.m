@@ -30,7 +30,7 @@ stddec  = std(Deltadec(:));
 
 %% record some stats at zi
 datstat = [stdDc stdTc rmsVc*MpcMyr_2_kms stdDb stdTb rmsVb*MpcMyr_2_kms rmsVcb*MpcMyr_2_kms Vcbp*MpcMyr_2_kms stdT];
-fout    = fopen([outputdir '/stats_zi.dat'],'w');
+fout    = fopen([setupdir '/stats_zi.dat'],'w');
 fprintf(fout,'@ zi:  stdDc stdThc rmsVc stdDb stdThb rmsVb rmsVcb Vcbp stdT\n');
 fprintf(fout,'Units: None  Myr^-1 km/s  None  Myr^-1 km/s  km/s   km/s None\n');
 fprintf(fout,'%e %e %e %e %e %e %e %e %e\n', datstat);
@@ -201,8 +201,8 @@ end
 icc = [icc1 icc2 icc3];
 
 %% Check if your patch has been selected already
-if exist([outputdir '/icc.dat'], 'file')
-  icc_read=load([outputdir '/icc.dat']);
+if exist([setupdir '/icc.dat'], 'file')
+  icc_read=load([setupdir '/icc.dat']);
   if ismember(icc,icc_read)
     disp('The patch has already been selected. Quitting');
     returnflag=true;
@@ -210,7 +210,7 @@ if exist([outputdir '/icc.dat'], 'file')
   end
 end
 
-fout=fopen([outputdir '/icc.dat'],'a');
+fout=fopen([setupdir '/icc.dat'],'a');
 fprintf(fout,'%i %i %i\n',icc');
 fclose(fout);
 
@@ -223,7 +223,7 @@ daticc(6) = V_cb_2 (icc1,icc2,icc3)*MpcMyr_2_kms;
 daticc(7) = V_cb_3 (icc1,icc2,icc3)*MpcMyr_2_kms;
 daticc(8) = sqrt(daticc(5).^2 + daticc(6).^2 + daticc(7).^2);
 daticc(9) = Delta_T(icc1,icc2,icc3);
-fout=fopen([outputdir '/zi_icc_Dc_Db_Thc_Thb_Vcb1_Vcb2_Vcb3_Vcb_DT.dat'],'a');
+fout=fopen([setupdir '/zi_icc_Dc_Db_Thc_Thb_Vcb1_Vcb2_Vcb3_Vcb_DT.dat'],'a');
 fprintf(fout,'%i %i %i %e %e %e %e %e %e %e %e %e\n',[icc daticc]');
 fclose(fout);
 
@@ -236,7 +236,7 @@ daticc(6) = V_cb_2_azend(icc1,icc2,icc3)*MpcMyr_2_kms;
 daticc(7) = V_cb_3_azend(icc1,icc2,icc3)*MpcMyr_2_kms;
 daticc(8) = sqrt(daticc(5).^2 + daticc(6).^2 + daticc(7).^2);
 daticc(9) = DT3D_azend  (icc1,icc2,icc3);
-fout=fopen([outputdir '/zend_icc_Dc_Db_Thc_Thb_Vcb1_Vcb2_Vcb3_Vcb_DT.dat'],'a');
+fout=fopen([setupdir '/zend_icc_Dc_Db_Thc_Thb_Vcb1_Vcb2_Vcb3_Vcb_DT.dat'],'a');
 fprintf(fout,'%i %i %i %e %e %e %e %e %e %e %e %e\n',[icc daticc]');
 fclose(fout);
 
