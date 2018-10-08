@@ -12,7 +12,7 @@
 Nold  = Noldseed;
 Ncold = Nold/2+1;
 
-if (mod(Nold,4) != 0)
+if (mod(Nold,4) ~= 0)
     disp('mod(Noldseed,4) should be zero. Check params_patch.m');
     return;
     returnflag = true;
