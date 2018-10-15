@@ -7,21 +7,23 @@ Currently, it only supports [enzo](enzo-project.org). We are inviting contributo
 
 The main code is composed of two parts.
 
-(1) Realization of large-scale fluctuations (at a length resolution of 4 Mpc comoving) and transfer function calculation (bccomics_setup.m):
+(1) Realization of large-scale fluctuations (at a length resolution of 4 Mpc comoving) and transfer function calculation (bccomics_setup.m):  
 Because the perturbation theory studying the dual impact from large-scale Delta and V_cb on small-scale fluctuations is relatively new ([Ahn 2016](http://adsabs.harvard.edu/abs/2016ApJ...830...68A)), transfer functions from usual linear Boltzmann solvers such as CAMB do not provide the level of accuracy of this new theory. Even when Delta variance is not considered, the suppression of high-k (around k~100/Mpc) modes due to V_cb ([Tseliakhovich & Hirata 2010](http://adsabs.harvard.edu/abs/2010PhRvD..82h3520T)) is not reflected in transfer function from CAMB. "bccomics_setup.m" makes realization of environmental variables, and once the user chooses a specific "patch" of generically non-zero Delta and V_cb, it calculates and records the transfer function.
 
-(2) Realization of small-scale fluctuations on a selected patch (bccomics.m):
-The user is asked again to choose one from already calculated set of patches, and then the corresponding transfer function is read in and used to generate 3D data of CDM and baryons. Currently, following data in simple bianry form and in enzo units are generated: 
-(a) CDM particle positions (cpos1, cpos2, cpos3), 
-(b) CDM particle velocities (vc1, vc2, vc3), 
-(c) baryon grid density (db), 
-(d) baryon grid velocities (vb1, vb2, vb3), 
-(e) baryon grid thermal energy (etherm), 
+(2) Realization of small-scale fluctuations on a selected patch (bccomics.m):  
+The user is asked again to choose one from already calculated set of patches, and then the corresponding transfer function is read in and used to generate 3D data of CDM and baryons. Currently, following data in simple bianry form and in enzo units are generated:  
+(a) CDM particle positions (cpos1, cpos2, cpos3)  
+(b) CDM particle velocities (vc1, vc2, vc3)  
+(c) baryon grid density (db)  
+(d) baryon grid velocities (vb1, vb2, vb3)  
+(e) baryon grid thermal energy (etherm)  
 (f) baryon grid kinetic+thermal energy (etot)
+(g) baryon particle positions (bpos1, bpos2, bpos3) (optional; with SPH in mind)
+(h) baryon particle velocities (vpb1, vpb2, vpb3) (optional; with SPH in mind)
 
-In case of MATLAB, initial conditions in hdf5 binary, ready to be used for enzo, are generated.
+*In case of MATLAB, initial conditions in hdf5 binary, ready to be used for enzo, are generated.
 
-(3) (OCTAVE-only) Conversion of binary data from step (2) into enzo-usable initial conditions, by "convert_enzo.py" using python+h5py.
+(3) (OCTAVE-only) Conversion of binary data from step (2) into enzo-usable initial conditions, by "convert_enzo.py" using python+h5py. 
 
 ## Installation Requirements
 
@@ -29,13 +31,13 @@ Installation of BCCOMICS: Either (1) clone this repo, or (2) download as a zip a
 
 BCCOMICS has two main scripts that run on either [MATLAB(R)](https://www.mathworks.com/products/matlab.html) or [gnu OCTAVE](https://www.gnu.org/software/octave/). gnu OCTAVE is easily installed with its dependency by package managers (e.g. "apt", "synaptic", ...) in usual linux distributions. Ask your system administrator for installation on a shared unix machine.
 
-For MATLAB, in addition to the main program, following additional packages need to be installed.
-- Image Processing Toolbox
+For MATLAB, in addition to the main program, following additional packages need to be installed.  
+- Image Processing Toolbox  
 - Statistics and Machine Learning Toolbox
 
-For gnu OCTAVE, in addition to the main program, following additional packages need to be installed. Use your linux distribution's package installer (e.g. "sudo apt install octave-image" for Ubuntu). Ask your system administrator for installation on a shared unix machine.
-- octave-image
-- octave-statistics (optional; if uninstalled BCCOMICS will use functions under BCCOMICS/statistics-1.3.0/)
+For gnu OCTAVE, in addition to the main program, following additional packages need to be installed. Use your linux distribution's package installer (e.g. "sudo apt install octave-image" for Ubuntu). Ask your system administrator for installation on a shared unix machine.  
+- octave-image  
+- octave-statistics (optional; if uninstalled BCCOMICS will use functions under BCCOMICS/statistics-1.3.0/)  
 - octave-odepkg (optional; if uninstalled BCCOMICS will use octave functions or those under BCCOMICS/odepkg-0.8.5/)
 
 ## Running
