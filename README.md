@@ -11,8 +11,18 @@ blah blah...
 
 ## Installation Requirements
 
+Installation of BCCOMICS: Either (1) git cloning this repository or (2) download as a zip and extract its contents. Click the green "Clone or download" button and choose whichever suits you. No further installation process is required.
 
-BCCOMICS is a set of scripts that run on either MATLAB(R) or gnu OCTAVE. Provide links like [this](url).
+BCCOMICS has two main scripts that run on either [MATLAB(R)](https://www.mathworks.com/products/matlab.html) or [gnu OCTAVE](https://www.gnu.org/software/octave/). gnu OCTAVE is easily installed with its dependency in usual linux distributions. Ask your system administrator for installation on a shared unix machine.
+
+For MATLAB, in addition to the main program, following additional packages need to be installed.
+- Image Processing Toolbox
+- Statistics and Machine Learning Toolbox
+
+For gnu OCTAVE, in addition to the main program, following additional packages need to be installed. Use your linux distribution's package installer (e.g. "sudo apt install octave-image" for Ubuntu). Ask your system administrator for installation on a shared unix machine.
+- octave-image
+- octave-statistics (optional)
+- octave-odepkg (optional)
 
 ## Running
 
