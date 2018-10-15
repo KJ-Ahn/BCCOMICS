@@ -21,7 +21,7 @@ The user is asked again to choose one from already calculated set of patches, an
 (g) baryon particle positions (bpos1, bpos2, bpos3) (optional; with SPH in mind)  
 (h) baryon particle velocities (vpb1, vpb2, vpb3) (optional; with SPH in mind)
 
-*In case of MATLAB, initial conditions in hdf5 binary, ready to be used for enzo, are generated in addition.
+*In case of MATLAB, initial conditions in hdf5 binary, ready to be used for enzo, can be generated.
 
 (3) (OCTAVE-only) Conversion of binary data from step (2) into enzo-usable initial conditions, by "convert_enzo.py" using python+h5py. 
 
