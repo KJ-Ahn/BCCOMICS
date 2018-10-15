@@ -18,7 +18,7 @@ The user is asked again to choose one from already calculated set of patches, an
 (d) baryon grid velocities (vb1, vb2, vb3)  
 (e) baryon grid thermal energy (etherm)  
 (f) baryon grid kinetic+thermal energy (etot)  
-(g) baryon particle positions (bpos1, bpos2, bpos3) (optional; with SPH in mind)
+(g) baryon particle positions (bpos1, bpos2, bpos3) (optional; with SPH in mind)  
 (h) baryon particle velocities (vpb1, vpb2, vpb3) (optional; with SPH in mind)
 
 *In case of MATLAB, initial conditions in hdf5 binary, ready to be used for enzo, are generated.
