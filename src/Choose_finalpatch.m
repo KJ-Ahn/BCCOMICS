@@ -3,23 +3,23 @@
 
 %% read in V_cb field: V_cb = Vc-Vb
 if matlabflag
-  load([setupdir '/V_cb_1_azend.dat'], '-mat', 'V_cb_1_azend');  
-  load([setupdir '/V_cb_2_azend.dat'], '-mat', 'V_cb_2_azend');
-  load([setupdir '/V_cb_3_azend.dat'], '-mat', 'V_cb_3_azend');
-  load([setupdir '/DT_azend.dat'],     '-mat', 'DT3D_azend');
-  load([setupdir '/Dc3D_azend.dat'],   '-mat', 'Dc3D_azend');
-  load([setupdir '/Db3D_azend.dat'],   '-mat', 'Db3D_azend');
-  load([setupdir '/THc3D_azend.dat'],  '-mat', 'THc3D_azend');
-  load([setupdir '/THb3D_azend.dat'],  '-mat', 'THb3D_azend');
+  load([setupdir '/V_cb_1_azend.matbin'], '-mat', 'V_cb_1_azend');  
+  load([setupdir '/V_cb_2_azend.matbin'], '-mat', 'V_cb_2_azend');
+  load([setupdir '/V_cb_3_azend.matbin'], '-mat', 'V_cb_3_azend');
+  load([setupdir '/DT_azend.matbin'],     '-mat', 'DT3D_azend');
+  load([setupdir '/Dc3D_azend.matbin'],   '-mat', 'Dc3D_azend');
+  load([setupdir '/Db3D_azend.matbin'],   '-mat', 'Db3D_azend');
+  load([setupdir '/THc3D_azend.matbin'],  '-mat', 'THc3D_azend');
+  load([setupdir '/THb3D_azend.matbin'],  '-mat', 'THb3D_azend');
 else
-  load('-mat-binary', [setupdir '/V_cb_1_azend.dat'], 'V_cb_1_azend');
-  load('-mat-binary', [setupdir '/V_cb_2_azend.dat'], 'V_cb_2_azend');
-  load('-mat-binary', [setupdir '/V_cb_3_azend.dat'], 'V_cb_3_azend');
-  load('-mat-binary', [setupdir '/DT_azend.dat'],     'DT3D_azend');
-  load('-mat-binary', [setupdir '/Dc3D_azend.dat'],   'Dc3D_azend');
-  load('-mat-binary', [setupdir '/Db3D_azend.dat'],   'Db3D_azend');
-  load('-mat-binary', [setupdir '/THc3D_azend.dat'],  'THc3D_azend');
-  load('-mat-binary', [setupdir '/THb3D_azend.dat'],  'THb3D_azend');
+  load('-mat-binary', [setupdir '/V_cb_1_azend.matbin'], 'V_cb_1_azend');
+  load('-mat-binary', [setupdir '/V_cb_2_azend.matbin'], 'V_cb_2_azend');
+  load('-mat-binary', [setupdir '/V_cb_3_azend.matbin'], 'V_cb_3_azend');
+  load('-mat-binary', [setupdir '/DT_azend.matbin'],     'DT3D_azend');
+  load('-mat-binary', [setupdir '/Dc3D_azend.matbin'],   'Dc3D_azend');
+  load('-mat-binary', [setupdir '/Db3D_azend.matbin'],   'Db3D_azend');
+  load('-mat-binary', [setupdir '/THc3D_azend.matbin'],  'THc3D_azend');
+  load('-mat-binary', [setupdir '/THb3D_azend.matbin'],  'THb3D_azend');
 end
 
 %% choose patch whose small scale fluctuations to calculate
@@ -59,13 +59,13 @@ kc   = cellspec(idxcc,3);
 vratio = norm([V_cb_1_azend(ic,jc,kc) V_cb_2_azend(ic,jc,kc) V_cb_3_azend(ic,jc,kc)])*MpcMyr_2_kms/cellspec_azend(idxcc,11);
 dratio = Dc3D_azend(ic,jc,kc)/cellspec_azend(ip,4);
 if (vratio>1.01 | vratio <0.99)
-  disp(['V_cb_*_azend.dat and ' setupdir '/zi_icc_Dc_Db_Thc_Thb_Vcb1_Vcb2_Vcb3_Vcb_DT.dat mismatch.']);
+  disp(['V_cb_*_azend.matbin and ' setupdir '/zi_icc_Dc_Db_Thc_Thb_Vcb1_Vcb2_Vcb3_Vcb_DT.dat mismatch.']);
   disp('Rerun bccomics_setup, and pick the newly written files.');
   returnflag = true;
   return;
 end
 if (dratio>1.01 | dratio <0.99)
-  disp(['Dc3D_azend.dat and ' setupdir '/zi_icc_Dc_Db_Thc_Thb_Vcb1_Vcb2_Vcb3_Vcb_DT.dat mismatch.']);
+  disp(['Dc3D_azend.matbin and ' setupdir '/zi_icc_Dc_Db_Thc_Thb_Vcb1_Vcb2_Vcb3_Vcb_DT.dat mismatch.']);
   disp('Rerun bccomics_setup, and pick the newly written files.');
   returnflag = true;
   return;
