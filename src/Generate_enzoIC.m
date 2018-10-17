@@ -307,9 +307,11 @@ dT = real(ifftn(ifftshift(dT)));
 %% Mean IGM temperature fit from Tseliakhovich & Hirata
 aa1  = 1/119
 aa2  = 1/115
-Tz    = TCMB0/af /(1+af/aa1/(1+(aa2/af)^1.5));  %% in K, global average temperature
-Tz    = Tz*(1+DT3D_azend(ic,jc,kc)); %% local(cell) average temperature
-  
+Tz   = TCMB0/af /(1+af/aa1/(1+(aa2/af)^1.5));  %% in K, global average temperature
+Tz   = Tz*(1+DT3D_azend(ic,jc,kc)); %% local(cell) average temperature
+
+mmw = 1.2195; %% mean molecular weight with X=0.76, Y=0.24, neutral.
+
 %% specific thermal energy for monatomic gas (H+He), in units of VelocityUnits^2 : sp_Eth_enzo
 %%Tcell = (dT+1)*Tz;  %% in K
 %%sp_Eth_enzo  = 3/2*kb*Tcell /(mmw*mH) /VelocityUnits^2;  %% see Enzo paper(2014) eq. 7.

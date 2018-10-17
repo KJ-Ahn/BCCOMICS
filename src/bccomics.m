@@ -66,6 +66,10 @@ Consts_Conversions;  %%==== script ==================
 run('../parameters/params.m');  %%==== script ==================
 %% Read in cosmology
 run(Cosmology);  %%==== script ==================
+
+fb = ombh2/(ombh2+omch2); %% baryon/matter fraction
+fc = omch2/(ombh2+omch2); %% CDM/matter fraction
+
 %% Read in parameters
 run('../parameters/params_patch.m');  %%==== script ==================
 %% Requires mod(Ncell_p,4)=0 to properly use file512seed when Nmode_p \neq 512.
