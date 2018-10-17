@@ -89,7 +89,7 @@ end
 %% Read in parameters for initial condition
 patch_init;  %%==== script ==================
 
-interp2opt = 'pchip'
+interp2opt = 'cubic'
 %% May choose 'pchip' for Matlab below, but for consistency with Octave
 %% just use 'linear'. Octave interpn does not have 'pchip' implemented yet.
 %% 'spline' is somewhat dangerous.
