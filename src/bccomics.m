@@ -197,9 +197,17 @@ Generate_enzoIC;  %%==== script ==================
 
 %% Dump figure-useful data
 if matlabflag
-  save([ICsubdir '/4fig.matbin'], 'xCDM_plane', 'xCDM_ex_plane', 'yCDM_plane', 'yCDM_ex_plane', 'Zc', 'xbar_plane', 'xbar_ex_plane', 'ybar_plane', 'ybar_ex_plane', 'Zb', 'Vc1', 'Vc2', 'Vc3', 'ZThc', 'Vb1', 'Vb2', 'Vb3', 'ZThb', 'Zeth', 'Ztemp', 'Zetot', '-v6') %%matlab
+  if baryonparticleflag
+    save([ICsubdir '/4fig.matbin'], 'xCDM_plane', 'xCDM_ex_plane', 'yCDM_plane', 'yCDM_ex_plane', 'Zc', 'xbar_plane', 'xbar_ex_plane', 'ybar_plane', 'ybar_ex_plane', 'Zb', 'Vc1', 'Vc2', 'Vc3', 'ZThc', 'Vb1', 'Vb2', 'Vb3', 'ZThb', 'Zeth', 'Ztemp', 'Zetot', '-v6')
+  else
+    save([ICsubdir '/4fig.matbin'], 'xCDM_plane', 'xCDM_ex_plane', 'yCDM_plane', 'yCDM_ex_plane', 'Zc', 'Zb', 'Vc1', 'Vc2', 'Vc3', 'ZThc', 'Vb1', 'Vb2', 'Vb3', 'ZThb', 'Zeth', 'Ztemp', 'Zetot', '-v6')
+  end
 else
-  save('-mat-binary', [ICsubdir '/4fig.matbin'], 'xCDM_plane', 'xCDM_ex_plane', 'yCDM_plane', 'yCDM_ex_plane', 'Zc', 'xbar_plane', 'xbar_ex_plane', 'ybar_plane', 'ybar_ex_plane', 'Zb', 'Vc1', 'Vc2', 'Vc3', 'ZThc', 'Vb1', 'Vb2', 'Vb3', 'ZThb', 'Zeth', 'Ztemp', 'Zetot') %%octave
+  if baryonparticleflag
+    save('-mat-binary', [ICsubdir '/4fig.matbin'], 'xCDM_plane', 'xCDM_ex_plane', 'yCDM_plane', 'yCDM_ex_plane', 'Zc', 'xbar_plane', 'xbar_ex_plane', 'ybar_plane', 'ybar_ex_plane', 'Zb', 'Vc1', 'Vc2', 'Vc3', 'ZThc', 'Vb1', 'Vb2', 'Vb3', 'ZThb', 'Zeth', 'Ztemp', 'Zetot')
+  else
+    save('-mat-binary', [ICsubdir '/4fig.matbin'], 'xCDM_plane', 'xCDM_ex_plane', 'yCDM_plane', 'yCDM_ex_plane', 'Zc', 'Zb', 'Vc1', 'Vc2', 'Vc3', 'ZThc', 'Vb1', 'Vb2', 'Vb3', 'ZThb', 'Zeth', 'Ztemp', 'Zetot')
+  end
 end
 
 
