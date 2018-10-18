@@ -17,14 +17,17 @@
 %% This is linear logarithmic interpolation along k, so the monopole
 %% term (k=0) may obtain inf or nan due to 0.5*log(ksq_p). 
 %% We will cure this by nullifying monopole anyway down below (**).
+disp('----- Interpolating transfer function -----');
 dc  = interp2(muext,log(ksampletab), deltasc,  costh_k_V,0.5*log(ksq_p),interp2opt);  %% dc still k-space values here.
 
 %% randomize, apply reality, and normalize
+disp('----- Convolving transfer function with random number -----');
 dc = rand_real_norm(dc,Nmode_p,Nc_p,randamp,randphs,Vbox_p);
 %% CDM displacement vector, related to CDM density at 1st order.
 %% No need for above normalization because this is
 %% derived after above normalization on dc.
 %% ------------- cpos1 ----------------------
+disp('----- Calculating CDM position x -----');
 Psi1                 = i*k1_3D_p./ksq_p.*dc;
 Psi1(Nc_p,Nc_p,Nc_p) = complex(0);  %% fixing nan or inf monopole
 Psi1                 = real(ifftn(ifftshift(Psi1)));
@@ -47,6 +50,7 @@ else
 end
 
 %% ------------- cpos2 ----------------------
+disp('----- Calculating CDM position y -----');
 Psi2                 = i*k2_3D_p./ksq_p.*dc;
 Psi2(Nc_p,Nc_p,Nc_p) = complex(0);  %% fixing nan or inf monopole
 Psi2                 = real(ifftn(ifftshift(Psi2)));
@@ -62,6 +66,7 @@ else
 end
 
 %% ------------- cpos3 ----------------------
+disp('----- Calculating CDM position z -----');
 Psi3                 = i*k3_3D_p./ksq_p.*dc;
 Psi3(Nc_p,Nc_p,Nc_p) = complex(0);  %% fixing nan or inf monopole
 Psi3                 = real(ifftn(ifftshift(Psi3)));
@@ -86,16 +91,20 @@ clear dc  %% save memory
 
 %% =========== CDM velocity ==================================== begin
 %% Matlab & Octave 2D interpolation!! --> generating k-space deltas 
+disp('----- Interpolating transfer function -----');
 Thc = interp2(muext,log(ksampletab), deltasThc, costh_k_V,0.5*log(ksq_p),interp2opt);
 
 %% randomize, apply reality, and normalize
+disp('----- Convolving transfer function with random number -----');
 Thc = rand_real_norm(Thc,Nmode_p,Nc_p,randamp,randphs,Vbox_p);
 
 %% ------------- vc1 ----------------------
+disp('----- Calculating CDM velocity x -----');
 vc1(:,:,:)          = -i*af*k1_3D_p./ksq_p.*Thc(:,:,:);
 vc1(Nc_p,Nc_p,Nc_p) = complex(0);  %% fixing nan or inf monopole
 vc1                 = real(ifftn(ifftshift(vc1)));
 if particlevelocity_accuracyflag
+  disp('******* Calculating CDM velocity x more accurately than 1LPT **');
   %% pad with periodic boundary condition, to provide 1:Nmode_p+1 domain. (**)
   vc1 = padarray(vc1, [1 1 1], 'circular', 'post'); %% now (Nmode_p+1)^3 elements.
   %% Find 
@@ -110,10 +119,12 @@ Vc1 = reshape(vc1(:,:,1) *MpcMyr_2_kms, Nmode_p, Nmode_p); %% for figure
 clear vc1  %% save memory
 
 %% ------------- vc2 ----------------------
+disp('----- Calculating CDM velocity y -----');
 vc2(:,:,:)          = -i*af*k2_3D_p./ksq_p.*Thc(:,:,:);
 vc2(Nc_p,Nc_p,Nc_p) = complex(0);  %% fixing nan or inf monopole
 vc2                 = real(ifftn(ifftshift(vc2)));
 if particlevelocity_accuracyflag
+  disp('******* Calculating CDM velocity y more accurately than 1LPT **');
   %% pad with periodic boundary condition, to provide 1:Nmode_p+1 domain. (**)
   vc2 = padarray(vc2, [1 1 1], 'circular', 'post'); %% now (Nmode_p+1)^3 elements.
   %% Find 
@@ -126,10 +137,12 @@ Vc2 = reshape(vc2(:,:,1) *MpcMyr_2_kms, Nmode_p, Nmode_p); %% for figure
 clear vc2  %% save memory
 
 %% ------------- vc3 ----------------------
+disp('----- Calculating CDM velocity z -----');
 vc3(:,:,:)          = -i*af*k3_3D_p./ksq_p.*Thc(:,:,:);
 vc3(Nc_p,Nc_p,Nc_p) = complex(0);  %% fixing nan or inf monopole
 vc3                 = real(ifftn(ifftshift(vc3)));
 if particlevelocity_accuracyflag
+  disp('******* Calculating CDM velocity y more accurately than 1LPT **');
   %% pad with periodic boundary condition, to provide 1:Nmode_p+1 domain. (**)
   vc3 = padarray(vc3, [1 1 1], 'circular', 'post'); %% now (Nmode_p+1)^3 elements.
   %% Find 
@@ -152,15 +165,18 @@ clear Thc  %% save memory
 
 %% =========== baryon density ================================== begin
 %% Matlab & Octave 2D interpolation!! --> generating k-space deltas 
+disp('----- Interpolating transfer function -----');
 db  = interp2(muext,log(ksampletab), deltasb,  costh_k_V,0.5*log(ksq_p),interp2opt);
 
 %% randomize, apply reality, and normalize
+disp('----- Convolving transfer function with random number -----');
 db = rand_real_norm(db,Nmode_p,Nc_p,randamp,randphs,Vbox_p);
 
 %%%% If SPH particle is used, one can here get the particle positions 
 %%%% just the way CDM positions are calculated.
 if baryonparticleflag
   %% ------------- bpos1 ----------------------
+  disp('----- Calculating baryon position x -----');
   Psi1                 = i*k1_3D_p./ksq_p.*db;
   Psi1(Nc_p,Nc_p,Nc_p) = complex(0);  %% fixing nan or inf monopole
   Psi1                 = real(ifftn(ifftshift(Psi1)));
@@ -176,6 +192,7 @@ if baryonparticleflag
   end
   
   %% ------------- bpos2 ----------------------
+  disp('----- Calculating baryon position y -----');
   Psi2                 = i*k2_3D_p./ksq_p.*db;
   Psi2(Nc_p,Nc_p,Nc_p) = complex(0);  %% fixing nan or inf monopole
   Psi2                 = real(ifftn(ifftshift(Psi2)));
@@ -191,6 +208,7 @@ if baryonparticleflag
   end
   
   %% ------------- bpos3 ----------------------
+  disp('----- Calculating baryon position z -----');
   Psi3                 = i*k3_3D_p./ksq_p.*db;
   Psi3(Nc_p,Nc_p,Nc_p) = complex(0);  %% fixing nan or inf monopole
   Psi3                 = real(ifftn(ifftshift(Psi3)));
@@ -204,6 +222,7 @@ if baryonparticleflag
   end
 end
 %% ------------- density ---------------------
+disp('----- Calculating baryon density -----');
 db = real(ifftn(ifftshift(db)));  
 
 %% enzo baryon density output is the following:
@@ -220,12 +239,15 @@ clear db  %% save memory
 
 %% =========== baryon velocity ==================================== begin
 %% Matlab & Octave 2D interpolation!! --> generating k-space deltas 
+disp('----- Interpolating transfer function -----');
 Thb = interp2(muext,log(ksampletab), deltasThb, costh_k_V,0.5*log(ksq_p),interp2opt);
 
 %% randomize, apply reality, and normalize
+disp('----- Convolving transfer function with random number -----');
 Thb = rand_real_norm(Thb,Nmode_p,Nc_p,randamp,randphs,Vbox_p);
 
 %% ------------- vb1 ----------------------
+disp('----- Calculating baryon velocity x -----');
 vb1(:,:,:)          = -i*af*k1_3D_p./ksq_p.*Thb(:,:,:);
 vb1(Nc_p,Nc_p,Nc_p) = complex(0);  %% fixing nan or inf monopole
 vb1                 = real(ifftn(ifftshift(vb1)));
@@ -249,6 +271,7 @@ Vb1 = reshape(vb1(:,:,1) *MpcMyr_2_kms, Nmode_p, Nmode_p); %% for figure
 clear vb1  %% save memory
 
 %% ------------- vb2 ----------------------
+disp('----- Calculating baryon velocity y -----');
 vb2(:,:,:)          = -i*af*k2_3D_p./ksq_p.*Thb(:,:,:);
 vb2(Nc_p,Nc_p,Nc_p) = complex(0);  %% fixing nan or inf monopole
 vb2                 = real(ifftn(ifftshift(vb2)));
@@ -270,6 +293,7 @@ Vb2 = reshape(vb2(:,:,1) *MpcMyr_2_kms, Nmode_p, Nmode_p); %% for figure
 clear vb2  %% save memory
 
 %% ------------- vb3 ----------------------
+disp('----- Calculating baryon velocity z -----');
 vb3(:,:,:)          = -i*af*k3_3D_p./ksq_p.*Thb(:,:,:);
 vb3(Nc_p,Nc_p,Nc_p) = complex(0);  %% fixing nan or inf monopole
 vb3                 = real(ifftn(ifftshift(vb3)));
@@ -300,12 +324,15 @@ clear Thb  %% save memory
 
 %% =========== baryon temperature, energies ======================= begin
 %% Matlab & Octave 2D interpolation!! --> generating k-space deltas 
+disp('----- Interpolating transfer function -----');
 dT  = interp2(muext,log(ksampletab), deltasT,  costh_k_V,0.5*log(ksq_p),interp2opt);
 
 %% randomize, apply reality, and normalize
+disp('----- Convolving transfer function with random number -----');
 dT = rand_real_norm(dT,Nmode_p,Nc_p,randamp,randphs,Vbox_p);
 
 %% ------------- temperature, energies  ---------------------
+disp('----- Calculating baryon temperature and energy -----');
 dT = real(ifftn(ifftshift(dT)));  
 
 
