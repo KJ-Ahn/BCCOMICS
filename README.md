@@ -53,9 +53,9 @@ BCCOMICS needs transfer function output files of [CAMB](https://camb.info/) (as 
 Best explained with an example. Let's assume that BCCOMICS is installed at `/home/kjahn/BCCOMICS`, whose sub-directories are `src`, `sample`, etc. (Or, assume BCCOMICS installed at `c:\Documents\BCCOMICS` on a Windows system)  
 Below `$` is a linux command prompt, `>>` is either OCTAVE's or MATLAB's command prompt.
 
-### work directory
+### (1) Set a work directory
 First, you need a work directory under which "params.m" and "params_patch.m" exist. The name of this directory can be anything. 
-Inside OCTAVE/MATLAB, you need to go to this directory by `cd` command. You also need to add the source path by `addpath` commmand.  
+Inside OCTAVE/MATLAB, you need to go to this directory by `cd` command. You also need to add the source path by `addpath` commmand. Current example "params.m" generates 151^3 unigrid patches inside (604 Mpc)^3 volume with bccomics_setup. Current example "params_setup.m" generates initial conditions for CDM and baryons with 64^3 resolution. For your own setup, copy `sample` directory to e.g. `my_params`, and modify "params.m" and "params_patch.m" which are both self-explanatory.
 #### (for OCTAVE on linux machine)
 ```
 $ octave
@@ -69,19 +69,24 @@ $ octave
 >> addpath('c:\Documents\BCCOMICS\src')
 ```
 
-### Run bccomics_setup
+### (2) Run bccomics_setup
 You will be asked to choose a patch with your desired CDM overdensity and V_cb (absolute value).
 ```
 >> bccomics_setup
 >>
 ```
 
-### Run bccomics
+### (3) Run bccomics
 You will be asked to choose one among those patches that you have chosen in more-than-one bccomics_setup runs.
 ```
 >> bccomics
 ```
 After all runs are successuful, you will have initial conditions under `ICdir` with appropriate directory name.
+
+### (4) For OCTAVE only, convert output binary ICs to enzo-readable HDF5 binary files.
+```
+$ python convert2enzo.py
+```
 
 ## Citing
 
