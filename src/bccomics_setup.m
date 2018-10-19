@@ -98,7 +98,8 @@ end
 
 disp('----------------Initializing----------------');
 %% Read in essential parameters
-run('../parameters/params');  %%==== script ==================
+run('params.m');  %%==== script ==================
+
 %% Define some box-related quantities
 box_init;  %%==== script ==================
 if (mod(Ncell,2)==0)
@@ -120,10 +121,10 @@ end
 if ~matlabflag
   if compare_versions(OCTAVE_VERSION,'4.0.1','<')
     %% Messages "warning: function * shadows ..." should be welcomed.
-    addpath('../mfiles_for_octave'); 
+    addpath([pkgdir '/mfiles_for_octave']); 
   end
   if ~exist('ode45')
-    addpath('../odepkg-0.8.5');
+    addpath([pkgdir '/odepkg-0.8.5']);
   end
 end
 

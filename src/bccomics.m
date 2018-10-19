@@ -63,7 +63,7 @@ end
 %% Read in constants in cgs unit and conversion factors.
 Consts_Conversions;  %%==== script ==================
 %% Read in parameters
-run('../parameters/params.m');  %%==== script ==================
+run('params.m');  %%==== script ==================
 %% Read in cosmology
 run(Cosmology);  %%==== script ==================
 
@@ -71,7 +71,7 @@ fb = ombh2/(ombh2+omch2); %% baryon/matter fraction
 fc = omch2/(ombh2+omch2); %% CDM/matter fraction
 
 %% Read in parameters
-run('../parameters/params_patch.m');  %%==== script ==================
+run('params_patch.m');  %%==== script ==================
 %% Requires mod(Ncell_p,4)=0 to properly use file512seed when Nmode_p \neq 512.
 if (mod(Ncell_p,4)~=0)
   disp('Choose a number which is multiple of 4 for Ncell_p');
