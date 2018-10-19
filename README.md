@@ -50,7 +50,7 @@ BCCOMICS needs transfer function output files of [CAMB](https://camb.info/) (as 
 - RECFAST
 
 ## Running
-Best explained with an example. Let's assume that BCCOMICS is installed on `/home/kjahn/BCCOMICS`, whose sub-directories are `src`, `sample`, etc. (Or, assume BCCOMICS installed on `c:\Documents\BCCOMICS` on a Windows system)  
+Best explained with an example. Let's assume that BCCOMICS is installed at `/home/kjahn/BCCOMICS`, whose sub-directories are `src`, `sample`, etc. (Or, assume BCCOMICS installed at `c:\Documents\BCCOMICS` on a Windows system)  
 Below `$` is a linux command prompt, `>>` is either OCTAVE's or MATLAB's command prompt.
 
 ### work directory
@@ -68,6 +68,20 @@ $ octave
 >> cd 'c:\Documents\BCCOMICS\sample'
 >> addpath('c:\Documents\BCCOMICS\src')
 ```
+
+### Run bccomics_setup
+You will be asked to choose a patch with your desired CDM overdensity and V_cb (absolute value).
+```
+>> bccomics_setup
+>>
+```
+
+### Run bccomics
+You will be asked to choose one among those patches that you have chosen in more-than-one bccomics_setup runs.
+```
+>> bccomics
+```
+After all runs are successuful, you will have initial conditions under `ICdir` with appropriate directory name.
 
 ## Citing
 
