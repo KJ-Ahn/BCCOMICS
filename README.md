@@ -25,29 +25,48 @@ The user is asked again to choose one from already calculated set of patches, an
 
 (3) (OCTAVE-only) Conversion of binary data from step (2) into enzo-usable initial conditions, by "convert_enzo.py" using python+h5py. 
 
-## Installation Requirements
+## Installation and Requirements
 
 Installation of BCCOMICS:  
 Either (1) clone this repo, or (2) download as a zip and extract its contents. Click the green "Clone or download" button and choose whichever suits you. No further installation process is required.
 
 BCCOMICS has two main scripts that run on either [MATLAB(R)](https://www.mathworks.com/products/matlab.html) or [gnu OCTAVE](https://www.gnu.org/software/octave/). gnu OCTAVE is easily installed with its dependency by package managers (e.g. "apt", "rpm", "synaptic", "flatpak", ...) in usual linux distributions. Ask your system administrator for installation on a shared unix machine.
 
+To install a rather recent version of OCTAVE on old linux distributions (or to install it privately on a shared machine without root priviledge), you might want to try installing [Anaconda](https://www.anaconda.com/download/), and then do `conda install -c conda-forge octave` for installing a recent OCTAVE with its dependencey without headache. 
+
 For MATLAB, in addition to the main program, following additional packages need to be installed.  
 - Image Processing Toolbox  
 - Statistics and Machine Learning Toolbox
 
-For gnu OCTAVE, in addition to the main program, following additional packages need to be installed. Use your linux distribution's package installer (e.g. "sudo apt install octave-image" for Ubuntu). Ask your system administrator for installation on a shared unix machine.  
+For gnu OCTAVE, in addition to the main program, following additional packages need to be installed. Use your linux distribution's package installer (e.g. `sudo apt install octave-image` for Ubuntu). Ask your system administrator for installation on a shared unix machine.  
 - octave-image  
 - octave-statistics (optional; if uninstalled BCCOMICS will use functions under BCCOMICS/statistics-1.3.0/)  
 - octave-odepkg (optional; if uninstalled BCCOMICS will use octave functions or those under BCCOMICS/odepkg-0.8.5/)
 - python
 - h5py
 
-## Running
+BCCOMICS needs transfer function output files of [CAMB](https://camb.info/) (as provided in BCCOMICS/sample/CAMB_for_mode_finding), and also a redshift-ionization output file from [RECFAST](http://www.astro.ubc.ca/people/scott/recfast.html). So in general, you need to install  
+- CAMB
+- RECFAST
 
-Here is an example of how to format text like source code:
+## Running
+Best explained with an example. Let's assume that BCCOMICS is installed on `/home/kjahn/BCCOMICS`, whose sub-directories are `src`, `sample`, etc. (Or, assume BCCOMICS installed on `c:\Documents\BCCOMICS` on a Windows system)  
+Below `$` is a linux command prompt, `>>` is either OCTAVE's or MATLAB's command prompt.
+
+### work directory
+First, you need a work directory under which "params.m" and "params_patch.m" exist. The name of this directory can be anything. 
+Inside OCTAVE/MATLAB, you need to go to this directory by `cd` command. You also need to add the source path by `addpath` commmand.  
+#### (for OCTAVE on linux machine)
 ```
-do something here.
+$ octave
+
+>> cd '/home/kjahn/BCCOMICS/sample'
+>> addpath('/home/kjahn/BCCOMICS/src')
+```
+#### (for MATLAB on Windows machine)
+```
+>> cd 'c:\Documents\BCCOMICS\sample'
+>> addpath('c:\Documents\BCCOMICS\src')
 ```
 
 ## Citing
