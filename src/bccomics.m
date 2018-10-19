@@ -42,16 +42,26 @@
 %% Binary files from bccomics_setup.m is also in hdf5 format, so
 %% porting bccomics.m into other languages & improving it are welcomed.
 
-clear;
+clear;  %% Clears the memory and have a fresh start!
 more off; %% enables to see progress
 returnflag = false; %% main program need to stop when script stops.
+
+%% Start recording log
+diary on;
 
 %% Detect which is running: octave or matlab?
 if (exist('OCTAVE_VERSION','builtin'))
   matlabflag=false;
+  disp('----------------run on OCTAVE----------------');
 else
   matlabflag=true;
+  disp('----------------run on MATLAB----------------');
 end
+
+%% Read in constants in cgs unit and conversion factors.
+Consts_Conversions;  %%==== script ==================
+%% Read in parameters
+run('params.m');  %%==== script ==================
 
 %% Check function availability and provide cure
 Check_functions;  %%==== script ==================
@@ -60,19 +70,15 @@ if returnflag
   return;
 end
 
-%% Read in constants in cgs unit and conversion factors.
-Consts_Conversions;  %%==== script ==================
-%% Read in parameters
-run('params.m');  %%==== script ==================
 %% Read in cosmology
 run(Cosmology);  %%==== script ==================
 
 fb = ombh2/(ombh2+omch2); %% baryon/matter fraction
 fc = omch2/(ombh2+omch2); %% CDM/matter fraction
 
-%% Read in parameters
+%% Read in parameters for initial condition
 run('params_patch.m');  %%==== script ==================
-%% Requires mod(Ncell_p,4)=0 to properly use file512seed when Nmode_p \neq 512.
+%% Requires mod(Ncell_p,4)=0 to properly use existing random seed.
 if (mod(Ncell_p,4)~=0)
   disp('Choose a number which is multiple of 4 for Ncell_p');
   clear;
@@ -210,5 +216,7 @@ else
   end
 end
 
-
+disp('*********** bccomics successfully ended ************');
+diary off;
+movefile('diary', [ICsubdir '/bccomics.log']);
 

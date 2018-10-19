@@ -5,8 +5,8 @@
 %%
 %% Also, interp2 is used for interpolating the transfer function, and 
 %% some old version of octave interpn either requires meshgrid data for X & Y 
-%% in interp2(X,Y,Z,x,y,interp2opt), or 'pchip' is not allowed as interpopt, 
-%% or even octave does not have interpn function. 
+%% in interp2(X,Y,Z,x,y,interp2opt), or 'pchip' is not allowed as interp2opt, 
+%% or even some old octave does not have interp2 function. 
 %% Test this and if this is the case use the working interp2.m.
 %%
 %% interpn is used for 3D interpolation when particlevelocity_accuracyflag
@@ -22,7 +22,7 @@
 if ~matlabflag
   if compare_versions(OCTAVE_VERSION,'4.0.1','<')
     %% Messages "warning: function * shadows ..." should be welcomed.
-    addpath('../mfiles_for_octave'); 
+    addpath([pkgdir '/mfiles_for_octave']); 
   end
   try  %% test system interp2
     a=[1:3]';
@@ -30,7 +30,7 @@ if ~matlabflag
     c=a*b;
     d=interp2(b,a,c,1.5,1.5,interp2opt);
   catch  %% when error occurs in interp2 use working interp2 instead 
-    addpath('../mfiles_for_octave'); 
+    addpath([pkgdir '/mfiles_for_octave']); 
   end
   try  %% test system interpn
     x = -1:1;
@@ -45,7 +45,7 @@ if ~matlabflag
     [xxi, yyi, zzi] = ndgrid (xi, yi, zi);
     vi = interpn (x, y, z, v, xxi, yyi, zzi, interpnopt);
   catch  %% when error occurs in interpn use working interpn instead 
-    addpath('../mfiles_for_octave'); 
+    addpath([pkgdir '/mfiles_for_octave']); 
   end
   try  %% test if padarray exists
     a=[1 2;3 4];
@@ -56,7 +56,7 @@ if ~matlabflag
     return;
   end
   if ~exist('raylrnd')
-    addpath('../statistics-1.3.0/inst');
+    addpath([pkgdir '/statistics-1.3.0/inst']);
   end
 else
   try  %% test if padarray exists

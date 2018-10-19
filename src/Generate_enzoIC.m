@@ -75,6 +75,7 @@ fwrite(fout, mod((Psi3 + (k3_3D_p/kunit_p+0.5)*Lcell_p + Lbox_p/2)/Lbox_p, 1), '
 fclose(fout);
 zCDM_plane    =   Psi3(:,:,1) + k3_3D_p(:,:,1)/kunit_p*Lcell_p + Lbox_p/2; %% for figure
 zCDM_ex_plane = 5*Psi3(:,:,1) + k3_3D_p(:,:,1)/kunit_p*Lcell_p + Lbox_p/2; %% for figure, NOT REAL buif particlevelocity_accuracyflag
+if particlevelocity_accuracyflag
   Psi3 = mod((Psi3 + (k3_3D_p/kunit_p)*Lcell_p + Lbox_p/2)/Lbox_p*Nmode_p, Nmode_p)+1;
 else
   clear Psi3  %% save memory
@@ -336,9 +337,9 @@ disp('----- Calculating baryon temperature and energy -----');
 dT = real(ifftn(ifftshift(dT)));  
 
 
-%% Mean IGM temperature fit from Tseliakhovich & Hirata
-aa1  = 1/119
-aa2  = 1/115
+%% Mean IGM temperature fit from Tseliakhovich & Hirata (2010)
+aa1  = 1/119;
+aa2  = 1/115;
 Tz   = TCMB0/af /(1+af/aa1/(1+(aa2/af)^1.5));  %% in K, global average temperature
 Tz   = Tz*(1+DT3D_azend(ic,jc,kc)); %% local(cell) average temperature
 

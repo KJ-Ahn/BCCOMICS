@@ -200,13 +200,11 @@ end
 [icc1 icc2 icc3] = ind2sub([Nmode, Nmode, Nmode], ind_patch);
 icc = [icc1 icc2 icc3];
 
-%% Check if your patch has been selected already
+%% Check if your patch has been selected already, and warn the user
 if exist([setupdir '/icc.dat'], 'file')
   icc_read=load([setupdir '/icc.dat']);
   if ismember(icc,icc_read)
-    disp('The patch has already been selected. Quitting');
-    returnflag=true;
-    return;
+    disp('The patch has already been selected. Proceeding anyways (recalculating).');
   end
 end
 

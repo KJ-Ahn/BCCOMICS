@@ -89,11 +89,16 @@ clear;
 more off; %% enables to see progress
 returnflag = false; %% main program need to stop when script stops.
 
+%% Start recording log
+diary on;
+
 %% Detect which is running: octave or matlab?
 if (exist('OCTAVE_VERSION','builtin'))
   matlabflag=false;
+  disp('----------------run on OCTAVE----------------');
 else
   matlabflag=true;
+  disp('----------------run on MATLAB----------------');
 end
 
 disp('----------------Initializing----------------');
@@ -344,3 +349,7 @@ disp('----------------Integrating----------------');
 global Thc_i Thb_i rV_i;
 
 Integrate_evolODE;  %%==== script ==================
+
+disp('*********** bccomics_setup successfully ended ************');
+diary off;
+movefile('diary', 'bccomics.log');

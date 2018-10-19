@@ -48,7 +48,7 @@ tspan = [1 0];
 y0 = 0;
 [t,y] = ode45(@(t,y) t, tspan, y0);
 if (length(t)==1) %% if ode45 does not do backward integration, length(t)=1.
-  addpath('odepkg-0.8.5');
+  addpath([pkgdir '/odepkg-0.8.5']);
 end
 
 %% designated scale factors for a-D tables.
