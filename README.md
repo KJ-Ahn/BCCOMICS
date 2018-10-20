@@ -28,7 +28,7 @@ The user is asked again to choose one from already calculated set of patches, an
 ## Installation and Requirements
 
 Installation of BCCOMICS:  
-Either (1) clone this repo, or (2) download as a zip and extract its contents. Click the green "Clone or download" button and choose whichever suits you. No further installation process is required.
+Either (1) clone this repo (`git clone https://github.com/KJ-Ahn/BCCOMICS.git`), or (2) download as a zip and extract its contents. Click the green "Clone or download" button and choose whichever suits you. No further installation process is required.
 
 BCCOMICS has two main scripts that run on either [MATLAB(R)](https://www.mathworks.com/products/matlab.html) or [gnu OCTAVE](https://www.gnu.org/software/octave/). gnu OCTAVE is easily installed with its dependency by package managers (e.g. "apt", "rpm", "synaptic", "flatpak", ...) in usual linux distributions. Ask your system administrator for installation on a shared unix machine.
 
