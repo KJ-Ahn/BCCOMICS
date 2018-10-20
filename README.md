@@ -45,7 +45,7 @@ For gnu OCTAVE, in addition to the main program, following additional packages n
 - python
 - h5py
 
-BCCOMICS needs transfer function output files of [CAMB](https://camb.info/) (as provided in BCCOMICS/sample/CAMB_for_mode_finding), and also a redshift-ionization output file from [RECFAST](http://www.astro.ubc.ca/people/scott/recfast.html). So in general, you need to install  
+BCCOMICS needs transfer function output files of [CAMB](https://camb.info/) (as provided in BCCOMICS/sample/CAMB_for_mode_finding), and also a redshift-ionization output file from [RECFAST](http://www.astro.ubc.ca/people/scott/recfast.html) (as provided as the file BCCOMICS/sample/output_recfast). So in general, you need to install  
 - CAMB
 - RECFAST
 
@@ -54,8 +54,7 @@ Best explained with an example. Let's assume that BCCOMICS is installed at `/hom
 Below `$` is a linux command prompt, `>>` is either OCTAVE's or MATLAB's command prompt.
 
 ### (1) Set a work directory
-First, you need a work directory under which "params.m" and "params_patch.m" exist. The name of this directory can be anything. 
-Inside OCTAVE/MATLAB, you need to go to this directory by `cd` command. You also need to add the source path by `addpath` commmand. Current example "params.m" generates 151^3 unigrid patches inside (604 Mpc)^3 volume with bccomics_setup. Current example "params_setup.m" generates initial conditions for CDM and baryons with 64^3 resolution. For your own setup, copy `sample` directory to e.g. `my_params`, and modify "params.m" and "params_patch.m" which are both self-explanatory.
+First, you need a work directory under which "params.m" and "params_patch.m" exist (You should stick to this naming convention!!), and also a cosmology parameter file (as provided as BCCOMICS/sample/LCDM.m). The name of the work directory can be anything. Inside OCTAVE/MATLAB, you need to go to this directory by `cd` command. You also need to add the source path by `addpath` commmand. Current example "params.m" generates 151^3 unigrid patches inside (604 Mpc)^3 volume with bccomics_setup. Current example "params_setup.m" generates initial conditions of CDM and baryons with 64^3 resolution. For your own setup, do a recursive copy of `sample` directory to e.g. `my_params`, and modify "params.m" and "params_patch.m" which are both self-explanatory. The cosmology parameter file (e.g. LCDM.m) should carefully reflect parameters you used for running CAMB and RECFAST.
 #### (for OCTAVE on linux machine)
 ```
 $ octave
