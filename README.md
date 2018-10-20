@@ -38,8 +38,8 @@ For MATLAB, in addition to the main program, following additional packages need 
 - Image Processing Toolbox  
 - Statistics and Machine Learning Toolbox
 
-For gnu OCTAVE, in addition to the main program, following additional packages need to be installed. Use your linux distribution's package installer (e.g. `sudo apt install octave-image` for Ubuntu). Ask your system administrator for installation on a shared unix machine.  
-- octave-image  
+For gnu OCTAVE, in addition to the main program, following additional packages need to be installed. Use your linux distribution's package installer (e.g. `sudo apt install octave-image` for Ubuntu). It is OK not to install following "octave-*" packages if you want, BCCOMICS is shipped with necessary function files of these packages anyways.  
+- octave-image (optional; if uninstalled BCCOMICS will use `padarray.m` under BCCOMICS/mfiles_for_octave/) 
 - octave-statistics (optional; if uninstalled BCCOMICS will use functions under BCCOMICS/statistics-1.3.0/)  
 - octave-odepkg (optional; if uninstalled BCCOMICS will use octave functions or those under BCCOMICS/odepkg-0.8.5/)
 - python
