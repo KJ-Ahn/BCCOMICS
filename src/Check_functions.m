@@ -51,18 +51,18 @@ if ~matlabflag
     a=[1 2;3 4];
     aa=padarray(a,[1 1],'circular','post');
   catch  %% when error occurs guide for installation
-    disp('octave-image package need be installed. Rerun after installation.');
-    returnflag = true;
-    return;
+    addpath([pkgdir '/mfiles_for_octave']); 
   end
   if ~exist('raylrnd')
     addpath([pkgdir '/statistics-1.3.0/inst']);
   end
 else
-  try  %% test if padarray exists
-    a=[1 2;3 4];
-    aa=padarray(a,[1 1],'circular','post');
-  catch  %% when error occurs guide for installation
+  if ~exist('raylrnd')
+    disp('Statistics Toolbox need be installed. Rerun after installation.');
+    returnflag = true;
+    return;
+  end
+  if ~exist('padarray')
     disp('Image Processing Toolbox need be installed. Rerun after installation.');
     returnflag = true;
     return;
