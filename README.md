@@ -7,10 +7,10 @@ Currently, it only supports [enzo](http://enzo-project.org). We are inviting con
 
 The main code is composed of two parts.
 
-(1) Realization of large-scale fluctuations (at a length resolution of 4 Mpc comoving) and transfer function calculation (bccomics_setup.m):  
+(1) Realization of large-scale fluctuations (at a length resolution of 4 Mpc comoving) and transfer function calculation (`bccomics_setup.m`):  
 Because the perturbation theory studying the dual impact from large-scale Delta and V_cb on small-scale fluctuations is relatively new ([Ahn 2016](http://adsabs.harvard.edu/abs/2016ApJ...830...68A)), transfer functions from usual linear Boltzmann solvers such as CAMB do not provide the level of accuracy of this new theory. Even when Delta variance is not considered, the suppression of high-k (around k~100/Mpc) modes due to V_cb ([Tseliakhovich & Hirata 2010](http://adsabs.harvard.edu/abs/2010PhRvD..82h3520T)) is not reflected in transfer function from CAMB. "bccomics_setup.m" makes realization of environmental variables, and once the user chooses a specific "patch" of generically non-zero Delta and V_cb, it calculates and records the transfer function.
 
-(2) Realization of small-scale fluctuations on a selected patch (bccomics.m):  
+(2) Realization of small-scale fluctuations on a selected patch (`bccomics.m`):  
 The user is asked again to choose one from already calculated set of patches, and then the corresponding transfer function is read in and used to generate 3D data of CDM and baryons. Currently, following data in simple bianry form and in enzo units are generated:  
 (a) CDM particle positions (cpos1, cpos2, cpos3)  
 (b) CDM particle velocities (vc1, vc2, vc3)  
