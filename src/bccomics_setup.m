@@ -275,14 +275,13 @@ fclose(fout);
 %% At z=1000, get baryon temperature fluctuation DT_zi
 Initialize_DeltaT;  %%==== script ==================
 
-disp('----------------gaussian seed being read-in (or generated)----------------');
-pause(1);
 %%%%%% Get 3D spatial fluctuatons in the big box ------------------------------ begin
 %% 2 Gaussian random number sets into a complex number field.
-%% Generate AND use file only when there does NOT exist the randome seed file.
+%% Generate AND use file only when there does NOT exist the random seed file.
 fgaussstr = [setupdir '/gaussseed.matbin'];
 if (~exist(fgaussstr))
-  Nreallization = 12000000;
+  disp(['------gaussian seed ' fgaussstr ' being generated------']);
+  Nreallization = Ncell^3;  %% need to be >= Ncell^3
 
   gauss1 = normrnd(0,1,[Nreallization,1]);
   gauss2 = normrnd(0,1,[Nreallization,1]);
@@ -296,6 +295,7 @@ if (~exist(fgaussstr))
     save('-mat-binary', fgaussstr, 'gauss'); %% -mat-binary = -v6 in octave
   end
 else %% load preexisting seed
+  disp(['------preexising gaussian seed ' fgaussstr ' being read in------']);
   if matlabflag
     load(fgaussstr, '-mat', 'gauss')  %% matlab knows about binary version
   else

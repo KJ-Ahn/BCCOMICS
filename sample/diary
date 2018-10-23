@@ -1,0 +1,92 @@
+----------------run on OCTAVE----------------
+----------------Initializing----------------
+plotflag = 0
+THflag = 0
+OWRTflag =  1
+warning: Option "RelTol" not set, new value 0.000001 is used
+warning: Option "AbsTol" not set, new value 0.000001 is used
+warning: Option "InitialStep" not set, new value -0.100000 is used
+warning: Option "MaxStep" not set, new value -0.100000 is used
+warning: Option "InitialStep" not set, new value 0.100000 is used
+warning: Option "MaxStep" not set, new value 0.100000 is used
+warning: Option "InitialStep" not set, new value -0.007592 is used
+warning: Option "MaxStep" not set, new value 0.007592 is used
+warning: Option "InitialStep" not set, new value 0.092308 is used
+warning: Option "MaxStep" not set, new value 0.092308 is used
+warning: Option "InitialStep" not set, new value -0.007592 is used
+warning: Option "MaxStep" not set, new value 0.007592 is used
+warning: Option "InitialStep" not set, new value 0.092308 is used
+warning: Option "MaxStep" not set, new value 0.092308 is used
+----------------gaussian seed being read-in (or generated)----------------
+----------------Generating real-space 3D fields----------------
+
+octave:2> quit
+
+----------------run on OCTAVE----------------
+----------------Initializing----------------
+plotflag = 0
+THflag = 0
+OWRTflag =  1
+warning: Option "RelTol" not set, new value 0.000001 is used
+warning: Option "AbsTol" not set, new value 0.000001 is used
+warning: Option "InitialStep" not set, new value -0.100000 is used
+warning: Option "MaxStep" not set, new value -0.100000 is used
+warning: Option "InitialStep" not set, new value 0.100000 is used
+warning: Option "MaxStep" not set, new value 0.100000 is used
+warning: Option "InitialStep" not set, new value -0.007592 is used
+warning: Option "MaxStep" not set, new value 0.007592 is used
+warning: Option "InitialStep" not set, new value 0.092308 is used
+warning: Option "MaxStep" not set, new value 0.092308 is used
+warning: Option "InitialStep" not set, new value -0.007592 is used
+warning: Option "MaxStep" not set, new value 0.007592 is used
+warning: Option "InitialStep" not set, new value 0.092308 is used
+warning: Option "MaxStep" not set, new value 0.092308 is used
+------gaussian seed ../setup_output/gaussseed.matbin being generated------
+----------------Generating real-space 3D fields----------------
+beta =  2.8000
+gamma =  0.33000
+Standard deviation of CDM overdensities (sDc) is 0.0041819
+Choose CDM overdensity environment:
+Input 0 for mean, 1 for overdense, 2 for underdense:1
+What multiple of sDc away from the mean overdensity, 0? Example: for Delta_c = +1.5*sDc, Enter 1.5
+Enter a floating-point number:2
+CDM overdensity chosen: Delta_c = 2*sDc = 0.0083638
+---------------------------------------
+RMS of Vbc (rmsV) at z = 1000 is 27.528 km/s
+Peak of Vbc in Maxwell-Boltzmann distribution is 22.477 km/s
+Choose Vbc environment at z = 1000
+Enter Vbc at z = 1000 in units of km/s: 30
+311 patches out of total 3.44295e+06 patches satisfy your chosen condition with 1% margin.
+----------------One best matching patch is being found----------------
+Wanted Delta_c = 0.0083638; Selected patch's Delta_c = 0.0083689
+Wanted Vcb = 30 km/s; Selected patch's Vcb = 30.011 km/s
+----------------Integrating----------------
+1th wavenumber out of 100 is being handled.
+* 1th angle outta 21 is being handled.
+warning: Option "InitialStep" not set, new value 0.000398 is used
+warning: Option "MaxStep" not set, new value 0.000398 is used
+* 2th angle outta 21 is being handled.
+warning: Option "InitialStep" not set, new value 0.000398 is used
+warning: Option "MaxStep" not set, new value 0.000398 is used
+* 3th angle outta 21 is being handled.
+warning: Option "InitialStep" not set, new value 0.000398 is used
+warning: Option "MaxStep" not set, new value 0.000398 is used
+* 4th angle outta 21 is being handled.
+warning: Option "InitialStep" not set, new value 0.000398 is used
+warning: Option "MaxStep" not set, new value 0.000398 is used
+* 5th angle outta 21 is being handled.
+warning: Option "InitialStep" not set, new value 0.000398 is used
+warning: Option "MaxStep" not set, new value 0.000398 is used
+* 6th angle outta 21 is being handled.
+warning: Option "InitialStep" not set, new value 0.000398 is used
+warning: Option "MaxStep" not set, new value 0.000398 is used
+* 7th angle outta 21 is being handled.
+warning: Option "InitialStep" not set, new value 0.000398 is used
+warning: Option "MaxStep" not set, new value 0.000398 is used
+
+octave:4> 
+octave:4> 
+octave:4> 
+octave:4> 
+octave:4> quit
+
