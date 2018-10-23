@@ -29,3 +29,11 @@ zzend      = 200;    %% Redshift at which you want to have initial condition.
 %% in a symmetric way.
 Lbox    = 604;         %% in Mpc unit; let it be (odd number)*4
 Ncell   = 151;         %% # of cells along one axis: make it an odd number
+
+%% If you know which cell to choose already, turn on the following flag
+%% Useful if bccomics_setup has not finished calculation and you want
+%% to rerun bccomics_setup
+patchidxinput_flag = false;  %% if true, idx1 & idx2 & idx3 need to be specified
+idx1 = 110; %% x-index of your patch (ignored when patchidxinput_flat = false)
+idx2 = 24;  %% y-index of your patch (ignored when patchidxinput_flat = false)
+idx3 = 115; %% z-index of your patch (ignored when patchidxinput_flat = false)

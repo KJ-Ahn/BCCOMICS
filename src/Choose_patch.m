@@ -69,7 +69,17 @@ Vcbp_azend  = sqrt(2/3)*rmsVcb_azend;  %% peak velocity in Maxwell-Boltzmann dis
 
 ee          = 1e-2;
 
-if choose_zi_flag
+if patchidxinput_flag
+  if (exist('idx1') && exist('idx2') && exist('idx3'))
+    disp('---------- patchidxinput_flag true, idx1, idx2, idx3 are from params.m ----------');
+    ind_patch = sub2ind([Nmode, Nmode, Nmode], idx1, idx2, idx3);
+  else
+    disp('Missing idx1, idx2, idx3: You need to specify these in params.m.');
+    disp('Or set patchidxinput_flag = false in params.m');
+    returnflag=true;
+    return;
+  end
+elseif choose_zi_flag
   %% When zi values are used: ------------------------------------------- begin
   disp(['Standard deviation of CDM overdensities (sDc) is ' num2str(stdDc)]);
   disp('Choose CDM overdensity environment:');
