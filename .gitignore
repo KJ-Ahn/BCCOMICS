@@ -1,6 +1,8 @@
 *~
 src/bccomics_setup_details.m
 src/*~
+src_converter/*~
+src_patchcosmo/*~
 sample/*~
 octave-workspace
 ICs
