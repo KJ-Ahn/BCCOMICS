@@ -54,7 +54,10 @@ Best explained with an example. Let's assume that BCCOMICS is installed at `/hom
 Below `$` is a linux command prompt, `>>` is either OCTAVE's or MATLAB's command prompt.
 
 ### (1) Set a work directory
-First, you need a work directory under which "params.m" and "params_patch.m" exist (You should stick to this naming convention!!), and also a cosmology parameter file (as provided as BCCOMICS/sample/LCDM.m). The name of the work directory can be anything. Inside OCTAVE/MATLAB, you need to go to this directory by `cd` command. You also need to add the source path by `addpath` commmand. Current example "params.m" generates 151^3 unigrid patches inside (604 Mpc)^3 volume with bccomics_setup. Current example "params_setup.m" generates initial conditions of CDM and baryons with 64^3 resolution. For your own setup, do a recursive copy of `sample` directory to e.g. `my_params`, and modify "params.m" and "params_patch.m" which are both self-explanatory. The cosmology parameter file (e.g. LCDM.m) should carefully reflect parameters you used for running CAMB and RECFAST.
+First, you need a work directory under which "params.m" and "params_patch.m" exist (You should stick to this naming convention!!), and also a cosmology parameter file (as provided as BCCOMICS/sample/LCDM.m). The name of the work directory can be anything. Inside OCTAVE/MATLAB, you need to go to this directory by `cd` command. You also need to add the source path by `addpath` commmand.  
+Current example "params.m" generates 151^3 unigrid patches inside (604 Mpc)^3 volume with `bccomics_setup.m`. Current example "params_patch.m" generates initial conditions of CDM and baryons with 64^3 resolution with `bccomics.m`.  
+For your own setup, do a recursive copy of `sample` directory to e.g. `my_params`, and modify "params.m" and "params_patch.m" which are both self-explanatory. The cosmology parameter file (e.g. LCDM.m) should carefully reflect parameters you used for running CAMB and RECFAST.  
+** If you want to use pre-generated (by bccomics_setup.m) gaussian random seed ("gaussseed.matbin"; stick to this naming convention!!), place it under `setupdir` specified in params.m.
 #### (for OCTAVE on linux machine)
 ```
 $ octave
@@ -68,13 +71,46 @@ $ octave
 >> addpath('c:\Documents\BCCOMICS\src')
 ```
 
-### (2) Run bccomics_setup
+### (2) Run bccomics_setup (when patchidxinput_flat=false in params.m)
 You will be asked to choose a patch with your desired CDM overdensity and V_cb (absolute value).
 ```
 >> bccomics_setup
->>
-```
+... Several message outputs ...
 
+Standard deviation of CDM overdensities (sDc) is 0.0041819
+Choose CDM overdensity environment:
+Input 0 for mean, 1 for overdense, 2 for underdense:
+```
+Well, if you are interested in overdense patch, enter 1
+```
+Input 0 for mean, 1 for overdense, 2 for underdense:1
+What multiple of sDc away from the mean overdensity, 0? Example: for Delta_c = +1.5*sDc, Enter 1.5
+Enter a floating-point number:
+```
+If you want 2sigma density environment for your patch, enter 2
+```
+Enter a floating-point number:2
+CDM overdensity chosen: Delta_c = 2*sDc = 0.0083638
+---------------------------------------
+RMS of Vbc (rmsV) at z = 1000 is 27.528 km/s
+Peak of Vbc in Maxwell-Boltzmann distribution is 22.477 km/s
+Choose Vbc environment at z = 1000
+Enter Vbc at z = 1000 in units of km/s: 
+```
+If you are interested in typical ones, from above Vbc=30 km/s is a good choice, so enter 30
+```
+Enter Vbc at z = 1000 in units of km/s: 30
+311 patches out of total 3.44295e+06 patches satisfy your chosen condition with 1% margin.
+----------------One best matching patch is being found----------------
+Wanted Delta_c = 0.0083638; Selected patch's Delta_c = 0.0083689
+Wanted Vcb = 30 km/s; Selected patch's Vcb = 30.011 km/s
+----------------Integrating----------------
+1th wavenumber out of 100 is being handled.
+* 1th angle outta 21 is being handled.
+* 2th angle outta 21 is being handled.
+...
+```
+Then you should wait until all wavenumbers are calculated. Be patient, it takes a while.
 ### (3) Run bccomics
 You will be asked to choose one among those patches that you have chosen in more-than-one bccomics_setup runs.
 ```
