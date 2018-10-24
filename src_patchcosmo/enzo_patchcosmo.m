@@ -25,52 +25,19 @@ global H_i H_l_i Om_l_i Omr_l_i OmLambda_l_i OmK_l_i aloci;
 %%%%%%%%%%%%%% Lbox_Mpch will change depending on which final time is chosen %%
 %%%%%%%%%%%%%% for each patch.  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Lbox_p_inMpch = Lbox_p*h;  %% enzo uses 'ComovingBoxSize' in units of Mpc/h
-Lbox_Mpch = 1  %% comoving size of the simulation box of our LCDM universe, in Mpc/h.
-
-G        = 6.67259e-8
-mH       = 1.6733e-24  %% gram
-kb       = 1.380658e-16  %% Boltzmann const.
-pc       = 3.086e18 %% in cm
-Mpc      = pc * 1e6;
-cm_inMpc = 1/Mpc
-km_inMpc = cm_inMpc * 1e5
-yr       = 365*24*3600; %% in sec
-Myr      = yr * 1e6;
-s_inMyr  = 1/Myr;
-c_inkms  = 2.99892458e5 %% speed of light in km/s
-%% multiply to convert Mpc/Myr velocity to km/s velocity
-MpcMyr_2_kms = Mpc/Myr /1e5;
-
-ns = 0.961  %% scalar_spectral_index(1)
-k0 = 0.05   %% pivot_scalar
-As = 2.2e-9 %% scalar_amp(1)
-h  = 0.703  %% hubble/100
-H0 = 100*h*km_inMpc/s_inMyr  %% H0 in Myr^-1
-ombh2 = 0.022239 %% Omb(0)*h^2
-omch2 = 0.114160 %% Omc(0)*h^2
-Om0   = (ombh2+omch2)/h^2
-Omgamma    = 4.98569497e-5
-Omneutrino = 3.44215495e-5
-Omr0       = Omgamma+Omneutrino
-OmLambda0  = 1-Om0-Omr0;
-TCMB0 = 2.726
-tgamma = 1/8.55e-13 /1e6 %% in Myr unit (Naoz & Barkana)
-
-fb = ombh2/(ombh2+omch2)
-fc = omch2/(ombh2+omch2)
 
 mmw = 1.2195 %% mean molecular weight with X=0.76, Y=0.24, neutral.
 rhocrit0 = 3*(100*h*1e5/Mpc)^2/(8*pi*G) %% in g/cm^3
 
-%% read in the redshift. zzbegin=1000, and zzend is for the initial
-%% condition generator, so azend and zzend correspond to "_i".
-zz    = load('zz.dat')
-zzbegin = zz(1)
-zzend   = zz(2)
-azbegin = 1/(1+zzbegin)
-azend   = 1/(1+zzend)
+%% read in the redshift. zzbegin=1000, and zzend is for the
+%% redshift of the initial conditions.
+zz    = load([setupdir '/zz.dat']);
+zzbegin = zz(1);
+zzend   = zz(2);
+azbegin = 1/(1+zzbegin);
+azend   = 1/(1+zzend);
 
-iccdat = load("icc_Dc_Db_Thc_Thb_Vcb1_Vcb2_Vcb3_Vcb_DT.dat");
+iccdat = load([setupdir '/icc_Dc_Db_Thc_Thb_Vcb1_Vcb2_Vcb3_Vcb_DT.dat']);
 icc_tab = iccdat(:,1:3);
 Dc_tab  = iccdat(:,4);
 Db_tab  = iccdat(:,5);

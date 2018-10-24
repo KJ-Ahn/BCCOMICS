@@ -90,3 +90,63 @@ octave:4>
 octave:4> 
 octave:4> quit
 
+----------------run on OCTAVE----------------
+----------------Initializing----------------
+plotflag = 0
+THflag = 0
+OWRTflag = 1
+------preexising gaussian seed ../setup_output/gaussseed.matbin being read in------
+----------------Generating real-space 3D fields----------------
+beta =  2.8000
+gamma =  0.33000
+Standard deviation of CDM overdensities (sDc) is 0.0041853
+Choose CDM overdensity environment:
+Input 0 for mean, 1 for overdense, 2 for underdense:0
+CDM overdensity chosen: Delta_c = 0*sDc = 0
+---------------------------------------
+RMS of Vbc (rmsV) at z = 1000 is 30.0772 km/s
+Peak of Vbc in Maxwell-Boltzmann distribution is 24.5579 km/s
+Choose Vbc environment at z = 1000
+Enter Vbc at z = 1000 in units of km/s: 
+>> exit
+
+----------------run on OCTAVE----------------
+----------------Initializing----------------
+plotflag = 0
+THflag = 0
+OWRTflag = 1
+------gaussian seed ../setup_output/gaussseed.matbin being generated------
+----------------Generating real-space 3D fields----------------
+beta =  2.8000
+gamma =  0.33000
+Standard deviation of CDM overdensities (sDc) is 0.0041809
+Choose CDM overdensity environment:
+Input 0 for mean, 1 for overdense, 2 for underdense:0
+CDM overdensity chosen: Delta_c = 0*sDc = 0
+---------------------------------------
+RMS of Vbc (rmsV) at z = 1000 is 26.8635 km/s
+Peak of Vbc in Maxwell-Boltzmann distribution is 21.9339 km/s
+Choose Vbc environment at z = 1000
+Enter Vbc at z = 1000 in units of km/s: 
+>> clear
+>> bccomics_setup 
+----------------run on OCTAVE----------------
+----------------Initializing----------------
+plotflag = 0
+THflag = 0
+OWRTflag = 1
+------gaussian seed ../setup_output/gaussseed.matbin being generated------
+----------------Generating real-space 3D fields----------------
+beta =  2.8000
+gamma =  0.33000
+Standard deviation of CDM overdensities (sDc) is 0.0041796
+Choose CDM overdensity environment:
+Input 0 for mean, 1 for overdense, 2 for underdense:0
+CDM overdensity chosen: Delta_c = 0*sDc = 0
+---------------------------------------
+RMS of Vbc (rmsV) at z = 1000 is 29.2981 km/s
+Peak of Vbc in Maxwell-Boltzmann distribution is 23.9218 km/s
+Choose Vbc environment at z = 1000
+Enter Vbc at z = 1000 in units of km/s: 
+>> exit
+
