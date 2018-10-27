@@ -78,8 +78,8 @@ end
 fileattrib('ParticlePositions','+w');
 ppos = [cpos1 ; cpos2 ; cpos3]
 topgriddims = -99999*ones(1,3);
-h5create('ParticlePositions','/ParticlePositions',size(pvel));
-h5write('ParticlePositions','/ParticlePositions',pvel);
+h5create('ParticlePositions','/ParticlePositions',size(ppos));
+h5write('ParticlePositions','/ParticlePositions',ppos);
 h5writeatt('ParticlePositions','/ParticlePositions','Component_Rank',3);
 h5writeatt('ParticlePositions','/ParticlePositions','Component_Size',size(cpos1));
 h5writeatt('ParticlePositions','/ParticlePositions','Rank',1);
