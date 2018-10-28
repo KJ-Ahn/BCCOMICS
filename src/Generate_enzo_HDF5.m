@@ -34,6 +34,7 @@ Psi1                 = real(ifftn(ifftshift(Psi1)));
 %% Normalized position of particles in domain [0,1), cell-centered way. (enzo)
 %% If unperturbed(Psi=0), it should run [0.5, 1.5, ...., Nmode_p-0.5]/Nmode_p,
 %% For enzo, wrapping needed if perturbed potition is out of the domain [0, 1).
+Psi1 = mod((Psi1 + (k1_3D_p/kunit_p+0.5)*Lcell_p + Lbox_p/2)/Lbox_p, 1);
 
 xCDM_plane    =   Psi1(:,:,1) + k1_3D_p(:,:,1)/kunit_p*Lcell_p + Lbox_p/2; %% for figure
 xCDM_ex_plane = 5*Psi1(:,:,1) + k1_3D_p(:,:,1)/kunit_p*Lcell_p + Lbox_p/2; %% for figure, NOT REAL but to make more contrast in CDM position
@@ -53,6 +54,8 @@ Psi2                 = i*k2_3D_p./ksq_p.*dc;
 Psi2(Nc_p,Nc_p,Nc_p) = complex(0);  %% fixing nan or inf monopole
 Psi2                 = real(ifftn(ifftshift(Psi2)));
 
+Psi2 = mod((Psi2 + (k2_3D_p/kunit_p+0.5)*Lcell_p + Lbox_p/2)/Lbox_p, 1);
+
 yCDM_plane    =   Psi2(:,:,1) + k2_3D_p(:,:,1)/kunit_p*Lcell_p + Lbox_p/2; %% for figure
 yCDM_ex_plane = 5*Psi2(:,:,1) + k2_3D_p(:,:,1)/kunit_p*Lcell_p + Lbox_p/2; %% for figure, NOT REAL but to make more contrast in CDM position
 if particlevelocity_accuracyflag
@@ -66,6 +69,9 @@ disp('----- Calculating CDM position z -----');
 Psi3                 = i*k3_3D_p./ksq_p.*dc;
 Psi3(Nc_p,Nc_p,Nc_p) = complex(0);  %% fixing nan or inf monopole
 Psi3                 = real(ifftn(ifftshift(Psi3)));
+
+Psi3 = mod((Psi3 + (k3_3D_p/kunit_p+0.5)*Lcell_p + Lbox_p/2)/Lbox_p, 1);
+
 zCDM_plane    =   Psi3(:,:,1) + k3_3D_p(:,:,1)/kunit_p*Lcell_p + Lbox_p/2; %% for figure
 zCDM_ex_plane = 5*Psi3(:,:,1) + k3_3D_p(:,:,1)/kunit_p*Lcell_p + Lbox_p/2; %% for figure, NOT REAL buif particlevelocity_accuracyflag
 if particlevelocity_accuracyflag
@@ -85,8 +91,8 @@ h5writeatt('ParticlePositions','/ParticlePositions','Component_Size',size(cpos1)
 h5writeatt('ParticlePositions','/ParticlePositions','Rank',1);
 h5writeatt('ParticlePositions','/ParticlePositions','Dimensions',size(cpos1));
 h5writeatt('ParticlePositions','/ParticlePositions','TopGridDims',topgriddims);
-h5writeatt('ParticlePositions','/ParticlePositions','TopGridEnd,topgriddims-1);
-h5writeatt('ParticlePositions','/ParticlePositions','TopGridStart,zeros(1,3));
+h5writeatt('ParticlePositions','/ParticlePositions','TopGridEnd',topgriddims-1);
+h5writeatt('ParticlePositions','/ParticlePositions','TopGridStart',zeros(1,3));
 clear cpos1
 clear cpos2
 clear cpos3
