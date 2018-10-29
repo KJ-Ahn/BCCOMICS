@@ -64,23 +64,29 @@ zCDM_ex_plane = 5*Psi3(:,:,1) + k3_3D_p(:,:,1)/kunit_p*Lcell_p + Lbox_p/2; %% fo
 Psi3 = mod((Psi3 + (k3_3D_p/kunit_p+0.5)*Lcell_p + Lbox_p/2)/Lbox_p, 1);
 
 %% Write Particle Positions
-fopen('ParticlePositions','+w');
+foutname='ParticlePositions';
+datasetname=['/' foutname];
+delete(foutname); %% In case file already exists, delete the file
 %%ppos = [Psi1 ; Psi2 ; Psi3]; %% This asssignment too memory costly
 topgriddims = -99999*ones(1,3);
-%%h5create('ParticlePositions','/ParticlePositions',size(ppos));
-%%h5write('ParticlePositions','/ParticlePositions',ppos);
-h5create('ParticlePositions','/ParticlePositions',size([Psi1; Psi2; Psi3]),);
-h5write('ParticlePositions','/ParticlePositions',[Psi1; Psi2; Psi3]);
-h5writeatt('ParticlePositions','/ParticlePositions','Component_Rank',3);
-h5writeatt('ParticlePositions','/ParticlePositions','Component_Size',size(Psi1));
-h5writeatt('ParticlePositions','/ParticlePositions','Rank',1);
-h5writeatt('ParticlePositions','/ParticlePositions','Dimensions',size(Psi1));
-h5writeatt('ParticlePositions','/ParticlePositions','TopGridDims',topgriddims);
-h5writeatt('ParticlePositions','/ParticlePositions','TopGridEnd',topgriddims-1);
-h5writeatt('ParticlePositions','/ParticlePositions','TopGridStart',zeros(1,3));
-clear Psi1
-clear Psi2
-clear Psi3
+%%h5create(foutname,datasetname,size(ppos));
+%%h5write(foutname,datasetname,ppos);
+ND1 = Ncell_p;
+ND3 = Ncell_p^3;
+h5create(foutname,datasetname,[ND3 3]);
+h5write(foutname,datasetname,Psi1(:), [1 1], [ND3 1]);
+h5write(foutname,datasetname,Psi2(:), [1 2], [ND3 1]);
+h5write(foutname,datasetname,Psi3(:), [1 3], [ND3 1]);
+h5writeatt(foutname,datasetname,'Component_Rank',int64(3));
+h5writeatt(foutname,datasetname,'Component_Size',int64(length(Psi1(:))));
+h5writeatt(foutname,datasetname,'Rank',int64(1));
+h5writeatt(foutname,datasetname,'Dimensions',int64(length(Psi1(:))));
+h5writeatt(foutname,datasetname,'TopGridDims',int64(topgriddims));
+h5writeatt(foutname,datasetname,'TopGridEnd',int64(topgriddims-1));
+h5writeatt(foutname,datasetname,'TopGridStart',int64(zeros(1,3)));
+clear Psi1;
+clear Psi2;
+clear Psi3;
 
 %% Prepare for interpn, let positions run from 1:Nmode_p for unperturbed particles,
 %% to get more-accurate-than-1LPT velocity when particlevelocity_accuracyflag=true.
