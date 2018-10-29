@@ -2480,3 +2480,551 @@ muext(Nmu-1:-1:1)  = -mu(2:Nmu);
 %% mu = cosine(angle between k vector and V_cb=V_c-V_b).
 %% The mu convention is consistent with f.m.
 costh_k_V = (V_cb_1_azend(ic,jc,kc)*k1_3D_p + V_cb_2_azend(ic,jc,kc)*k2_3D_p + V_cb_3_azend(ic,jc,kc)*k3_3D_p) /norm([V_cb_1_azend(ic,jc,kc) V_cb_2_azend(ic,jc,kc) V_cb_3_azend(ic,jc,kc)]) ./sqrt(ksq_p);
+
+%% Detect which is running: octave or matlab?
+if (exist('OCTAVE_VERSION','builtin'))
+  matlabflag=false;
+  disp('----------------run on OCTAVE----------------');
+else
+  matlabflag=true;
+  disp('----------------run on MATLAB----------------');
+end
+----------------run on MATLAB----------------
+
+%% Read in constants in cgs unit and conversion factors.
+Consts_Conversions;  %%==== script ==================
+{Undefined function or variable 'Consts_Conversions'.
+} 
+addpath('../src')
+more off; %% enables to see progress
+returnflag = false; %% main program need to stop when script stops.
+
+%% Start recording log
+diary on;
+
+%% Detect which is running: octave or matlab?
+if (exist('OCTAVE_VERSION','builtin'))
+  matlabflag=false;
+  disp('----------------run on OCTAVE----------------');
+else
+  matlabflag=true;
+  disp('----------------run on MATLAB----------------');
+end
+----------------run on MATLAB----------------
+
+%% Read in constants in cgs unit and conversion factors.
+Consts_Conversions;  %%==== script ==================
+%% Read in parameters
+run('params.m');  %%==== script ==================
+
+plotflag =
+
+  <a href="matlab:helpPopup logical" style="font-weight:bold">logical</a>
+
+   0
+
+
+THflag =
+
+  <a href="matlab:helpPopup logical" style="font-weight:bold">logical</a>
+
+   0
+
+
+OWRTflag =
+
+  <a href="matlab:helpPopup logical" style="font-weight:bold">logical</a>
+
+   1
+
+
+%% Check function availability and provide cure
+Check_functions;  %%==== script ==================
+if returnflag
+  clear;
+  return;
+end
+
+%% Read in cosmology
+run(Cosmology);  %%==== script ==================
+
+fb = ombh2/(ombh2+omch2); %% baryon/matter fraction
+fc = omch2/(ombh2+omch2); %% CDM/matter fraction
+
+%% Read in parameters for initial condition
+run('params_patch.m');  %%==== script ==================
+%% Requires mod(Ncell_p,4)=0 to properly use existing random seed.
+if (mod(Ncell_p,4)~=0)
+  disp('Choose a number which is multiple of 4 for Ncell_p');
+  clear;
+  return;
+end
+%% Setting resolution etc.
+%% index for center of k-space (e.g. if 6 sample points exist, 4th is the
+%% center, not 3rd). This convention for even number is different from that
+%% in p.69 of "DFT: An Owner Manual ..." by W. Briggs.
+%% k index runs from -N/2 to N/2-1 in this code, but Briggs uses
+%% -N/2+1 to N/2. Had to choose the former convention due to FFT convention
+%% of Matlab and Octave for even numbered cases.
+
+%% Read in parameters for initial condition
+patch_init;  %%==== script ==================
+
+interp2opt = 'cubic'
+
+interp2opt =
+
+    'cubic'
+
+%% May choose 'pchip' for Matlab below, but for consistency with Octave
+%% just use 'linear'. Octave interpn does not have 'pchip' implemented yet.
+%% 'spline' is somewhat dangerous.
+interpnopt = 'linear' 
+
+interpnopt =
+
+    'linear'
+
+
+%% For assigning k, see p.69 of "DFT..." by W. Briggs.
+%% The convention below has [-Nhalf_p:Nhalf_p-1], different
+%% from Briggs convention [-Nhalf_p+1:Nhalf_p], but this is
+%% to par with Matlab and Octave FFT convention.
+
+%% k1 component on each (k1,k2,k3) point, etc.
+[k1_3D_p, k2_3D_p, k3_3D_p] = ndgrid(-Nhalf_p:Nhalf_p-1);
+k1_3D_p = kunit_p * k1_3D_p;
+k2_3D_p = kunit_p * k2_3D_p;
+k3_3D_p = kunit_p * k3_3D_p;
+ksq_p   = k1_3D_p.^2 +k2_3D_p.^2 +k3_3D_p.^2; %% |k|^2
+
+%% utilize above for rvector too, but just in memory saving way (****)
+%%r1 = k1_3D_p/kunit_p;
+%%r2 = k2_3D_p/kunit_p;
+%%r3 = k3_3D_p/kunit_p;
+
+%% read in mu info
+mu  = load([setupdir '/mu.dat']);
+dmu = mu(2)-mu(1);
+Nmu = length(mu);
+
+%% choose patch to generate initial condition on
+Choose_finalpatch;  %%==== script ==================
+Patches ordered in calculation time, from oldest(top) to newest(bottom)
+-----------------------------------------------------------------------
+Patch #  ix  iy  iz  Deltac/sigma(Deltac)  V_cb(km/s)  at z=1000
+  1     118 102 120      1.000e+00          3.000e+01
+  2      75  42 120      1.998e+00          5.003e+01
+  3      40  84  79      2.966e-04          2.299e+01
+  4     127  34  65     -5.001e-01          2.000e+01
+  5     135  36  39      1.999e+00          2.455e+01
+  6      34   7  94      1.997e-02          4.702e-01
+  7     113  52  44      3.682e-03          2.079e+00
+  8     113  52  44      3.682e-03          2.079e+00
+Choose a patch of your interest; default is 8 if you just hit Enter below.
+Enter your choice (patch #):3
+Patch # 3 chosen.
+if returnflag
+  clear;
+  return;
+end
+
+%% open transfer function file for given patch
+ic   = cellspec(idxcc,1);
+jc   = cellspec(idxcc,2);
+kc   = cellspec(idxcc,3);
+strD = [setupdir '/deltas/Deltas_1Dmu_ic' num2str(ic) '_jc' num2str(jc) '_kc' num2str(kc) '-muhalf.matbin'];
+if matlabflag
+  load(strD, '-mat', 'ksampletab', 'deltasc', 'deltasb', 'deltasThc', 'deltasThb', 'deltasT');
+else
+  load('-mat-binary', strD, 'ksampletab', 'deltasc', 'deltasb', 'deltasThc', 'deltasThb', 'deltasT');
+end
+
+%% Generate initial condition directory
+if ~exist(ICdir)
+  mkdir(ICdir);
+end
+
+Lbox_p_inMpch = Lbox_p*h;  %% enzo uses 'ComovingBoxSize' in units of Mpc/h
+
+ICsubdir = [ICdir '/' num2str(Lbox_p_inMpch,'%.2f') 'Mpch_' num2str(Ncell_p) '_ic' num2str(ic) '_jc' num2str(jc) '_kc' num2str(kc)];
+if ~exist(ICsubdir)
+  mkdir(ICsubdir); 
+end
+
+zf = zzend;  %% redshift for initial condition
+af = 1/(1+zf);  %% scale factor for initial condition
+
+%% prepare for initial conditions for enzo (set units)
+Prepare_enzoIC;  %%==== script ==================
+
+%% Set gaussian random seed
+Set_gaussrand;  %%==== script ==================
+{License checkout failed.
+License Manager Error -4
+Maximum number of users for Statistics_Toolbox reached.
+Try again later.
+
+Troubleshoot this issue by visiting:
+<a href="http://www.mathworks.com/support/lme/R2017b/4">http://www.mathworks.com/support/lme/R2017b/4</a>
+
+Diagnostic Information:
+Feature: Statistics_Toolbox
+License path:
+C:\Users\Orary\AppData\Roaming\MathWorks\MATLAB\R2017b_licenses;C:\Program
+Files\MATLAB\R2017b\licenses\license.dat;C:\Program
+Files\MATLAB\R2017b\licenses\network.lic
+Licensing error: -4,132.
+
+Error in <a href="matlab:matlab.internal.language.introspective.errorDocCallback('Set_gaussrand', 'C:\Users\Orary\PClinuxOSDATA\BCCOMICS_for_release\BCCOMICS\src\Set_gaussrand.m', 114)" style="font-weight:bold">Set_gaussrand</a> (<a href="matlab: opentoline('C:\Users\Orary\PClinuxOSDATA\BCCOMICS_for_release\BCCOMICS\src\Set_gaussrand.m',114,0)">line 114</a>)
+  randamp = raylrnd(1,      [Nmode_p*Nmode_p*Nc_p,1]);   %% new seed
+  (amplitude)
+} 
+addpath('../mfiles_for_matlab/')
+more off; %% enables to see progress
+returnflag = false; %% main program need to stop when script stops.
+
+%% Start recording log
+diary on;
+
+%% Detect which is running: octave or matlab?
+if (exist('OCTAVE_VERSION','builtin'))
+  matlabflag=false;
+  disp('----------------run on OCTAVE----------------');
+else
+  matlabflag=true;
+  disp('----------------run on MATLAB----------------');
+end
+----------------run on MATLAB----------------
+
+%% Read in constants in cgs unit and conversion factors.
+Consts_Conversions;  %%==== script ==================
+%% Read in parameters
+run('params.m');  %%==== script ==================
+
+plotflag =
+
+  <a href="matlab:helpPopup logical" style="font-weight:bold">logical</a>
+
+   0
+
+
+THflag =
+
+  <a href="matlab:helpPopup logical" style="font-weight:bold">logical</a>
+
+   0
+
+
+OWRTflag =
+
+  <a href="matlab:helpPopup logical" style="font-weight:bold">logical</a>
+
+   1
+
+
+%% Check function availability and provide cure
+Check_functions;  %%==== script ==================
+if returnflag
+  clear;
+  return;
+end
+
+%% Read in cosmology
+run(Cosmology);  %%==== script ==================
+
+fb = ombh2/(ombh2+omch2); %% baryon/matter fraction
+fc = omch2/(ombh2+omch2); %% CDM/matter fraction
+
+%% Read in parameters for initial condition
+run('params_patch.m');  %%==== script ==================
+%% Requires mod(Ncell_p,4)=0 to properly use existing random seed.
+if (mod(Ncell_p,4)~=0)
+  disp('Choose a number which is multiple of 4 for Ncell_p');
+  clear;
+  return;
+end
+%% Setting resolution etc.
+%% index for center of k-space (e.g. if 6 sample points exist, 4th is the
+%% center, not 3rd). This convention for even number is different from that
+%% in p.69 of "DFT: An Owner Manual ..." by W. Briggs.
+%% k index runs from -N/2 to N/2-1 in this code, but Briggs uses
+%% -N/2+1 to N/2. Had to choose the former convention due to FFT convention
+%% of Matlab and Octave for even numbered cases.
+
+%% Read in parameters for initial condition
+patch_init;  %%==== script ==================
+
+interp2opt = 'cubic'
+
+interp2opt =
+
+    'cubic'
+
+%% May choose 'pchip' for Matlab below, but for consistency with Octave
+%% just use 'linear'. Octave interpn does not have 'pchip' implemented yet.
+%% 'spline' is somewhat dangerous.
+interpnopt = 'linear' 
+
+interpnopt =
+
+    'linear'
+
+
+%% For assigning k, see p.69 of "DFT..." by W. Briggs.
+%% The convention below has [-Nhalf_p:Nhalf_p-1], different
+%% from Briggs convention [-Nhalf_p+1:Nhalf_p], but this is
+%% to par with Matlab and Octave FFT convention.
+
+%% k1 component on each (k1,k2,k3) point, etc.
+[k1_3D_p, k2_3D_p, k3_3D_p] = ndgrid(-Nhalf_p:Nhalf_p-1);
+k1_3D_p = kunit_p * k1_3D_p;
+k2_3D_p = kunit_p * k2_3D_p;
+k3_3D_p = kunit_p * k3_3D_p;
+ksq_p   = k1_3D_p.^2 +k2_3D_p.^2 +k3_3D_p.^2; %% |k|^2
+
+%% utilize above for rvector too, but just in memory saving way (****)
+%%r1 = k1_3D_p/kunit_p;
+%%r2 = k2_3D_p/kunit_p;
+%%r3 = k3_3D_p/kunit_p;
+
+%% read in mu info
+mu  = load([setupdir '/mu.dat']);
+dmu = mu(2)-mu(1);
+Nmu = length(mu);
+
+%% choose patch to generate initial condition on
+Choose_finalpatch;  %%==== script ==================
+Patches ordered in calculation time, from oldest(top) to newest(bottom)
+-----------------------------------------------------------------------
+Patch #  ix  iy  iz  Deltac/sigma(Deltac)  V_cb(km/s)  at z=1000
+  1     118 102 120      1.000e+00          3.000e+01
+  2      75  42 120      1.998e+00          5.003e+01
+  3      40  84  79      2.966e-04          2.299e+01
+  4     127  34  65     -5.001e-01          2.000e+01
+  5     135  36  39      1.999e+00          2.455e+01
+  6      34   7  94      1.997e-02          4.702e-01
+  7     113  52  44      3.682e-03          2.079e+00
+  8     113  52  44      3.682e-03          2.079e+00
+Choose a patch of your interest; default is 8 if you just hit Enter below.
+Enter your choice (patch #):3
+Patch # 3 chosen.
+if returnflag
+  clear;
+  return;
+end
+
+%% open transfer function file for given patch
+ic   = cellspec(idxcc,1);
+jc   = cellspec(idxcc,2);
+kc   = cellspec(idxcc,3);
+strD = [setupdir '/deltas/Deltas_1Dmu_ic' num2str(ic) '_jc' num2str(jc) '_kc' num2str(kc) '-muhalf.matbin'];
+if matlabflag
+  load(strD, '-mat', 'ksampletab', 'deltasc', 'deltasb', 'deltasThc', 'deltasThb', 'deltasT');
+else
+  load('-mat-binary', strD, 'ksampletab', 'deltasc', 'deltasb', 'deltasThc', 'deltasThb', 'deltasT');
+end
+
+%% Generate initial condition directory
+if ~exist(ICdir)
+  mkdir(ICdir);
+end
+
+Lbox_p_inMpch = Lbox_p*h;  %% enzo uses 'ComovingBoxSize' in units of Mpc/h
+
+ICsubdir = [ICdir '/' num2str(Lbox_p_inMpch,'%.2f') 'Mpch_' num2str(Ncell_p) '_ic' num2str(ic) '_jc' num2str(jc) '_kc' num2str(kc)];
+if ~exist(ICsubdir)
+  mkdir(ICsubdir); 
+end
+
+zf = zzend;  %% redshift for initial condition
+af = 1/(1+zf);  %% scale factor for initial condition
+
+%% prepare for initial conditions for enzo (set units)
+Prepare_enzoIC;  %%==== script ==================
+
+%% Set gaussian random seed
+Set_gaussrand;  %%==== script ==================
+
+%% record random seed if wanted
+if recordseedflag
+  fileNseed = [ICsubdir '/subgaussseed' num2str(Nmode_p) '.matbin'];
+  if matlabflag
+    save(fileNseed, 'randamp', 'randphs', '-v6');
+  else
+    save('-mat-binary', fileNseed, 'randamp', 'randphs');
+  end
+end
+
+
+%% For a given k, -mu case has its Real same as Imag of mu case,
+%%                         and its Imag same as Real of mu case.
+%% Switching Real and Imag is done easily by i*conj(complex_number).
+%% -- First, shift mu=[0,...,1] values to right (matrices increase in size).
+deltasc  (:,Nmu:2*Nmu-1) = deltasc  (:,:);
+deltasb  (:,Nmu:2*Nmu-1) = deltasb  (:,:);
+deltasThc(:,Nmu:2*Nmu-1) = deltasThc(:,:);
+deltasThb(:,Nmu:2*Nmu-1) = deltasThb(:,:);
+deltasT  (:,Nmu:2*Nmu-1) = deltasT  (:,:);
+%% -- Then, generate mu=[-1,...,0) values
+deltasc  (:,Nmu-1:-1:1) = conj(deltasc  (:,Nmu+1:2*Nmu-1))*i;
+deltasb  (:,Nmu-1:-1:1) = conj(deltasb  (:,Nmu+1:2*Nmu-1))*i;
+deltasThc(:,Nmu-1:-1:1) = conj(deltasThc(:,Nmu+1:2*Nmu-1))*i;
+deltasThb(:,Nmu-1:-1:1) = conj(deltasThb(:,Nmu+1:2*Nmu-1))*i;
+deltasT  (:,Nmu-1:-1:1) = conj(deltasT  (:,Nmu+1:2*Nmu-1))*i;
+  
+%% Extend mu to cover full angle accordingly: muext=[-1,...,0,...,1]
+muext              = zeros(1,2*Nmu-1);
+muext(Nmu:2*Nmu-1) =  mu(1:Nmu);
+muext(Nmu-1:-1:1)  = -mu(2:Nmu);
+
+%% mu = cosine(angle between k vector and V_cb=V_c-V_b).
+%% The mu convention is consistent with f.m.
+costh_k_V = (V_cb_1_azend(ic,jc,kc)*k1_3D_p + V_cb_2_azend(ic,jc,kc)*k2_3D_p + V_cb_3_azend(ic,jc,kc)*k3_3D_p) /norm([V_cb_1_azend(ic,jc,kc) V_cb_2_azend(ic,jc,kc) V_cb_3_azend(ic,jc,kc)]) ./sqrt(ksq_p);
+aa=zeros(2,2,2);
+bb=aa+1;
+cc=aa+2;
+aa
+
+aa(:,:,1) =
+
+     0     0
+     0     0
+
+
+aa(:,:,2) =
+
+     0     0
+     0     0
+
+
+bb
+
+bb(:,:,1) =
+
+     1     1
+     1     1
+
+
+bb(:,:,2) =
+
+     1     1
+     1     1
+
+cc
+
+cc(:,:,1) =
+
+     2     2
+     2     2
+
+
+cc(:,:,2) =
+
+     2     2
+     2     2
+
+ppos=[aa;bb;cc];
+ppos
+
+ppos(:,:,1) =
+
+     0     0
+     0     0
+     1     1
+     1     1
+     2     2
+     2     2
+
+
+ppos(:,:,2) =
+
+     0     0
+     0     0
+     1     1
+     1     1
+     2     2
+     2     2
+
+size(ppos)
+
+ans =
+
+     6     2     2
+
+disp('----- Interpolating transfer function -----');
+----- Interpolating transfer function -----
+dc  = interp2(muext,log(ksampletab), deltasc,  costh_k_V,0.5*log(ksq_p),interp2opt);  %% dc still k-space values here.
+
+%% randomize, apply reality, and normalize
+disp('----- Convolving transfer function with random number -----');
+----- Convolving transfer function with random number -----
+dc = rand_real_norm(dc,Nmode_p,Nc_p,randamp,randphs,Vbox_p);
+%% CDM displacement vector, related to CDM density at 1st order.
+%% No need for above normalization because this is
+%% derived after above normalization on dc.
+%% ------------- cpos1 ----------------------
+disp('----- Calculating CDM position x -----');
+----- Calculating CDM position x -----
+Psi1                 = i*k1_3D_p./ksq_p.*dc;
+Psi1(Nc_p,Nc_p,Nc_p) = complex(0);  %% fixing nan or inf monopole
+Psi1                 = real(ifftn(ifftshift(Psi1)));
+
+xCDM_plane    =   Psi1(:,:,1) + k1_3D_p(:,:,1)/kunit_p*Lcell_p + Lbox_p/2; %% for figure
+xCDM_ex_plane = 5*Psi1(:,:,1) + k1_3D_p(:,:,1)/kunit_p*Lcell_p + Lbox_p/2; %% for figure, NOT REAL but to make more contrast in CDM position
+
+%% Normalized position of particles in domain [0,1), cell-centered way. (enzo)
+%% If unperturbed(Psi=0), it should run [0.5, 1.5, ...., Nmode_p-0.5]/Nmode_p,
+%% For enzo, wrapping needed if perturbed potition is out of the domain [0, 1).
+Psi1 = mod((Psi1 + (k1_3D_p/kunit_p+0.5)*Lcell_p + Lbox_p/2)/Lbox_p, 1);
+
+
+%% ------------- cpos2 ----------------------
+disp('----- Calculating CDM position y -----');
+----- Calculating CDM position y -----
+Psi2                 = i*k2_3D_p./ksq_p.*dc;
+Psi2(Nc_p,Nc_p,Nc_p) = complex(0);  %% fixing nan or inf monopole
+Psi2                 = real(ifftn(ifftshift(Psi2)));
+
+yCDM_plane    =   Psi2(:,:,1) + k2_3D_p(:,:,1)/kunit_p*Lcell_p + Lbox_p/2; %% for figure
+yCDM_ex_plane = 5*Psi2(:,:,1) + k2_3D_p(:,:,1)/kunit_p*Lcell_p + Lbox_p/2; %% for figure, NOT REAL but to make more contrast in CDM position
+
+Psi2 = mod((Psi2 + (k2_3D_p/kunit_p+0.5)*Lcell_p + Lbox_p/2)/Lbox_p, 1);
+
+%% ------------- cpos3 ----------------------
+disp('----- Calculating CDM position z -----');
+----- Calculating CDM position z -----
+Psi3                 = i*k3_3D_p./ksq_p.*dc;
+Psi3(Nc_p,Nc_p,Nc_p) = complex(0);  %% fixing nan or inf monopole
+Psi3                 = real(ifftn(ifftshift(Psi3)));
+
+zCDM_plane    =   Psi3(:,:,1) + k3_3D_p(:,:,1)/kunit_p*Lcell_p + Lbox_p/2; %% for figure
+zCDM_ex_plane = 5*Psi3(:,:,1) + k3_3D_p(:,:,1)/kunit_p*Lcell_p + Lbox_p/2; %% for figure, NOT REAL buif particlevelocity_accuracyflag
+
+Psi3 = mod((Psi3 + (k3_3D_p/kunit_p+0.5)*Lcell_p + Lbox_p/2)/Lbox_p, 1);
+fileattrib('ParticlePositions','+w');
+{Error using <a href="matlab:matlab.internal.language.introspective.errorDocCallback('fileattrib')" style="font-weight:bold">fileattrib</a>
+The system cannot find the file specified.
+} 
+ppos
+
+ppos(:,:,1) =
+
+     0     0
+     0     0
+     1     1
+     1     1
+     2     2
+     2     2
+
+
+ppos(:,:,2) =
+
+     0     0
+     0     0
+     1     1
+     1     1
+     2     2
+     2     2
+
+exit

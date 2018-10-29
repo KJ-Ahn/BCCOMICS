@@ -31,13 +31,57 @@ disp('----- Calculating CDM position x -----');
 Psi1                 = i*k1_3D_p./ksq_p.*dc;
 Psi1(Nc_p,Nc_p,Nc_p) = complex(0);  %% fixing nan or inf monopole
 Psi1                 = real(ifftn(ifftshift(Psi1)));
+
+xCDM_plane    =   Psi1(:,:,1) + k1_3D_p(:,:,1)/kunit_p*Lcell_p + Lbox_p/2; %% for figure
+xCDM_ex_plane = 5*Psi1(:,:,1) + k1_3D_p(:,:,1)/kunit_p*Lcell_p + Lbox_p/2; %% for figure, NOT REAL but to make more contrast in CDM position
+
 %% Normalized position of particles in domain [0,1), cell-centered way. (enzo)
 %% If unperturbed(Psi=0), it should run [0.5, 1.5, ...., Nmode_p-0.5]/Nmode_p,
 %% For enzo, wrapping needed if perturbed potition is out of the domain [0, 1).
 Psi1 = mod((Psi1 + (k1_3D_p/kunit_p+0.5)*Lcell_p + Lbox_p/2)/Lbox_p, 1);
 
-xCDM_plane    =   Psi1(:,:,1) + k1_3D_p(:,:,1)/kunit_p*Lcell_p + Lbox_p/2; %% for figure
-xCDM_ex_plane = 5*Psi1(:,:,1) + k1_3D_p(:,:,1)/kunit_p*Lcell_p + Lbox_p/2; %% for figure, NOT REAL but to make more contrast in CDM position
+
+%% ------------- cpos2 ----------------------
+disp('----- Calculating CDM position y -----');
+Psi2                 = i*k2_3D_p./ksq_p.*dc;
+Psi2(Nc_p,Nc_p,Nc_p) = complex(0);  %% fixing nan or inf monopole
+Psi2                 = real(ifftn(ifftshift(Psi2)));
+
+yCDM_plane    =   Psi2(:,:,1) + k2_3D_p(:,:,1)/kunit_p*Lcell_p + Lbox_p/2; %% for figure
+yCDM_ex_plane = 5*Psi2(:,:,1) + k2_3D_p(:,:,1)/kunit_p*Lcell_p + Lbox_p/2; %% for figure, NOT REAL but to make more contrast in CDM position
+
+Psi2 = mod((Psi2 + (k2_3D_p/kunit_p+0.5)*Lcell_p + Lbox_p/2)/Lbox_p, 1);
+
+%% ------------- cpos3 ----------------------
+disp('----- Calculating CDM position z -----');
+Psi3                 = i*k3_3D_p./ksq_p.*dc;
+Psi3(Nc_p,Nc_p,Nc_p) = complex(0);  %% fixing nan or inf monopole
+Psi3                 = real(ifftn(ifftshift(Psi3)));
+
+zCDM_plane    =   Psi3(:,:,1) + k3_3D_p(:,:,1)/kunit_p*Lcell_p + Lbox_p/2; %% for figure
+zCDM_ex_plane = 5*Psi3(:,:,1) + k3_3D_p(:,:,1)/kunit_p*Lcell_p + Lbox_p/2; %% for figure, NOT REAL buif particlevelocity_accuracyflag
+
+Psi3 = mod((Psi3 + (k3_3D_p/kunit_p+0.5)*Lcell_p + Lbox_p/2)/Lbox_p, 1);
+
+%% Write Particle Positions
+fopen('ParticlePositions','+w');
+%%ppos = [Psi1 ; Psi2 ; Psi3]; %% This asssignment too memory costly
+topgriddims = -99999*ones(1,3);
+%%h5create('ParticlePositions','/ParticlePositions',size(ppos));
+%%h5write('ParticlePositions','/ParticlePositions',ppos);
+h5create('ParticlePositions','/ParticlePositions',size([Psi1; Psi2; Psi3]),);
+h5write('ParticlePositions','/ParticlePositions',[Psi1; Psi2; Psi3]);
+h5writeatt('ParticlePositions','/ParticlePositions','Component_Rank',3);
+h5writeatt('ParticlePositions','/ParticlePositions','Component_Size',size(Psi1));
+h5writeatt('ParticlePositions','/ParticlePositions','Rank',1);
+h5writeatt('ParticlePositions','/ParticlePositions','Dimensions',size(Psi1));
+h5writeatt('ParticlePositions','/ParticlePositions','TopGridDims',topgriddims);
+h5writeatt('ParticlePositions','/ParticlePositions','TopGridEnd',topgriddims-1);
+h5writeatt('ParticlePositions','/ParticlePositions','TopGridStart',zeros(1,3));
+clear Psi1
+clear Psi2
+clear Psi3
+
 %% Prepare for interpn, let positions run from 1:Nmode_p for unperturbed particles,
 %% to get more-accurate-than-1LPT velocity when particlevelocity_accuracyflag=true.
 %% Using mod function, the actual positions will run from 1 to Nmode_p+0.9999999...
@@ -47,56 +91,18 @@ if particlevelocity_accuracyflag
 else
   clear Psi1  %% save memory
 end
-
-%% ------------- cpos2 ----------------------
-disp('----- Calculating CDM position y -----');
-Psi2                 = i*k2_3D_p./ksq_p.*dc;
-Psi2(Nc_p,Nc_p,Nc_p) = complex(0);  %% fixing nan or inf monopole
-Psi2                 = real(ifftn(ifftshift(Psi2)));
-
-Psi2 = mod((Psi2 + (k2_3D_p/kunit_p+0.5)*Lcell_p + Lbox_p/2)/Lbox_p, 1);
-
-yCDM_plane    =   Psi2(:,:,1) + k2_3D_p(:,:,1)/kunit_p*Lcell_p + Lbox_p/2; %% for figure
-yCDM_ex_plane = 5*Psi2(:,:,1) + k2_3D_p(:,:,1)/kunit_p*Lcell_p + Lbox_p/2; %% for figure, NOT REAL but to make more contrast in CDM position
 if particlevelocity_accuracyflag
   Psi2 = mod((Psi2 + (k2_3D_p/kunit_p)*Lcell_p + Lbox_p/2)/Lbox_p*Nmode_p, Nmode_p)+1;
 else
   clear Psi2  %% save memory
 end
-
-%% ------------- cpos3 ----------------------
-disp('----- Calculating CDM position z -----');
-Psi3                 = i*k3_3D_p./ksq_p.*dc;
-Psi3(Nc_p,Nc_p,Nc_p) = complex(0);  %% fixing nan or inf monopole
-Psi3                 = real(ifftn(ifftshift(Psi3)));
-
-Psi3 = mod((Psi3 + (k3_3D_p/kunit_p+0.5)*Lcell_p + Lbox_p/2)/Lbox_p, 1);
-
-zCDM_plane    =   Psi3(:,:,1) + k3_3D_p(:,:,1)/kunit_p*Lcell_p + Lbox_p/2; %% for figure
-zCDM_ex_plane = 5*Psi3(:,:,1) + k3_3D_p(:,:,1)/kunit_p*Lcell_p + Lbox_p/2; %% for figure, NOT REAL buif particlevelocity_accuracyflag
 if particlevelocity_accuracyflag
   Psi3 = mod((Psi3 + (k3_3D_p/kunit_p)*Lcell_p + Lbox_p/2)/Lbox_p*Nmode_p, Nmode_p)+1;
 else
   clear Psi3  %% save memory
 end
 
-%% Write Particle Positions
-fileattrib('ParticlePositions','+w');
-ppos = [cpos1 ; cpos2 ; cpos3]
-topgriddims = -99999*ones(1,3);
-h5create('ParticlePositions','/ParticlePositions',size(ppos));
-h5write('ParticlePositions','/ParticlePositions',ppos);
-h5writeatt('ParticlePositions','/ParticlePositions','Component_Rank',3);
-h5writeatt('ParticlePositions','/ParticlePositions','Component_Size',size(cpos1));
-h5writeatt('ParticlePositions','/ParticlePositions','Rank',1);
-h5writeatt('ParticlePositions','/ParticlePositions','Dimensions',size(cpos1));
-h5writeatt('ParticlePositions','/ParticlePositions','TopGridDims',topgriddims);
-h5writeatt('ParticlePositions','/ParticlePositions','TopGridEnd',topgriddims-1);
-h5writeatt('ParticlePositions','/ParticlePositions','TopGridStart',zeros(1,3));
-clear cpos1
-clear cpos2
-clear cpos3
-clear ppos
+
 
 %% ------------- density ---------------------
 dc = real(ifftn(ifftshift(dc)));  %% just for debugging
