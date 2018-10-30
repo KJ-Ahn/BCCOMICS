@@ -23,6 +23,16 @@ dc  = interp2(muext,log(ksampletab), deltasc,  costh_k_V,0.5*log(ksq_p),interp2o
 %% randomize, apply reality, and normalize
 disp('----- Convolving transfer function with random number -----');
 dc = rand_real_norm(dc,Nmode_p,Nc_p,randamp,randphs,Vbox_p);
+
+%% Prepare to write Particle Positions in hdf5
+foutname='ParticlePositions';
+datasetname=['/' foutname];
+delete(foutname); %% In case file already exists, delete the file
+topgriddims = -99999*ones(1,3);
+ND1 = Ncell_p;
+ND3 = Ncell_p^3;
+h5create(foutname,datasetname,[ND3 3]);
+
 %% CDM displacement vector, related to CDM density at 1st order.
 %% No need for above normalization because this is
 %% derived after above normalization on dc.
@@ -39,7 +49,16 @@ xCDM_ex_plane = 5*Psi1(:,:,1) + k1_3D_p(:,:,1)/kunit_p*Lcell_p + Lbox_p/2; %% fo
 %% If unperturbed(Psi=0), it should run [0.5, 1.5, ...., Nmode_p-0.5]/Nmode_p,
 %% For enzo, wrapping needed if perturbed potition is out of the domain [0, 1).
 Psi1 = mod((Psi1 + (k1_3D_p/kunit_p+0.5)*Lcell_p + Lbox_p/2)/Lbox_p, 1);
-
+h5write(foutname,datasetname,Psi1(:), [1 1], [ND3 1]);
+%% Prepare for interpn: let positions run from 1:Nmode_p for unperturbed particles,
+%% to get more-accurate-than-1LPT velocity when particlevelocity_accuracyflag=true.
+%% Using mod function, the actual positions will run from 1 to Nmode_p+0.9999999...
+%% Interpolation basis will have domain 1:Nmode_p+1 for safe interpolation (see **).
+if particlevelocity_accuracyflag
+  Psi1 = mod(Psi1*Nmode_p - 0.5, Nmode_p)+1;
+else
+  clear Psi1  %% save memory
+end
 
 %% ------------- cpos2 ----------------------
 disp('----- Calculating CDM position y -----');
@@ -51,6 +70,12 @@ yCDM_plane    =   Psi2(:,:,1) + k2_3D_p(:,:,1)/kunit_p*Lcell_p + Lbox_p/2; %% fo
 yCDM_ex_plane = 5*Psi2(:,:,1) + k2_3D_p(:,:,1)/kunit_p*Lcell_p + Lbox_p/2; %% for figure, NOT REAL but to make more contrast in CDM position
 
 Psi2 = mod((Psi2 + (k2_3D_p/kunit_p+0.5)*Lcell_p + Lbox_p/2)/Lbox_p, 1);
+h5write(foutname,datasetname,Psi2(:), [1 2], [ND3 1]);
+if particlevelocity_accuracyflag
+  Psi2 = mod(Psi2*Nmode_p - 0.5, Nmode_p)+1;
+else
+  clear Psi2  %% save memory
+end
 
 %% ------------- cpos3 ----------------------
 disp('----- Calculating CDM position z -----');
@@ -62,21 +87,14 @@ zCDM_plane    =   Psi3(:,:,1) + k3_3D_p(:,:,1)/kunit_p*Lcell_p + Lbox_p/2; %% fo
 zCDM_ex_plane = 5*Psi3(:,:,1) + k3_3D_p(:,:,1)/kunit_p*Lcell_p + Lbox_p/2; %% for figure, NOT REAL buif particlevelocity_accuracyflag
 
 Psi3 = mod((Psi3 + (k3_3D_p/kunit_p+0.5)*Lcell_p + Lbox_p/2)/Lbox_p, 1);
-
-%% Write Particle Positions
-foutname='ParticlePositions';
-datasetname=['/' foutname];
-delete(foutname); %% In case file already exists, delete the file
-%%ppos = [Psi1 ; Psi2 ; Psi3]; %% This asssignment too memory costly
-topgriddims = -99999*ones(1,3);
-%%h5create(foutname,datasetname,size(ppos));
-%%h5write(foutname,datasetname,ppos);
-ND1 = Ncell_p;
-ND3 = Ncell_p^3;
-h5create(foutname,datasetname,[ND3 3]);
-h5write(foutname,datasetname,Psi1(:), [1 1], [ND3 1]);
-h5write(foutname,datasetname,Psi2(:), [1 2], [ND3 1]);
 h5write(foutname,datasetname,Psi3(:), [1 3], [ND3 1]);
+if particlevelocity_accuracyflag
+  Psi3 = mod(Psi3*Nmode_p - 0.5, Nmode_p)+1;
+else
+  clear Psi3  %% save memory
+end
+
+%% Finalize writing Particle Positions in hdf5
 h5writeatt(foutname,datasetname,'Component_Rank',int64(3));
 h5writeatt(foutname,datasetname,'Component_Size',int64(length(Psi1(:))));
 h5writeatt(foutname,datasetname,'Rank',int64(1));
@@ -84,31 +102,6 @@ h5writeatt(foutname,datasetname,'Dimensions',int64(length(Psi1(:))));
 h5writeatt(foutname,datasetname,'TopGridDims',int64(topgriddims));
 h5writeatt(foutname,datasetname,'TopGridEnd',int64(topgriddims-1));
 h5writeatt(foutname,datasetname,'TopGridStart',int64(zeros(1,3)));
-clear Psi1;
-clear Psi2;
-clear Psi3;
-
-%% Prepare for interpn, let positions run from 1:Nmode_p for unperturbed particles,
-%% to get more-accurate-than-1LPT velocity when particlevelocity_accuracyflag=true.
-%% Using mod function, the actual positions will run from 1 to Nmode_p+0.9999999...
-%% Interpolation basis will have domain 1:Nmode_p+1 for safe interpolation (see **).
-if particlevelocity_accuracyflag  
-  Psi1 = mod((Psi1 + (k1_3D_p/kunit_p)*Lcell_p + Lbox_p/2)/Lbox_p*Nmode_p, Nmode_p)+1;
-else
-  clear Psi1  %% save memory
-end
-if particlevelocity_accuracyflag
-  Psi2 = mod((Psi2 + (k2_3D_p/kunit_p)*Lcell_p + Lbox_p/2)/Lbox_p*Nmode_p, Nmode_p)+1;
-else
-  clear Psi2  %% save memory
-end
-if particlevelocity_accuracyflag
-  Psi3 = mod((Psi3 + (k3_3D_p/kunit_p)*Lcell_p + Lbox_p/2)/Lbox_p*Nmode_p, Nmode_p)+1;
-else
-  clear Psi3  %% save memory
-end
-
-
 
 %% ------------- density ---------------------
 dc = real(ifftn(ifftshift(dc)));  %% just for debugging
@@ -127,6 +120,15 @@ Thc = interp2(muext,log(ksampletab), deltasThc, costh_k_V,0.5*log(ksq_p),interp2
 %% randomize, apply reality, and normalize
 disp('----- Convolving transfer function with random number -----');
 Thc = rand_real_norm(Thc,Nmode_p,Nc_p,randamp,randphs,Vbox_p);
+
+%% Prepare to write Particle Positions in hdf5
+foutname='ParticleVelocities';
+datasetname=['/' foutname];
+delete(foutname); %% In case file already exists, delete the file
+topgriddims = -99999*ones(1,3);
+ND1 = Ncell_p;
+ND3 = Ncell_p^3;
+h5create(foutname,datasetname,[ND3 3]);
 
 %% ------------- vc1 ----------------------
 disp('----- Calculating CDM velocity x -----');
