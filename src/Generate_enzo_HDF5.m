@@ -96,12 +96,12 @@ end
 
 %% Finalize writing Particle Positions in hdf5
 h5writeatt(foutname,datasetname,'Component_Rank',int64(3));
-h5writeatt(foutname,datasetname,'Component_Size',int64(length(Psi1(:))));
-h5writeatt(foutname,datasetname,'Rank',int64(1));
-h5writeatt(foutname,datasetname,'Dimensions',int64(length(Psi1(:))));
-h5writeatt(foutname,datasetname,'TopGridDims',int64(topgriddims));
-h5writeatt(foutname,datasetname,'TopGridEnd',int64(topgriddims-1));
-h5writeatt(foutname,datasetname,'TopGridStart',int64(zeros(1,3)));
+h5writeatt(foutname,datasetname,'Component_Size',int64(ND3));
+h5writeatt(foutname,datasetname,'Rank',          int64(1));
+h5writeatt(foutname,datasetname,'Dimensions',    int64(ND3));
+h5writeatt(foutname,datasetname,'TopGridDims',   int64(topgriddims));
+h5writeatt(foutname,datasetname,'TopGridEnd',    int64(topgriddims-1));
+h5writeatt(foutname,datasetname,'TopGridStart',  int64(zeros(1,3)));
 
 %% ------------- density ---------------------
 dc = real(ifftn(ifftshift(dc)));  %% just for debugging
@@ -142,8 +142,10 @@ if particlevelocity_accuracyflag
   %% Find 
   vc1 = interpn(vc1, Psi1, Psi2, Psi3, interpnopt); %% now Nmode_p^3 elements
 end
-%% enzo velocity output is the following:
-%%vc1_enzo = vc1 * MpcMyr_2_kms * 1e5 /VelocityUnits;
+%% into enzo velocity unit
+vc1 = vc1 * MpcMyr_2_kms * 1e5 /VelocityUnits;
+h5write(foutname,datasetname, vc1(:), [1 1], [ND3 1]);
+clear vc1;
 
 %% ------------- vc2 ----------------------
 disp('----- Calculating CDM velocity y -----');
@@ -157,6 +159,9 @@ if particlevelocity_accuracyflag
   %% Find 
   vc2 = interpn(vc2, Psi1, Psi2, Psi3, interpnopt); %% now Nmode_p^3 elements
 end
+vc2 = vc2 * MpcMyr_2_kms * 1e5 /VelocityUnits;
+h5write(foutname,datasetname, vc2(:), [1 2], [ND3 1]);
+clear vc2;
 
 %% ------------- vc3 ----------------------
 disp('----- Calculating CDM velocity z -----');
@@ -170,24 +175,18 @@ if particlevelocity_accuracyflag
   %% Find 
   vc3 = interpn(vc3, Psi1, Psi2, Psi3, interpnopt); %% now Nmode_p^3 elements
 end
+vc3 = vc3 * MpcMyr_2_kms * 1e5 /VelocityUnits;
+h5write(foutname,datasetname, vc3(:), [1 3], [ND3 1]);
+clear vc3;
 
-%% Write Particle Velocities
-fileattrib('ParticleVelocities','+w');
-pvel = [vc1 ; vc2 ; vc3]
-topgriddims = -99999*ones(1,3);
-h5create('ParticleVelocities','/ParticleVelocities',size(pvel));
-h5write('ParticleVelocities','/ParticleVelocities',pvel);
-h5writeatt('ParticleVelocities','/ParticleVelocities','Component_Rank',3);
-h5writeatt('ParticleVelocities','/ParticleVelocities','Component_Size',size(vc1));
-h5writeatt('ParticleVelocities','/ParticleVelocities','Rank',1);
-h5writeatt('ParticleVelocities','/ParticleVelocities','Dimensions',size(vc1));
-h5writeatt('ParticleVelocities','/ParticleVelocities','TopGridDims',topgriddims);
-h5writeatt('ParticleVelocities','/ParticleVelocities','TopGridEnd,topgriddims-1);
-h5writeatt('ParticleVelocities','/ParticleVelocities','TopGridStart,zeros(1,3));
-clear vc1
-clear vc2
-clear vc3
-clear pvel
+%% Finalize writing Particle Positions in hdf5
+h5writeatt(foutname,datasetname,'Component_Rank',int64(3));
+h5writeatt(foutname,datasetname,'Component_Size',int64(ND3));
+h5writeatt(foutname,datasetname,'Rank',          int64(1));
+h5writeatt(foutname,datasetname,'Dimensions',    int64(ND3));
+h5writeatt(foutname,datasetname,'TopGridDims',   int64(topgriddims));
+h5writeatt(foutname,datasetname,'TopGridEnd',    int64(topgriddims-1));
+h5writeatt(foutname,datasetname,'TopGridStart',  int64(zeros(1,3)));
 
 %% ------------- velocity divergence ---------------------
 Thc = real(ifftn(ifftshift(Thc)));  
