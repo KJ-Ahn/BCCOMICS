@@ -182,7 +182,7 @@ if enzo_bin_flag
   fclose(fout);
 end
 if enzo_HDF5_flag
-  %% Prepare to write Particle Positions in hdf5
+  %% Prepare to write Particle Velocities in hdf5
   datname     = 'ParticleVelocities';
   foutname    = [ICsubdir '/' datname];
   datasetname = ['/' datname];
