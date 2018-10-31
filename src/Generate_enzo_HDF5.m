@@ -126,6 +126,7 @@ Thc = rand_real_norm(Thc,Nmode_p,Nc_p,randamp,randphs,Vbox_p);
 datname     = 'ParticleVelocities';
 foutname    = [ICsubdir '/' datname];
 datasetname = ['/' datname];
+delete(foutname); %% In case file already exists, delete the file
 h5create(foutname,datasetname,[ND3 3]);
 
 %% ------------- vc1 ----------------------
@@ -394,6 +395,4 @@ h5writeatt(foutname,datasetname,'TopGridStart',  int64(zeros(1,3)));
 clear dT sp_Etot_enzo
 %% =========== baryon temperature, energies ======================= begin
 
-%% Save some memory
-clear costh_k_V 
-%clear randamp randphs k1_3D_p k2_3D_p k3_3D_p ksq_p
+

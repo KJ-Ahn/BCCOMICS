@@ -204,26 +204,10 @@ muext(Nmu-1:-1:1)  = -mu(2:Nmu);
 %% The mu convention is consistent with f.m.
 costh_k_V = (V_cb_1_azend(ic,jc,kc)*k1_3D_p + V_cb_2_azend(ic,jc,kc)*k2_3D_p + V_cb_3_azend(ic,jc,kc)*k3_3D_p) /norm([V_cb_1_azend(ic,jc,kc) V_cb_2_azend(ic,jc,kc) V_cb_3_azend(ic,jc,kc)]) ./sqrt(ksq_p);
 
-if matlabflag
-  %% Generate and dump initial condition data for enzo in plain binary
-  if enzo_bin_flag
-    Generate_enzo_bin;  %%==== script ==================
-  end
-  %% Generate and dump initial condition data for enzo in HDF5 binary
-  if enzo_HDF5_flag
-    Generate_enzo_HDF5;  %%==== script ==================
-  end
-else
-  if (enzo_bin_flag || enzo_HDF_flag)
-    Generate_enzo_bin;  %%==== script ==================
-  end
-end
-%% Generate and dump initial condition data for Gadget in plain binary
-if gadget_bin_flag
-  disp('=== Not implemented yet; just dumping plain binary ===')
-  Generate_enzo_bin;  %%==== script ==================
-end
+%% Generate and dump initial condition data
+Generate_IC;  %%==== script ==================
 
+clear costh_k_V;
 
 %% Dump figure-useful data
 if matlabflag
