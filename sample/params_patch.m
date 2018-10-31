@@ -30,4 +30,7 @@ recordseedflag = true;   %% if true, record the used seed with right dimension
 particlevelocity_accuracyflag = true;
 
 
-
+%% Choose which simulation code & which format (may overlap)
+enzo_bin_flag   = true;
+enzo_HDF5_flag  = true;
+gadget_bin_flag = false;  %% Not implemented yet

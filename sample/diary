@@ -1676,4 +1676,55 @@ foutname='ParticlePositions';
 datasetname=['/' foutname];
 delete(foutname); %% In case file already exists, delete the file
 %%ppos = [Psi1 ; Psi2 ; Psi3]; %% This asssignment too memory costly
-topgriddim
+topgriddim----------------run on MATLAB----------------
+
+plotflag =
+
+  <a href="matlab:helpPopup logical" style="font-weight:bold">logical</a>
+
+   0
+
+
+THflag =
+
+  <a href="matlab:helpPopup logical" style="font-weight:bold">logical</a>
+
+   0
+
+
+OWRTflag =
+
+  <a href="matlab:helpPopup logical" style="font-weight:bold">logical</a>
+
+   1
+
+Image Processing Toolbox need be installed. Rerun after installation.
+raylrnd(1,[5 1])
+
+ans =
+
+    1.8362
+    2.1736
+    0.5212
+    2.2119
+    1.4147
+
+padarray
+{'padarray'을(를) 사용하려면 다음 제품이 라이선스가 부여되고 설치되어 있어야 함:
+  <a href="matlab:matlab.internal.language.introspective.showAddon('IP', 'padarray');">Image Processing Toolbox</a>
+} 
+clear
+addpath('../mfiles_for_matlab/')
+padarray
+{'padarray'을(를) 사용하려면 다음 제품이 라이선스가 부여되고 설치되어 있어야 함:
+  <a href="matlab:matlab.internal.language.introspective.showAddon('IP', 'padarray');">Image Processing Toolbox</a>
+} 
+clear
+padarray
+{'padarray'을(를) 사용하려면 다음 제품이 라이선스가 부여되고 설치되어 있어야 함:
+  <a href="matlab:matlab.internal.language.introspective.showAddon('IP', 'padarray');">Image Processing Toolbox</a>
+} 
+which raylrnd
+Y:\VMShared\PClinuxOSDATA\BCCOMICS_for_release\BCCOMICS\mfiles_for_matlab\raylrnd.m
+which padarray
+'padarray'을(를) 찾을 수 없습니다.
