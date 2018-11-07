@@ -37,14 +37,13 @@ zzend   = zz(2);
 azbegin = 1/(1+zzbegin);
 azend   = 1/(1+zzend);
 
-iccdat = load([setupdir '/icc_Dc_Db_Thc_Thb_Vcb1_Vcb2_Vcb3_Vcb_DT.dat']);
-icc_tab = iccdat(:,1:3);
-Dc_tab  = iccdat(:,4);
-Db_tab  = iccdat(:,5);
-Thc_tab = iccdat(:,6);
-Ncc     = length(iccdat(:,1));
+iccdat = load('/icc_Dc_Db_Thc_Thb_Vcb1_Vcb2_Vcb3_Vcb_DT.dat');
+icc = iccdat(:,1:3);
+Dc  = iccdat(:,4);
+Db  = iccdat(:,5);
+Thc = iccdat(:,6);
 
-flagmean = (abs(Dc_tab)<1e-3); %% flag for mean-density cases
+flagmean = (abs(Dc)<1e-3); %% flag for mean-density cases
 
 H_loc_i         = zeros(Ncc,1);
 rhocrit_loc_i   = zeros(Ncc,1);
@@ -55,43 +54,44 @@ OmLambda_loc_i  = zeros(Ncc,1);
 OmK_loc_i       = zeros(Ncc,1);
 
 %% For the same-cosmic-time Enzo outputs, first list wanted global redshifts
-zglobal_enzo = [linspace(200,120,5)';  linspace(100,40,7)'; linspace(30,22,5)'; linspace(20,11,10)'; linspace(10,3,15)']
+zglobal_enzo = load('zglobal_enzo.dat');
+zglobal_enzo = sort(zglobal_enzo, 'descend'); %% sort in descending order
+%zglobal_enzo = [linspace(200,120,5)';  linspace(100,40,7)'; linspace(30,22,5)'; linspace(20,11,10)'; linspace(10,3,15)']
 aglobal_enzo = 1./(1+zglobal_enzo);
 Nz_enzo      = length(zglobal_enzo);
 
 thefactor = sqrt(Om0/azend^3 + Omr0/azend^4 + OmLambda0); % global one
 
-fc_l         = (1+Dc_tab)*fc ./ ((1+Dc_tab)*fc + (1+Db_tab)*fb); %% local CDM fraction
+%% lock fb_l/fc_l ratio locked for the patch. In practice very close to fb/fc.
+fc_l         = (1+Dc)*fc / ((1+Dc)*fc + (1+Db)*fb); %% local CDM fraction
 fb_l         = 1 - fc_l; %% local CDM fraction
-Ddot_over_D1 = -Thc_tab./(1+Dc_tab);  %% Myr^-1, using dD/dt=-Th relation, and follow CDM only.
-for icc=1:Ncc
-  H_i          = H0*thefactor; %% initial Hubble constant (Myr^-1) for global, flat universe
-  H_loc_i(icc) = H_i - (1/3)*Ddot_over_D1(icc); %% As in Goldberg & Vogeley (2004, eq. 3)
+Ddot_over_D1 = -Thc/(1+Dc);  %% Myr^-1, using dD/dt=-Th relation, and follow CDM only.
 
-  rhocrit_i            = 3*(H_i         *s_inMyr)^2 / (8*pi*G); %% g/cm^3
-  rhocrit_loc_i(icc)   = 3*(H_loc_i(icc)*s_inMyr)^2 / (8*pi*G); %% g/cm^3
-  rhocrit_ratio_i(icc) = rhocrit_loc_i(icc)/rhocrit_i; 
+H_i          = H0*thefactor; %% initial Hubble constant (Myr^-1) for global, flat universe
+H_loc_i = H_i - (1/3)*Ddot_over_D1; %% As in Goldberg & Vogeley (2004, eq. 3)
 
-  % initial global Omega's.
-  Om_i       = (Om0 /azend^3) / thefactor^2;
-  Omr_i      = (Omr0/azend^4) / thefactor^2;
-  OmLambda_i = (OmLambda0)    / thefactor^2;
+rhocrit_i       = 3*(H_i    *s_inMyr)^2 / (8*pi*G); %% g/cm^3
+rhocrit_loc_i   = 3*(H_loc_i*s_inMyr)^2 / (8*pi*G); %% g/cm^3
+rhocrit_ratio_i = rhocrit_loc_i/rhocrit_i; 
 
-  % initial local Omega's.
-  Om_loc_i      (icc) = Om_i*(1+Dc_tab(icc))/ rhocrit_ratio_i(icc);
-  Omr_loc_i     (icc) = Omr_i               / rhocrit_ratio_i(icc);
-  OmLambda_loc_i(icc) = OmLambda_i          / rhocrit_ratio_i(icc);
-  OmK_loc_i     (icc) = 1 - (Om_loc_i(icc) + Omr_loc_i(icc) + OmLambda_loc_i(icc));
-end
+%% initial global Omega's.
+Om_i       = (Om0 /azend^3) / thefactor^2;
+Omr_i      = (Omr0/azend^4) / thefactor^2;
+OmLambda_i = (OmLambda0)    / thefactor^2;
+
+%% initial local Omega's.
+Om_loc_i       = Om_i*(1+Dc_tab)/ rhocrit_ratio_i;
+Omr_loc_i      = Omr_i               / rhocrit_ratio_i;
+OmLambda_loc_i = OmLambda_i          / rhocrit_ratio_i;
+OmK_loc_i      = 1 - (Om_loc_i + Omr_loc_i + OmLambda_loc_i);
 
 %% record useful values
-fout        = fopen('zi_rhocriti_Hi_Omi_Omri_OmLambdai','w');
+fout        = fopen('global_and_local_quantities.dat','w');
 datglobal_i = [zzend rhocrit_i H_i Om_i Omr_i OmLambda_i];
 fprintf(fout, 'zred rhocrit(g/cm^3) H(Myr^-1) Om Omr OmLambda\n');
 fprintf(fout, '%i %e %e %e %e %e\n', datglobal_i');
-fclose(fout);
+fprintf(fout, '\n');
 
-fout     = fopen('icc_rhocriti_Hi_Omi_Omri_OmLambdai_OmKi','w');
 datloc_i = [icc_tab rhocrit_loc_i H_loc_i Om_loc_i Omr_loc_i OmLambda_loc_i OmK_loc_i];
 fprintf(fout, 'icc1 icc2 icc3 rhocrit(g/cm^3) H(Myr^-1)  Om   Omr   OmLambda  OmK\n');
 fprintf(fout, '%4i %4i %4i %e %e %e %e %e %e\n', datloc_i');
@@ -124,7 +124,7 @@ options              = odeset('RelTol',1e-6,'AbsTol',1e-9);
 [tHiode, aglobalode] = ode45(@fdadt, [tiHi, tfHi], sqrt(2*tiHi*sqrt(Omr_i))*a_i, options);
 
 tHi_a_0p25     = interp1(aglobalode, tHiode, 0.25, 'spline');
-%% tHi table corresponding to aglobal_enzo table.
+%% tHi table corresponding to aglobal table.
 tHiglobal_enzo = interp1(aglobalode, tHiode, aglobal_enzo, 'spline');
 
 loglog(tHiode, aglobalode, tHiode, 6.4e-3*tHiode.^(2/3))
