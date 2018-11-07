@@ -81,19 +81,19 @@ OmLambda_i = (OmLambda0)    / thefactor^2;
 
 %% initial local Omega's.
 Om_loc_i       = Om_i*(1+Dc_tab)/ rhocrit_ratio_i;
-Omr_loc_i      = Omr_i               / rhocrit_ratio_i;
-OmLambda_loc_i = OmLambda_i          / rhocrit_ratio_i;
+Omr_loc_i      = Omr_i          / rhocrit_ratio_i;
+OmLambda_loc_i = OmLambda_i     / rhocrit_ratio_i;
 OmK_loc_i      = 1 - (Om_loc_i + Omr_loc_i + OmLambda_loc_i);
 
 %% record useful values
 fout        = fopen('global_and_local_quantities.dat','w');
 datglobal_i = [zzend rhocrit_i H_i Om_i Omr_i OmLambda_i];
-fprintf(fout, 'zred rhocrit(g/cm^3) H(Myr^-1) Om Omr OmLambda\n');
+fprintf(fout, '## zred rhocrit(g/cm^3) H(Myr^-1) Om Omr OmLambda\n');
 fprintf(fout, '%i %e %e %e %e %e\n', datglobal_i');
 fprintf(fout, '\n');
 
 datloc_i = [icc_tab rhocrit_loc_i H_loc_i Om_loc_i Omr_loc_i OmLambda_loc_i OmK_loc_i];
-fprintf(fout, 'icc1 icc2 icc3 rhocrit(g/cm^3) H(Myr^-1)  Om   Omr   OmLambda  OmK\n');
+fprintf(fout, '## icc1 icc2 icc3 rhocrit(g/cm^3) H(Myr^-1)  Om   Omr   OmLambda  OmK\n');
 fprintf(fout, '%4i %4i %4i %e %e %e %e %e %e\n', datloc_i');
 fclose(fout);
 
@@ -116,6 +116,7 @@ OmLambda_l_i = OmLambda_i;
 OmK_l_i      = 1 - (Om_l_i + Omr_l_i + OmLambda_l_i);
 aloci        = a_i;
 
+%%%% time ~ (scale factor) table for global case.
 %% take small enough value for radiation domination
 tiHi                 = 0.000001; 
 tfHi                 = 1000;
@@ -140,10 +141,7 @@ fout=fopen('tHi_a.dat','w');  %% columns: t*Hi, a. (Hi is again H at given initi
 fprintf(fout,'%e %e\n', dattemp');
 fclose(fout);
 
-%%%%%%%%% Now do integration to obtain (time) ~ (scale factor) table,
-%%%%%%%%% both for the global case and for each patch.
-
-%%%% for local case
+%%%% time ~ (scale factor) table for local case.
 
 for icc=1:Ncc
     H_l_i        = H_loc_i(icc);
