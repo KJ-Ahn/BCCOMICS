@@ -62,12 +62,24 @@ if plotflag
 end
 
 %% In case azend values are used...
-sDc_azend   = std(Dc3D_azend(:));
-Vcb_azend   = sqrt(V_cb_1_azend(:).^2+V_cb_2_azend(:).^2+V_cb_3_azend(:).^2);
-rmsVcb_azend=sqrt(mean(Vcb_azend.^2));
-Vcbp_azend  = sqrt(2/3)*rmsVcb_azend;  %% peak velocity in Maxwell-Boltzmann distr.
+sDc_azend    = std(Dc3D_azend(:));
+sTc_azend    = std(THc3D_azend(:));
+sDb_azend    = std(Db3D_azend(:));
+sTb_azend    = std(THb3D_azend(:));
+Vcb_azend    = sqrt(V_cb_1_azend(:).^2+V_cb_2_azend(:).^2+V_cb_3_azend(:).^2);
+rmsVcb_azend = sqrt(mean(Vcb_azend.^2));
+Vcbp_azend   = sqrt(2/3)*rmsVcb_azend;  %% peak velocity in Maxwell-Boltzmann distr.
+sT_azend     = std(DT3D_azend(:));
 
-ee          = 1e-2;
+datstat = [sDc_azend sTc_azend sDb_azend sTb_azend rmsVcb_azend*MpcMyr_2_kms Vcbp_azend*MpcMyr_2_kms sT_azend];
+fout    = fopen([setupdir '/stats_zend.dat'],'w');
+fprintf(fout,'@ zend:  stdDc  stdThc  stdDb  stdThb  rmsVcb  Vcbp  stdT\n');
+fprintf(fout,'Units:   None   Myr^-1  None   Myr^-1  km/s    km/s  None\n');
+fprintf(fout,'%e %e %e %e %e %e %e\n', datstat);
+fclose(fout);
+
+
+ee = 1e-2;
 
 if patchidxinput_flag
   if (exist('idx1') && exist('idx2') && exist('idx3'))

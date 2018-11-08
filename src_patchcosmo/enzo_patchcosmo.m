@@ -35,15 +35,15 @@ azbegin = 1/(1+zzbegin);
 azend   = 1/(1+zzend);
 
 iccdat = load('icc_Dc_Db_Thc_Thb_Vcb1_Vcb2_Vcb3_Vcb_DT.dat');
-icc = iccdat(:,1:3);
-Dc  = iccdat(:,4);
-Db  = iccdat(:,5);
-Thc = iccdat(:,6);
+icc = iccdat(1:3);
+Dc  = iccdat(4);
+Db  = iccdat(5);
+Thc = iccdat(6);
 
-fin = fopen([setupdir '/stats_zend.dat'],'r');
-dum = fgetl(fout);
-dum = fgetl(fout);
-fprintf(fout,'%e %e %e %e %e %e %e %e %e', datstat);
+fin = fopen('stats_zend.dat','r');
+dum = fgetl(fin);
+dum = fgetl(fin);
+datstat = fscanf(fin,'%e %e %e %e %e %e %e %e %e')';
 fclose(fin);
 
 flagmean = (abs(Dc)<1e-3); %% flag for mean-density cases
@@ -57,7 +57,7 @@ OmLambda_loc_i  = zeros(Ncc,1);
 OmK_loc_i       = zeros(Ncc,1);
 
 %% For the same-cosmic-time Enzo outputs, first list wanted global redshifts
-zglobal_enzo = load('zglobal_enzo.dat');
+zglobal_enzo = load('zglobal.dat');
 zglobal_enzo = sort(zglobal_enzo, 'descend'); %% sort in descending order
 %zglobal_enzo = [linspace(200,120,5)';  linspace(100,40,7)'; linspace(30,22,5)'; linspace(20,11,10)'; linspace(10,3,15)']
 aglobal_enzo = 1./(1+zglobal_enzo);
@@ -111,7 +111,7 @@ TimeUnits = 2.519445e17/sqrt(Om0) /h * a_i^(3/2)  %% Enzo time unit (in seconds)
 %% For simplicity, set the initial time = 0.
 %% Whenever required, one can add the actual cosmic time_i*H_i to the timetable.
 
-%% assign values to globals
+%% assign values to globals: mean-density patch just follows global LCDM evolution
 H_l_i        = H_i;
 Om_l_i       = Om_i;
 Omr_l_i      = Omr_i;
