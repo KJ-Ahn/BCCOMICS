@@ -21,9 +21,6 @@ run('params_patch.m');  %%==== script ==================
 
 global H_i H_l_i Om_l_i Omr_l_i OmLambda_l_i OmK_l_i aloci;
 
-%%%%%%%%%%%%%% Do NOT forget to match the correct comoving box size %%%%%%%%%%%
-%%%%%%%%%%%%%% Lbox_Mpch will change depending on which final time is chosen %%
-%%%%%%%%%%%%%% for each patch.  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Lbox_p_inMpch = Lbox_p*h;  %% enzo uses 'ComovingBoxSize' in units of Mpc/h
 
 mmw = 1.2195 %% mean molecular weight with X=0.76, Y=0.24, neutral.
@@ -31,17 +28,23 @@ rhocrit0 = 3*(100*h*1e5/Mpc)^2/(8*pi*G) %% in g/cm^3
 
 %% read in the redshift. zzbegin=1000, and zzend is for the
 %% redshift of the initial conditions.
-zz    = load([setupdir '/zz.dat']);
+zz    = load('zz.dat');
 zzbegin = zz(1);
 zzend   = zz(2);
 azbegin = 1/(1+zzbegin);
 azend   = 1/(1+zzend);
 
-iccdat = load('/icc_Dc_Db_Thc_Thb_Vcb1_Vcb2_Vcb3_Vcb_DT.dat');
+iccdat = load('icc_Dc_Db_Thc_Thb_Vcb1_Vcb2_Vcb3_Vcb_DT.dat');
 icc = iccdat(:,1:3);
 Dc  = iccdat(:,4);
 Db  = iccdat(:,5);
 Thc = iccdat(:,6);
+
+fin = fopen([setupdir '/stats_zend.dat'],'r');
+dum = fgetl(fout);
+dum = fgetl(fout);
+fprintf(fout,'%e %e %e %e %e %e %e %e %e', datstat);
+fclose(fin);
 
 flagmean = (abs(Dc)<1e-3); %% flag for mean-density cases
 
