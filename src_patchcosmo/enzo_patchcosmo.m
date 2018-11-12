@@ -44,100 +44,98 @@ fin = fopen('stats_zend.dat','r');
 dum = fgetl(fin);
 dum = fgetl(fin);
 datstat = fscanf(fin,'%e %e %e %e %e %e %e %e %e')';
+stdDc = datstat(1); 
 fclose(fin);
 
-flagmean = (abs(Dc)<1e-3); %% flag for mean-density cases
+flagmean = (abs(Dc)/stdDc <1e-2); %% flag for mean-density cases
 
-H_loc_i         = zeros(Ncc,1);
-rhocrit_loc_i   = zeros(Ncc,1);
-rhocrit_ratio_i = zeros(Ncc,1);
-Om_loc_i        = zeros(Ncc,1);
-Omr_loc_i       = zeros(Ncc,1);
-OmLambda_loc_i  = zeros(Ncc,1);
-OmK_loc_i       = zeros(Ncc,1);
+if flagmean
+  disp('This patch has zero overdensity, so it is not needed to calculate local parameters.');
+  disp('Stopping enzo_patchcosmo.');
+  return;
+else
+  %% For the same-cosmic-time Enzo outputs, first list wanted global redshifts
+  zglobal_enzo = load('zglobal.dat');
+  zglobal_enzo = sort(zglobal_enzo, 'descend'); %% sort in descending order
+  %%zglobal_enzo = [linspace(200,120,5)';  linspace(100,40,7)'; linspace(30,22,5)'; linspace(20,11,10)'; linspace(10,3,15)']
+  aglobal_enzo = 1./(1+zglobal_enzo);
+  Nz_enzo      = length(zglobal_enzo);
 
-%% For the same-cosmic-time Enzo outputs, first list wanted global redshifts
-zglobal_enzo = load('zglobal.dat');
-zglobal_enzo = sort(zglobal_enzo, 'descend'); %% sort in descending order
-%zglobal_enzo = [linspace(200,120,5)';  linspace(100,40,7)'; linspace(30,22,5)'; linspace(20,11,10)'; linspace(10,3,15)']
-aglobal_enzo = 1./(1+zglobal_enzo);
-Nz_enzo      = length(zglobal_enzo);
+  thefactor = sqrt(Om0/azend^3 + Omr0/azend^4 + OmLambda0); % global one
 
-thefactor = sqrt(Om0/azend^3 + Omr0/azend^4 + OmLambda0); % global one
+  %% lock fb_l/fc_l ratio locked for the patch. In practice very close to fb/fc.
+  fc_l         = (1+Dc)*fc / ((1+Dc)*fc + (1+Db)*fb); %% local CDM fraction
+  fb_l         = 1 - fc_l; %% local CDM fraction
+  Ddot_over_D1 = -Thc/(1+Dc);  %% Myr^-1, using dD/dt=-Th relation, and follow CDM only.
 
-%% lock fb_l/fc_l ratio locked for the patch. In practice very close to fb/fc.
-fc_l         = (1+Dc)*fc / ((1+Dc)*fc + (1+Db)*fb); %% local CDM fraction
-fb_l         = 1 - fc_l; %% local CDM fraction
-Ddot_over_D1 = -Thc/(1+Dc);  %% Myr^-1, using dD/dt=-Th relation, and follow CDM only.
+  H_i          = H0*thefactor; %% initial Hubble constant (Myr^-1) for global, flat universe
+  H_loc_i = H_i - (1/3)*Ddot_over_D1; %% As in Goldberg & Vogeley (2004, eq. 3)
 
-H_i          = H0*thefactor; %% initial Hubble constant (Myr^-1) for global, flat universe
-H_loc_i = H_i - (1/3)*Ddot_over_D1; %% As in Goldberg & Vogeley (2004, eq. 3)
+  rhocrit_i       = 3*(H_i    *s_inMyr)^2 / (8*pi*G); %% g/cm^3
+  rhocrit_loc_i   = 3*(H_loc_i*s_inMyr)^2 / (8*pi*G); %% g/cm^3
+  rhocrit_ratio_i = rhocrit_loc_i/rhocrit_i; 
 
-rhocrit_i       = 3*(H_i    *s_inMyr)^2 / (8*pi*G); %% g/cm^3
-rhocrit_loc_i   = 3*(H_loc_i*s_inMyr)^2 / (8*pi*G); %% g/cm^3
-rhocrit_ratio_i = rhocrit_loc_i/rhocrit_i; 
+  %% initial global Omega's.
+  Om_i       = (Om0 /azend^3) / thefactor^2;
+  Omr_i      = (Omr0/azend^4) / thefactor^2;
+  OmLambda_i = (OmLambda0)    / thefactor^2;
 
-%% initial global Omega's.
-Om_i       = (Om0 /azend^3) / thefactor^2;
-Omr_i      = (Omr0/azend^4) / thefactor^2;
-OmLambda_i = (OmLambda0)    / thefactor^2;
+  %% initial local Omega's.
+  Om_loc_i       = Om_i*(1+Dc)/ rhocrit_ratio_i;
+  Omr_loc_i      = Omr_i      / rhocrit_ratio_i;
+  OmLambda_loc_i = OmLambda_i / rhocrit_ratio_i;
+  OmK_loc_i      = 1 - (Om_loc_i + Omr_loc_i + OmLambda_loc_i);
 
-%% initial local Omega's.
-Om_loc_i       = Om_i*(1+Dc_tab)/ rhocrit_ratio_i;
-Omr_loc_i      = Omr_i          / rhocrit_ratio_i;
-OmLambda_loc_i = OmLambda_i     / rhocrit_ratio_i;
-OmK_loc_i      = 1 - (Om_loc_i + Omr_loc_i + OmLambda_loc_i);
+  %% record useful values
+  fout        = fopen('global_and_local_quantities.dat','w');
+  datglobal_i = [zzend rhocrit_i H_i Om_i Omr_i OmLambda_i];
+  fprintf(fout, '## zred rhocrit(g/cm^3) H(Myr^-1) Om Omr OmLambda\n');
+  fprintf(fout, '%i %e %e %e %e %e\n', datglobal_i');
+  fprintf(fout, '\n');
 
-%% record useful values
-fout        = fopen('global_and_local_quantities.dat','w');
-datglobal_i = [zzend rhocrit_i H_i Om_i Omr_i OmLambda_i];
-fprintf(fout, '## zred rhocrit(g/cm^3) H(Myr^-1) Om Omr OmLambda\n');
-fprintf(fout, '%i %e %e %e %e %e\n', datglobal_i');
-fprintf(fout, '\n');
-
-datloc_i = [icc_tab rhocrit_loc_i H_loc_i Om_loc_i Omr_loc_i OmLambda_loc_i OmK_loc_i];
-fprintf(fout, '## icc1 icc2 icc3 rhocrit(g/cm^3) H(Myr^-1)  Om   Omr   OmLambda  OmK\n');
-fprintf(fout, '%4i %4i %4i %e %e %e %e %e %e\n', datloc_i');
-fclose(fout);
+  datloc_i = [icc rhocrit_loc_i H_loc_i Om_loc_i Omr_loc_i OmLambda_loc_i OmK_loc_i];
+  fprintf(fout, '## icc1 icc2 icc3 rhocrit(g/cm^3) H(Myr^-1)  Om   Omr   OmLambda  OmK\n');
+  fprintf(fout, '%4i %4i %4i %e %e %e %e %e %e\n', datloc_i');
+  fclose(fout);
 
 
 %%%%%%%%% Now do integration to obtain (time) ~ (scale factor) table,
 %%%%%%%%% both for the global case and for each patch.
 
 %%%% for global case
-a_i       = azend   %% azend corresponds to "_i" as explained above.
-TimeUnits = 2.519445e17/sqrt(Om0) /h * a_i^(3/2)  %% Enzo time unit (in seconds), which is related to a_i. See CosmologyGetUnits.C from enzo src. The number seems to be using a slightly different Myr calculation.
+  a_i       = azend   %% azend corresponds to "_i" as explained above.
+  TimeUnits = 2.519445e17/sqrt(Om0) /h * a_i^(3/2)  %% Enzo time unit (in seconds), which is related to a_i. See CosmologyGetUnits.C from enzo src. The number seems to be using a slightly different Myr calculation.
 
-%% For simplicity, set the initial time = 0.
-%% Whenever required, one can add the actual cosmic time_i*H_i to the timetable.
+  %% For simplicity, set the initial time = 0.
+  %% Whenever required, one can add the actual cosmic time_i*H_i to the timetable.
 
-%% assign values to globals: mean-density patch just follows global LCDM evolution
-H_l_i        = H_i;
-Om_l_i       = Om_i;
-Omr_l_i      = Omr_i;
-OmLambda_l_i = OmLambda_i;
-OmK_l_i      = 1 - (Om_l_i + Omr_l_i + OmLambda_l_i);
-aloci        = a_i;
+  %% assign values to globals: mean-density patch just follows global LCDM evolution
+  H_l_i        = H_i;
+  Om_l_i       = Om_i;
+  Omr_l_i      = Omr_i;
+  OmLambda_l_i = OmLambda_i;
+  OmK_l_i      = 1 - (Om_l_i + Omr_l_i + OmLambda_l_i);
+  aloci        = a_i;
 
 %%%% time ~ (scale factor) table for global case.
-%% take small enough value for radiation domination
-tiHi                 = 0.000001; 
-tfHi                 = 1000;
-options              = odeset('RelTol',1e-6,'AbsTol',1e-9);
-%% initial a value, assuming radiation domination, is given analytically.
-[tHiode, aglobalode] = ode45(@fdadt, [tiHi, tfHi], sqrt(2*tiHi*sqrt(Omr_i))*a_i, options);
+  %% take small enough value for radiation domination
+  tiHi                 = 0.000001; 
+  tfHi                 = 1000;
+  options              = odeset('RelTol',1e-6,'AbsTol',1e-9);
+  %% initial a value, assuming radiation domination, is given analytically.
+  [tHiode, aglobalode] = ode45(@fdadt, [tiHi, tfHi], sqrt(2*tiHi*sqrt(Omr_i))*a_i, options);
 
-tHi_a_0p25     = interp1(aglobalode, tHiode, 0.25, 'spline');
-%% tHi table corresponding to aglobal table.
-tHiglobal_enzo = interp1(aglobalode, tHiode, aglobal_enzo, 'spline');
+  tHi_a_0p25     = interp1(aglobalode, tHiode, 0.25, 'spline');
+  %% tHi table corresponding to aglobal table.
+  tHiglobal_enzo = interp1(aglobalode, tHiode, aglobal_enzo, 'spline');
 
-loglog(tHiode, aglobalode, tHiode, 6.4e-3*tHiode.^(2/3))
-axis([1e-3 1e4 5e-5 1])
+  loglog(tHiode, aglobalode, tHiode, 6.4e-3*tHiode.^(2/3))
+  axis([1e-3 1e4 5e-5 1])
 
-dattemp = [tHiode aglobalode];
-fout=fopen('tHi_a_fine.dat','w');  %% columns: t*Hi, a. (Hi is again H at given initial time)
-fprintf(fout,'%e %e\n', dattemp');
-fclose(fout);
+  dattemp = [tHiode aglobalode];
+  fout=fopen('tHi_a_fine.dat','w');  %% columns: t*Hi, a. (Hi is again H at given initial time)
+  fprintf(fout,'%e %e\n', dattemp');
+  fclose(fout);
 
 dattemp = [tHiglobal_enzo aglobal_enzo];
 fout=fopen('tHi_a.dat','w');  %% columns: t*Hi, a. (Hi is again H at given initial time)
@@ -145,30 +143,28 @@ fprintf(fout,'%e %e\n', dattemp');
 fclose(fout);
 
 %%%% time ~ (scale factor) table for local case.
+H_l_i        = H_loc_i;
+Om_l_i       = Om_loc_i;
+Omr_l_i      = Omr_loc_i;
+OmLambda_l_i = OmLambda_loc_i;
+OmK_l_i      = 1 - (Om_l_i + Omr_l_i + OmLambda_l_i);
+aloci        = a_i; %% To make Enzo use the same code units, a_i should be universal
 
-for icc=1:Ncc
-    H_l_i        = H_loc_i(icc);
-    Om_l_i       = Om_loc_i(icc);
-    Omr_l_i      = Omr_loc_i(icc);
-    OmLambda_l_i = OmLambda_loc_i(icc);
-    OmK_l_i      = 1 - (Om_l_i + Omr_l_i + OmLambda_l_i);
-    aloci        = a_i; %% To make Enzo use the same code units, a_i should be universal
-
-    %% Check if turnaround occurs (not completed yet!!!)
-    aloc_test    = linspace(a_i,1,1e5);
-    insidesquare = Om_l_i./(aloc_test/aloci) + Omr_l_i./(aloc_test/aloci).^2 + OmLambda_l_i*(aloc_test/aloci).^2 + OmK_l_i;
-    if (any(insidesquare<0))
-        [xval,fval]=fzero(@(x) Om_l_i/x+Omr_l_i/x^2+OmLambda_l_i*x^2+OmK_l_i, [1,1/aloci]) 
-        a_loc_turnaround = xval*aloci
-        %% Do something clever to change tfHi
-    end
-    
-    tfHi = tHi_a_0p25; %% Choose universal end time, which is "0" or "present" for each icc.
-    [tHiode_l, aglobalode_l] = ode45(@fdadt, [tiHi, tfHi], sqrt(2*tiHi*H_l_i/H_i*sqrt(Omr_l_i))*aloci, options);
-    aloc_enzo(:,icc) = interp1(tHiode_l, aglobalode_l, tHiglobal_enzo, 'spline');
-    alocf(icc,1) = aglobalode_l(length(aglobalode_l));
-
+%% Check if turnaround occurs (not completed yet!!!)
+aloc_test    = linspace(a_i,1,1e5);
+insidesquare = Om_l_i./(aloc_test/aloci) + Omr_l_i./(aloc_test/aloci).^2 + OmLambda_l_i*(aloc_test/aloci).^2 + OmK_l_i;
+if (any(insidesquare<0))
+  [xval,fval]=fzero(@(x) Om_l_i/x+Omr_l_i/x^2+OmLambda_l_i*x^2+OmK_l_i, [1,1/aloci]) 
+  a_loc_turnaround = xval*aloci
+  %% Do something clever to change tfHi
 end
+    
+tfHi = tHi_a_0p25; %% Choose universal end time, which is "0" or "present" for each icc.
+[tHiode_l, aglobalode_l] = ode45(@fdadt, [tiHi, tfHi], sqrt(2*tiHi*H_l_i/H_i*sqrt(Omr_l_i))*aloci, options);
+aloc_enzo(:,icc) = interp1(tHiode_l, aglobalode_l, tHiglobal_enzo, 'spline');
+alocf(icc,1) = aglobalode_l(length(aglobalode_l));
+
+
 
 clear dattemp;
 dattemp = [tHiglobal_enzo aloc_enzo];
@@ -239,10 +235,7 @@ end
 fclose(foutratio);
 
 
-
-
-
-
+end
 
 
 

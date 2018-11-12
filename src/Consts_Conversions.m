@@ -1,5 +1,6 @@
 %% Constants in cgs and conversion factors
 
+G        = 6.67259e-8;     %% graviational const.
 mH       = 1.6733e-24;     %% gram
 kb       = 1.380658e-16;   %% Boltzmann const.
 pc       = 3.086e18;       %% pc in cm
