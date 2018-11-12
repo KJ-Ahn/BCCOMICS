@@ -129,26 +129,27 @@ else
   %% tHi table corresponding to aglobal table.
   tHiglobal_enzo = interp1(aglobalode, tHiode, aglobal_enzo, 'spline');
 
-  loglog(tHiode, aglobalode, tHiode, 6.4e-3*tHiode.^(2/3))
-  axis([1e-3 1e4 5e-5 1])
+%% plot for debugging
+%%  loglog(tHiode, aglobalode, tHiode, 6.4e-3*tHiode.^(2/3))
+%%  axis([1e-3 1e4 5e-5 1])
 
   dattemp = [tHiode aglobalode];
   fout=fopen('tHi_a_fine.dat','w');  %% columns: t*Hi, a. (Hi is again H at given initial time)
   fprintf(fout,'%e %e\n', dattemp');
   fclose(fout);
 
-dattemp = [tHiglobal_enzo aglobal_enzo];
-fout=fopen('tHi_a.dat','w');  %% columns: t*Hi, a. (Hi is again H at given initial time)
-fprintf(fout,'%e %e\n', dattemp');
-fclose(fout);
+  dattemp = [tHiglobal_enzo aglobal_enzo];
+  fout=fopen('tHi_a.dat','w');  %% columns: t*Hi, a. (Hi is again H at given initial time)
+  fprintf(fout,'%e %e\n', dattemp');
+  fclose(fout);
 
 %%%% time ~ (scale factor) table for local case.
-H_l_i        = H_loc_i;
-Om_l_i       = Om_loc_i;
-Omr_l_i      = Omr_loc_i;
-OmLambda_l_i = OmLambda_loc_i;
-OmK_l_i      = 1 - (Om_l_i + Omr_l_i + OmLambda_l_i);
-aloci        = a_i; %% To make Enzo use the same code units, a_i should be universal
+  H_l_i        = H_loc_i;
+  Om_l_i       = Om_loc_i;
+  Omr_l_i      = Omr_loc_i;
+  OmLambda_l_i = OmLambda_loc_i;
+  OmK_l_i      = 1 - (Om_l_i + Omr_l_i + OmLambda_l_i);
+  aloci        = a_i; %% To make Enzo use the same code units, a_i should be universal
 
 %% Check if turnaround occurs (not completed yet!!!)
 aloc_test    = linspace(a_i,1,1e5);
