@@ -124,8 +124,10 @@ else
   options              = odeset('RelTol',1e-6,'AbsTol',1e-9);
   %% initial a value, assuming radiation domination, is given analytically.
   [tHiode, aglobalode] = ode45(@fdadt, [tiHi, tfHi], sqrt(2*tiHi*sqrt(Omr_i))*a_i, options);
-
-  tHi_a_0p25     = interp1(aglobalode, tHiode, 0.25, 'spline');
+  while (max(aglobalode)<0.5) %% Lets make the final a at tfHi to be larger than 0.5.
+    tfHi                 = 2*tfHi; 
+    [tHiode, aglobalode] = ode45(@fdadt, [tiHi, tfHi], sqrt(2*tiHi*sqrt(Omr_i))*a_i, options);
+  end
   %% tHi table corresponding to aglobal table.
   tHiglobal_enzo = interp1(aglobalode, tHiode, aglobal_enzo, 'spline');
 
@@ -151,16 +153,24 @@ else
   OmK_l_i      = 1 - (Om_l_i + Omr_l_i + OmLambda_l_i);
   aloci        = a_i; %% To make Enzo use the same code units, a_i should be universal
 
-%% Check if turnaround occurs (not completed yet!!!)
-aloc_test    = linspace(a_i,1,1e5);
-insidesquare = Om_l_i./(aloc_test/aloci) + Omr_l_i./(aloc_test/aloci).^2 + OmLambda_l_i*(aloc_test/aloci).^2 + OmK_l_i;
-if (any(insidesquare<0))
-  [xval,fval]=fzero(@(x) Om_l_i/x+Omr_l_i/x^2+OmLambda_l_i*x^2+OmK_l_i, [1,1/aloci]) 
-  a_loc_turnaround = xval*aloci
-  %% Do something clever to change tfHi
-end
+  %% Check when turnaround occurs, for a closed-universy patch.
+  %% May use the 2nd-kind Friedmann equation (with double time differentiation of a),
+  %% but just use the 1st-kind one and stop before turnaround occurs.
+  if (OmK_l_i < 0)
+    aloc_test    = linspace(a_i,1,1e5);
+    insidesquare = Om_l_i./(aloc_test/aloci) + Omr_l_i./(aloc_test/aloci).^2 + OmLambda_l_i*(aloc_test/aloci).^2 + OmK_l_i;
+    if (any(insidesquare<0))
+      %% "find" below gives index just after turnaround, so subtract several indices
+      %% to safely pick the stopping time
+      aloc_before_ta = aloc_test(find(insidesquare<0, 1,'first')-10);
+      %% Do something clever to choose appropriate tfHi for local overdense patch
+      
+      
+    else
+    end
+  end
     
-tfHi = tHi_a_0p25; %% Choose universal end time, which is "0" or "present" for each icc.
+
 [tHiode_l, aglobalode_l] = ode45(@fdadt, [tiHi, tfHi], sqrt(2*tiHi*H_l_i/H_i*sqrt(Omr_l_i))*aloci, options);
 aloc_enzo(:,icc) = interp1(tHiode_l, aglobalode_l, tHiglobal_enzo, 'spline');
 alocf(icc,1) = aglobalode_l(length(aglobalode_l));
