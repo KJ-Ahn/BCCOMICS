@@ -63,14 +63,10 @@ def convert_file(input_filename, output_filename,
     dataset.attrs["Component_Rank"] = crank
     dataset.attrs["Component_Size"] = csize
     dataset.attrs["Rank"]           = rank
-    dataset.attrs["Dimensions"]     = shape
-    dataset.attrs["TopGridDims"]    = topgriddims
-    dataset.attrs["TopGridEnd"]     = end
-    dataset.attrs["TopGridStart"]   = start
-#    dataset.attrs["Dimensions"]     = getattr(shape, "tolist", lambda x=shape: x)()
-#    dataset.attrs["TopGridDims"]    = getattr(topgriddims, "tolist", lambda x=topgriddims: x)()
-#    dataset.attrs["TopGridEnd"]     = getattr(end, "tolist", lambda x=end: x)()
-#    dataset.attrs["TopGridStart"]   = getattr(start, "tolist", lambda x=start: x)()
+    dataset.attrs["Dimensions"]     = getattr(shape, "tolist", lambda x=shape: x)()
+    dataset.attrs["TopGridDims"]    = getattr(topgriddims, "tolist", lambda x=topgriddims: x)()
+    dataset.attrs["TopGridEnd"]     = getattr(end, "tolist", lambda x=end: x)()
+    dataset.attrs["TopGridStart"]   = getattr(start, "tolist", lambda x=start: x)()
     fh.close()
 
 if __name__ == "__main__":
