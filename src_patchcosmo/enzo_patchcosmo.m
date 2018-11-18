@@ -157,94 +157,90 @@ else
   %% May use the 2nd-kind Friedmann equation (with double time differentiation of a),
   %% but just use the 1st-kind one and stop before turnaround occurs.
   if (OmK_l_i < 0)
-    aloc_test    = linspace(a_i,1,1e5);
+    aloc_test    = linspace(a_i,max(aglobalode),1e5);
     insidesquare = Om_l_i./(aloc_test/aloci) + Omr_l_i./(aloc_test/aloci).^2 + OmLambda_l_i*(aloc_test/aloci).^2 + OmK_l_i;
     if (any(insidesquare<0))
-      %% "find" below gives index just after turnaround, so subtract several indices
+      %% "find" below gives index just after turnaround, so subtract some indices
       %% to safely pick the stopping time
-      aloc_before_ta = aloc_test(find(insidesquare<0, 1,'first')-10);
+      aloc_test_before_ta = aloc_test(find(insidesquare<0, 1,'first')-50);
       %% Do something clever to choose appropriate tfHi for local overdense patch
-      
-      
+      [tHiode, a_loc_ode] = ode45(@fdadt, [tiHi, tfHi], sqrt(2*tiHi*sqrt(Omr_l_i))*aloci, options);
+      while (~any(a_loc_ode>aloc_test_before_ta))
+        tfHi = tfHi*2;
+        [tHiode, a_loc_ode] = ode45(@fdadt, [tiHi, tfHi], sqrt(2*tiHi*H_l_i/H_i*sqrt(Omr_l_i))*aloci, options);
+      end
+      idx_final_ode   = find(a_loc_ode<aloc_test_before_ta, 1,'last');
+      idx_final_local = find(tHiglobal_enzo<tHiode(idx_final_ode), 1,'last');
     else
+      idx_final_local = length(tHiglobal_enzo);
     end
   end
-    
+  
+  tHiglobal_enzo = tHiglobal_enzo(1:idx_final_local);
+  aloc_enzo = interp1(tHiode(1:idx_final_ode), a_loc_ode(1:idx_final_ode), tHiglobal_enzo, 'pchip');
+  alocf     = aloc_enzo(length(aloc_enzo));
 
-[tHiode_l, aglobalode_l] = ode45(@fdadt, [tiHi, tfHi], sqrt(2*tiHi*H_l_i/H_i*sqrt(Omr_l_i))*aloci, options);
-aloc_enzo(:,icc) = interp1(tHiode_l, aglobalode_l, tHiglobal_enzo, 'spline');
-alocf(icc,1) = aglobalode_l(length(aglobalode_l));
+  clear dattemp;
+  dattemp = [tHiglobal_enzo aloc_enzo];
+  fout=fopen('tHi_alocal.dat','w');
+  fprintf(fout,'%e %e\n', dattemp');
+  fclose(fout);
+
+%%%% Calculate local cosmological parameters at the final time, which will be "present".
+
+  aratio      = alocf/aloci;
+  denominator = Om_loc_i*aratio^(-3) + Omr_loc_i*aratio^(-4) + OmLambda_loc_i + OmK_loc_i*aratio^(-2);
+  Om0_l       = Om_loc_i      *aratio^(-3) / denominator;
+  Omr0_l      = Omr_loc_i     *aratio^(-4) / denominator;
+  OmLambda0_l = OmLambda_loc_i             / denominator;
+  OmK0_l      = OmK_loc_i     *aratio^(-2) / denominator;
+  h0_l        = H_loc_i/(100*km_inMpc/s_inMyr) * sqrt(denominator);  %% unitless
+
+  %% Enzo uses "0" values to denote when the scale factor = 1, and
+  %% redshift = 0. In order to satisfy this convention AND make the time
+  %% of alocf correspond to "0", from the relation 
+  %% aloc/alocf = (1+zlocf)/(1+zloc) = 1/(1+zloc_new),
+  %% 1+zloc_new = (1+zloc)/(1+zlocf), or zloc_new = (1+zloc)/(1+zlocf) -1.
+  %% This also means                     zloc_new = alocf/aloc -1.
+  %% Similarly, aloc/alocf = aloc_new.
+
+  aloc_new_enzo = aloc_enzo/alocf;
+  zloc_new_enzo = 1./aloc_new_enzo - 1;
 
 
+  %%%% Write an enzo parameter file patch, to be included in there.
 
-clear dattemp;
-dattemp = [tHiglobal_enzo aloc_enzo];
-fout=fopen('tHi_alocal.dat','w');  %% columns: t*Hi, alocal(icc). (Hi is again H at given initial time)
-fprintf(fout,'%e %e %e %e %e %e %e %e %e %e %e %e %e\n', dattemp'); %% should have Ncc+1 columns.
-fclose(fout);
-
-%%%% for each alocf(icc,i), calculate cosmological parameters at that time.
-for icc=1:Ncc
-    aratio             = alocf(icc)/aloci;
-    denominator(icc,1) = Om_loc_i(icc)*aratio^(-3) + Omr_loc_i(icc)*aratio^(-4) + OmLambda_loc_i(icc) + OmK_loc_i(icc)*aratio^(-2);
-    Om0_l      (icc,1) = Om_loc_i(icc)      *aratio^(-3) / denominator(icc);
-    Omr0_l     (icc,1) = Omr_loc_i(icc)     *aratio^(-4) / denominator(icc);
-    OmLambda0_l(icc,1) = OmLambda_loc_i(icc)             / denominator(icc);
-    OmK0_l     (icc,1) = OmK_loc_i(icc)     *aratio^(-2) / denominator(icc);
-    h0_l       (icc,1) = H_loc_i(icc)/(100*km_inMpc/s_inMyr) * sqrt(denominator(icc));  %% unitless
-
-    %% Enzo uses "0" values to denote when the scale factor = 1, and
-    %% redshift = 0. In order to satisfy this convention AND make the time
-    %% of alocf(icc) correspond to "0", from the relation 
-    %% aloc/alocf = (1+zlocf)/(1+zloc) = 1/(1+zloc_new),
-    %% 1+zloc_new = (1+zloc)/(1+zlocf), or zloc_new = (1+zloc)/(1+zlocf) -1.
-    %% This also means                     zloc_new = alocf/aloc -1.
-    %% Similarly, aloc/alocf = aloc_new.
-
-    aloc_new_enzo(:,icc) = aloc_enzo(:,icc)/alocf(icc);
-    zloc_new_enzo(:,icc) = 1./aloc_new_enzo(:,icc) - 1;
-end
-
-%%%% Write an enzo parameter file patch, to be included in there.
-foutratio=fopen('enzounit_ratio.dat','w');
-for icc=1:Ncc
-    strbox = ['Lbox-' num2str(Lbox_p_inMpch) 'Mpch_'];
-    stric = num2str(icc_tab(icc,1));
-    strjc = num2str(icc_tab(icc,2));
-    strkc = num2str(icc_tab(icc,3));
-    strout = [strbox 'ic' stric '_jc' strjc '_kc' strkc '_enzoparm.dat'];
-    fout = fopen(strout, 'w');
-    fprintf(fout, 'CosmologySimulationOmegaBaryonNow        = %f\n', Om0_l(icc)*fb_l(icc) );
-    fprintf(fout, 'CosmologySimulationOmegaCDMNow           = %f\n', Om0_l(icc)*fc_l(icc) );
-    fprintf(fout, '\n');
-    fprintf(fout, 'CosmologyOmegaMatterNow    = %f\n', Om0_l(icc)       );
-    fprintf(fout, 'CosmologyOmegaLambdaNow    = %f\n', OmLambda0_l(icc) );
-    fprintf(fout, 'CosmologyOmegaRadiationNow = %f\n', Omr0_l(icc)      );
-    fprintf(fout, 'CosmologyHubbleConstantNow = %f\n', h0_l(icc)        );
-    %% comoving box size is the proper size at "0", so it is (proper size at a_i)*(expansion ratio)
-    %%                                                     = L * a_i * (alocf/aloci) = L * alocf
-    %% But also, Lbox_p_inMpch uses h, not h0_l, so need to rescale with (h0_l/h)
-    fprintf(fout, 'CosmologyComovingBoxSize   = %f  ', Lbox_p_inMpch*(h0_l(icc)/h)*alocf(icc)); 
-    fprintf(fout, ' // Mpc/h\n' );  
-    fprintf(fout, 'CosmologyInitialRedshift   = %f\n', zloc_new_enzo(1, icc)        );
-    fprintf(fout, 'CosmologyFinalRedshift     = %f\n', zloc_new_enzo(Nz_enzo,icc)   );
-    fprintf(fout, '\n');
-    for iz_enzo = 1:Nz_enzo
-        fprintf(fout, 'CosmologyOutputRedshift[%i] = %f\n', iz_enzo-1, zloc_new_enzo(iz_enzo,icc) );
-    end
-    fclose(fout);
-    %% Print out the ratios of enzo units (in CosmologyGetUnits.C).
-    %% ratio = global/local
-	lengunit_ratio = Lbox_p_inMpch/(h*(1+zzend)) /(Lbox_p_inMpch*(h0_l(icc)/h)*alocf(icc)/(h0_l(icc)*(1+zloc_new_enzo(1,icc))));
-    densunit_ratio = Om0*h^2*(1+zzend)^3 /(Om0_l(icc)*h0_l(icc)^2*(1+zloc_new_enzo(1,icc))^3);
-    timeunit_ratio = sqrt(Om0_l(icc))*h0_l(icc)*(1+zloc_new_enzo(1,icc))^1.5 /(sqrt(Om0)*h*(1+zzend)^1.5);
-    velounit_ratio = Lbox_p_inMpch*sqrt(Om0)*sqrt(1+zzend) /(Lbox_p_inMpch*(h0_l(icc)/h)*alocf(icc)*sqrt(Om0_l(icc))*sqrt(1+zloc_new_enzo(1,icc)));
-    tempunit_ratio = velounit_ratio^2;
-    datcc = [icc flagmean(icc) icc_tab(icc,:) lengunit_ratio densunit_ratio timeunit_ratio velounit_ratio tempunit_ratio];
-    fprintf(foutratio, '%2i %2i  %4i %4i %4i  %e %e %e %e %e\n', datcc');
-end
-fclose(foutratio);
-
+  fout = fopen('enzo_part.dat', 'w');
+  fprintf(fout, 'CosmologySimulationOmegaBaryonNow        = %f\n', Om0_l*fb_l);
+  fprintf(fout, 'CosmologySimulationOmegaCDMNow           = %f\n', Om0_l*fc_l);
+  fprintf(fout, '\n');
+  fprintf(fout, 'CosmologyOmegaMatterNow    = %f\n', Om0_l       );
+  fprintf(fout, 'CosmologyOmegaLambdaNow    = %f\n', OmLambda0_l );
+  fprintf(fout, 'CosmologyOmegaRadiationNow = %f\n', Omr0_l      );
+  fprintf(fout, 'CosmologyHubbleConstantNow = %f\n', h0_l        );
+  %% comoving box size is the proper size at "0", so it is 
+  %% (proper size at a_i)*(expansion ratio) = L * a_i * (alocf/aloci) = L * alocf
+  %% But also, Lbox_p_inMpch uses h, not h0_l, so need to rescale with (h0_l/h)
+  fprintf(fout, 'CosmologyComovingBoxSize   = %f  ', Lbox_p_inMpch*(h0_l/h)*alocf); 
+  fprintf(fout, ' // Mpc/h\n' );  
+  fprintf(fout, 'CosmologyInitialRedshift   = %f\n', zloc_new_enzo(1, icc)        );
+  fprintf(fout, 'CosmologyFinalRedshift     = %f\n', zloc_new_enzo(Nz_enzo,icc)   );
+  fprintf(fout, '\n');
+  for iz_enzo = 1:Nz_enzo
+      fprintf(fout, 'CosmologyOutputRedshift[%i] = %f\n', iz_enzo-1, zloc_new_enzo(iz_enzo,icc) );
+  end
+  fclose(fout);
+  %% Print out the ratios of enzo units (in CosmologyGetUnits.C).
+  %% ratio = global/local
+  lengunit_ratio = Lbox_p_inMpch/(h*(1+zzend)) /(Lbox_p_inMpch*(h0_l/h)*alocf/(h0_l*(1+zloc_new_enzo(1,icc))));
+  densunit_ratio = Om0*h^2*(1+zzend)^3 /(Om0_l*h0_l^2*(1+zloc_new_enzo(1,icc))^3);
+  timeunit_ratio = sqrt(Om0_l)*h0_l*(1+zloc_new_enzo(1,icc))^1.5 /(sqrt(Om0)*h*(1+zzend)^1.5);
+  velounit_ratio = Lbox_p_inMpch*sqrt(Om0)*sqrt(1+zzend) /(Lbox_p_inMpch*(h0_l/h)*alocf*sqrt(Om0_l)*sqrt(1+zloc_new_enzo(1,icc)));
+  tempunit_ratio = velounit_ratio^2;
+  datcc = [icc flagmean icc_tab(icc,:) lengunit_ratio densunit_ratio timeunit_ratio velounit_ratio tempunit_ratio];
+  foutratio=fopen('enzounit_ratio.dat','w');
+  fprintf(foutratio, '%2i %2i  %4i %4i %4i  %e %e %e %e %e\n', datcc');
+  fclose(foutratio);
 
 end
 
