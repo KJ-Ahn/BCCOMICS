@@ -53,7 +53,8 @@ def convert_file(input_filename, output_filename,
         shape = np.array([csize], dtype=dtype)
         topgriddims = -99999 * np.ones(3, dtype=dtype)
         end = topgriddims - 1
-    start = np.zeros(rank, dtype=dtype)
+#    start = np.zeros(rank, dtype=dtype)
+    start = np.zeros(3, dtype=dtype)
     data = np.array(data)
 
     fh = h5py.File(output_filename, "w")
