@@ -168,10 +168,11 @@ $ cat zglobal.dat
 50
 $
 ```
-Then, run octave(matlab) in this directory, and run "enzo_patchcosmo.m". It will then generate file `enzoparam_part.enzo`, which you should copy & paste to your final enzo parameter file (e.z. `localcosmo.enzo`). You'd better keep `zglobal.dat`, so that you can later match a "local redshift" in `enzoparam_part.enzo` to its corresponding "global redshift" in `zglobal.dat`. Take a look at `localcosmo.enzo`, and you will see non-zero curvature term, and also seemigly odd cosmological parameters and "local redshifts". But this is how you fool enzo to simulate overdense(underdense) patches.
+Then, run octave(matlab) in this directory, and run "enzo_patchcosmo.m". It will then generate file `enzoparam_part.enzo`, which you should copy & paste to your final enzo parameter file (e.z. `localcosmo.enzo`). You'd better keep `zglobal.dat`, so that you can later match a "local redshift" in `enzoparam_part.enzo` to its corresponding "global redshift" in `zglobal.dat`. Take a look at `enzoparam_part.enzo`, and you will see non-zero curvature term, and also seemigly odd cosmological parameters and "local redshifts". But this is how you fool enzo to simulate overdense(underdense) patches.
 ```
 $ octave
 >> cd '/home/kjahn/BCCOMICS/ICs/1.00Mpch_64_ic75_jc42_kc120'
+>> addpath('/home/kjahn/BCCOMICS/src')
 >> enzo_patchcosmo
 ```
 ## Citing
