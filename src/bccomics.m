@@ -159,6 +159,16 @@ if ~exist(ICsubdir)
   mkdir(ICsubdir); 
 end
 
+%% Copy essential files to ICsubdir. This helps consistency in record tracking.
+copyfile('params.m', ICsubdir);
+copyfile('params_patch.m', ICsubdir);
+copyfile([setupdir '/zz.dat'], ICsubdir);
+copyfile([setupdir '/stats_zend.dat'], ICsubdir);
+iccdat = cellspec_azend(idxcc,:);
+fout   = fopen([ICsubdir '/icc_Dc_Db_Thc_Thb_Vcb1_Vcb2_Vcb3_Vcb_DT.dat'],'w');
+fprintf(fout, '%4i %4i %4i %e %e %e %e %e %e %e %e %e\n', iccdat');
+fclose(fout);
+
 zf = zzend;  %% redshift for initial condition
 af = 1/(1+zf);  %% scale factor for initial condition
 

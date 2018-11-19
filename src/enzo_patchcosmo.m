@@ -210,7 +210,7 @@ else
 
   %%%% Write an enzo parameter file patch, to be included in there.
 
-  fout = fopen('enzo_part.dat', 'w');
+  fout = fopen('enzoparam_part.enzo', 'w');
   fprintf(fout, 'CosmologySimulationOmegaBaryonNow        = %f\n', Om0_l*fb_l);
   fprintf(fout, 'CosmologySimulationOmegaCDMNow           = %f\n', Om0_l*fc_l);
   fprintf(fout, '\n');
