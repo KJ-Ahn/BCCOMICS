@@ -71,7 +71,7 @@ $ octave
 >> addpath('c:\Documents\BCCOMICS\src')
 ```
 
-### (2) Run bccomics_setup (when patchidxinput_flat=false in params.m)
+### (2) Run bccomics_setup (when patchidxinput_flag=false in params.m)
 You will be asked to choose a patch with your desired CDM overdensity and V_cb (absolute value).
 ```
 >> bccomics_setup
@@ -112,17 +112,68 @@ Wanted Vcb = 30 km/s; Selected patch's Vcb = 30.011 km/s
 ```
 Then you should wait until all wavenumbers are calculated. Be patient, it takes a while.
 ### (3) Run bccomics
-You will be asked to choose one among those patches that you have chosen in more-than-one bccomics_setup runs.
+Necessary parameters for bccomics is in "params_patch.m". It is mostly self-explanatory. Just a bit more explanation on gaussian random seed: for the final initial condition, you need to either (a) use preexisting seed or (b) generate a new seed. If (a) is the case, `olseedflag = true`, and you should specify `diroldseed` and `Noldseed`. The gaussian random seed is named as e.g. `subgaussseed512.matbin` if `Noldseed=512`, and the file has `Noldseed*Noldseed*(Noldseed/2+1)` complex values. 
+
+After setting "params_patch.m", start octave or matlab, go to the work directory, add path of the src directory, and then run bccomics:
 ```
+$ octave  
+
+>> cd '/home/kjahn/BCCOMICS/sample'
+>> addpath('/home/kjahn/BCCOMICS/src')
 >> bccomics
 ```
-After all runs are successuful, you will have initial conditions under `ICdir` with appropriate directory name.
+You will be asked to choose one among those patches that you have chosen in more-than-one bccomics_setup runs.
+```
+Patches ordered in calculation time, from oldest(top) to newest(bottom)
+-----------------------------------------------------------------------
+Patch #  ix  iy  iz  Deltac/sigma(Deltac)  V_cb(km/s)  at z=1000
+  1     118 102 120      1.000e+00          3.000e+01
+  2      75  42 120      1.998e+00          5.003e+01
+  3      40  84  79      2.966e-04          2.299e+01
+Choose a patch of your interest; default is 3 if you just hit Enter below.
+Enter your choice (patch #):
+```
+Assume you want Patch # 2 above, which is 2sigma Density peak with V_cb=50.03 km/s. Then enter 2:
+```
+Enter your choice (patch #):2
+Patch # 2 chosen.
+----- Interpolating transfer function -----
+----- Convolving transfer function with random number -----
+----- Calculating CDM position x -----
+... (more messages)
+*********** bccomics successfully ended ************
+>>
+```
+After all runs are successuful, you will have a sub-directory under `ICdir`, named e.g. as 1.00Mpch_64_ic75_jc42_kc120. Under this direcotyr, you will have initial conditions.
 
 ### (4) For OCTAVE only, convert output binary ICs to enzo-readable HDF5 binary files.
+Matlab can produce enzo initial conditions directly in step (3). But Octave still lacks the functionality to do so. The initial conditions from Octave will be files named "cpos1", "cpos2", ..., "vc1", ..., "db", "vb1", ..., "ether", "etot". Go to the initial condition directory, and run the provided python script:
 ```
-$ python convert2enzo.py
+$ cd /home/kjahn/BCCOMICS/ICs/1.00Mpch_64_ic75_jc42_kc120
+$ python /home/kjahn/BCCOMICS/src_converter/convert2enzo.py
 ```
+Then you will get enzo-readable HDF5 files named "ParticlePositions", "ParticleVelocities", "GridDensity", "GridVelocities", "GasThermalSpecEnergy", and "GasTotalSpecEnergy".
 
+### (5) For overdense or underdense patches only, you absolutely should tweak the enzo parameter file.
+Because cosmology simulation by enzo needs typically a periodic boundary condition, simulating overdense(underdense) patches requires fooling enzo (see section 3 of Ahn & Smith). This is done by "enzo_patchcosmo.m". You first need to provide file `zglobal.dat` under the IC directory (e.g. `/home/kjahn/BCCOMICS/ICs/1.00Mpch_64_ic75_jc42_kc120`) just listing "global redshifts" for enzo output dumps:
+```
+$ pwd
+kjahn@machine:/home/kjahn/BCCOMICS/ICs/1.00Mpch_64_ic75_jc42_kc120
+$ cat zglobal.dat
+100
+90
+80
+70
+60
+50
+$
+```
+Then, run octave(matlab) in this directory, and run "enzo_patchcosmo.m". It will then generate file `enzoparam_part.enzo`, which you should copy & paste to your final enzo parameter file (e.z. `localcosmo.enzo`). You'd better keep `zglobal.dat`, so that you can later match a "local redshift" in `enzoparam_part.enzo` to its corresponding "global redshift" in `zglobal.dat`. Take a look at `localcosmo.enzo`, and you will see non-zero curvature term, and also seemigly odd cosmological parameters and "local redshifts". But this is how you fool enzo to simulate overdense(underdense) patches.
+```
+$ octave
+>> cd '/home/kjahn/BCCOMICS/ICs/1.00Mpch_64_ic75_jc42_kc120'
+>> enzo_patchcosmo
+```
 ## Citing
 
 If you use `BCCOMICS` in your work, please cite as:
