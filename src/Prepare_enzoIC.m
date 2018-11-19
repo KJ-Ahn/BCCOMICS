@@ -7,6 +7,8 @@ VelocityUnits = 1.22475e7*Lbox_p_inMpch*sqrt(Om0)*sqrt(1+zf);
 SpecificEnergyUnits = VelocityUnits^2; %% specific energy = energy/mass 
 
 fout = fopen([ICsubdir '/Units.txt'],'w');
-fprintf(fout,'%s\n', '## density units; velocity units; specific energy units -- for enzo');
+fprintf(fout,'%s\n', '## Pls look at the snippet "CosmologyGetUnits.C" of enzo src,\n');
+fprintf(fout,'and also how sp_Etot_enzo is obtained in "Generate_IC.m" for clarity.\n');
+fprintf(fout,'%s\n', '## density unit (g/cm^3); velocity unit (cm/s); specific energy unit (cm^2/s^2) -- for enzo');
 fprintf(fout,'%e %e %e\n', DensityUnits, VelocityUnits, SpecificEnergyUnits);
 fclose(fout);
