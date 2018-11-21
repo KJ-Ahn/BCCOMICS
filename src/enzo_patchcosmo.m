@@ -57,7 +57,6 @@ else
   %% For the same-cosmic-time Enzo outputs, first list wanted global redshifts
   zglobal_enzo = load('zglobal.dat');
   zglobal_enzo = sort(zglobal_enzo, 'descend'); %% sort in descending order
-  %%zglobal_enzo = [linspace(200,120,5)';  linspace(100,40,7)'; linspace(30,22,5)'; linspace(20,11,10)'; linspace(10,3,15)']
   aglobal_enzo = 1./(1+zglobal_enzo);
   Nz_enzo      = length(zglobal_enzo);
 
@@ -223,25 +222,28 @@ else
   %% But also, Lbox_p_inMpch uses h, not h0_l, so need to rescale with (h0_l/h)
   fprintf(fout, 'CosmologyComovingBoxSize   = %f  ', Lbox_p_inMpch*(h0_l/h)*alocf); 
   fprintf(fout, ' // Mpc/h\n' );  
-  fprintf(fout, 'CosmologyInitialRedshift   = %f\n', zloc_new_enzo(1, icc)        );
-  fprintf(fout, 'CosmologyFinalRedshift     = %f\n', zloc_new_enzo(Nz_enzo,icc)   );
+  fprintf(fout, 'CosmologyInitialRedshift   = %f\n', zloc_new_enzo(1)      );
+  fprintf(fout, 'CosmologyFinalRedshift     = %f\n', zloc_new_enzo(Nz_enzo));
   fprintf(fout, '\n');
   for iz_enzo = 1:Nz_enzo
-      fprintf(fout, 'CosmologyOutputRedshift[%i] = %f\n', iz_enzo-1, zloc_new_enzo(iz_enzo,icc) );
+      fprintf(fout, 'CosmologyOutputRedshift[%i] = %f\n', iz_enzo-1, zloc_new_enzo(iz_enzo) );
   end
   fclose(fout);
   %% Print out the ratios of enzo units (in CosmologyGetUnits.C).
   %% ratio = global/local
-  lengunit_ratio = Lbox_p_inMpch/(h*(1+zzend)) /(Lbox_p_inMpch*(h0_l/h)*alocf/(h0_l*(1+zloc_new_enzo(1,icc))));
-  densunit_ratio = Om0*h^2*(1+zzend)^3 /(Om0_l*h0_l^2*(1+zloc_new_enzo(1,icc))^3);
-  timeunit_ratio = sqrt(Om0_l)*h0_l*(1+zloc_new_enzo(1,icc))^1.5 /(sqrt(Om0)*h*(1+zzend)^1.5);
-  velounit_ratio = Lbox_p_inMpch*sqrt(Om0)*sqrt(1+zzend) /(Lbox_p_inMpch*(h0_l/h)*alocf*sqrt(Om0_l)*sqrt(1+zloc_new_enzo(1,icc)));
+  lengunit_ratio = Lbox_p_inMpch/(h*(1+zzend)) /(Lbox_p_inMpch*(h0_l/h)*alocf/(h0_l*(1+zloc_new_enzo(1))));
+  densunit_ratio = Om0*h^2*(1+zzend)^3 /(Om0_l*h0_l^2*(1+zloc_new_enzo(1))^3);
+  timeunit_ratio = sqrt(Om0_l)*h0_l*(1+zloc_new_enzo(1))^1.5 /(sqrt(Om0)*h*(1+zzend)^1.5);
+  velounit_ratio = Lbox_p_inMpch*sqrt(Om0)*sqrt(1+zzend) /(Lbox_p_inMpch*(h0_l/h)*alocf*sqrt(Om0_l)*sqrt(1+zloc_new_enzo(1)));
   tempunit_ratio = velounit_ratio^2;
-  datcc = [icc flagmean icc_tab(icc,:) lengunit_ratio densunit_ratio timeunit_ratio velounit_ratio tempunit_ratio];
+  datcc = [icc lengunit_ratio densunit_ratio timeunit_ratio velounit_ratio tempunit_ratio];
   foutratio=fopen('enzounit_ratio.dat','w');
-  fprintf(foutratio, '%2i %2i  %4i %4i %4i  %e %e %e %e %e\n', datcc');
+  fprintf(foutratio, '%4i %4i %4i  %e %e %e %e %e\n', datcc');
   fclose(foutratio);
 
+  disp('************* Local parameters found and written ********');
+  disp('Contents of enzoparm_part.enzo should replace parameters in your full enzo parameter file.');
+  disp('*********************************************************');
 end
 
 

@@ -162,6 +162,7 @@ end
 %% Copy essential files to ICsubdir. This helps consistency in record tracking.
 copyfile('params.m', ICsubdir);
 copyfile('params_patch.m', ICsubdir);
+copyfile(Cosmology, ICsubdir);
 copyfile([setupdir '/zz.dat'], ICsubdir);
 copyfile([setupdir '/stats_zend.dat'], ICsubdir);
 iccdat = cellspec_azend(idxcc,:);
