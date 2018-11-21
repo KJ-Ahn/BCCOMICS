@@ -155,7 +155,7 @@ $ python /home/kjahn/BCCOMICS/src_converter/convert2enzo.py
 Then you will get enzo-readable HDF5 files named "ParticlePositions", "ParticleVelocities", "GridDensity", "GridVelocities", "GasThermalSpecEnergy", and "GasTotalSpecEnergy".
 
 ### (5) For overdense or underdense patches only, you absolutely should tweak the enzo parameter file.
-Because cosmology simulation by enzo needs typically a periodic boundary condition, simulating overdense(underdense) patches requires fooling enzo (see section 3 of Ahn & Smith). This is done by "enzo_patchcosmo.m". You first need to provide file `zglobal.dat` under the IC directory (e.g. `/home/kjahn/BCCOMICS/ICs/1.00Mpch_64_ic75_jc42_kc120`) just listing "global redshifts" for enzo output dumps:
+Because cosmology simulation by enzo needs typically a periodic boundary condition, simulating overdense(underdense) patches requires fooling enzo or any other simulation codes (see section 3 of Ahn & Smith). For enzo, this is done by "enzo_patchcosmo.m". You first need to provide file `zglobal.dat` under the IC directory (e.g. `/home/kjahn/BCCOMICS/ICs/1.00Mpch_64_ic75_jc42_kc120`) listing "global redshifts" for enzo output dumps:
 ```
 $ pwd
 kjahn@machine:/home/kjahn/BCCOMICS/ICs/1.00Mpch_64_ic75_jc42_kc120
@@ -168,13 +168,20 @@ $ cat zglobal.dat
 50
 $
 ```
-Then, run octave(matlab) in this directory, and run "enzo_patchcosmo.m". It will then generate file `enzoparam_part.enzo`, which you should copy & paste to your final enzo parameter file (e.z. `localcosmo.enzo`). You'd better keep `zglobal.dat`, so that you can later match a "local redshift" in `enzoparam_part.enzo` to its corresponding "global redshift" in `zglobal.dat`. Take a look at `enzoparam_part.enzo`, and you will see non-zero curvature term, and also seemigly odd cosmological parameters and "local redshifts". But this is how you fool enzo to simulate overdense(underdense) patches.
+You may try zglobal.m in the source directory for easy creation of zglobal.dat to your taste.
+
+Then, run octave(matlab) in this directory, and run "enzo_patchcosmo.m". It will then generate file `enzoparam_part.enzo`, which you should copy & paste to your final enzo parameter file (e.z. `localcosmo.enzo`). You'd better keep `zglobal.dat`, so that you can later match a "local redshift" in `enzoparam_part.enzo` to its corresponding "global redshift" in `zglobal.dat`. Take a look at `enzoparam_part.enzo`, and you will see non-zero curvature term, and also seemigly odd cosmological parameters and "local redshifts". But this is how you fool enzo (and similarly other simulation codes) to simulate overdense(underdense) patches.
 ```
 $ octave
 >> cd '/home/kjahn/BCCOMICS/ICs/1.00Mpch_64_ic75_jc42_kc120'
 >> addpath('/home/kjahn/BCCOMICS/src')
 >> enzo_patchcosmo
 ```
+## To-Do
+- Porting to Gadget, RAMSES, etc. WE WELCOME ANYONE WHO IS INTERESTED IN THIS EFFORT. DROP US A LINE, WE'LL ADD YOU AS A CONTRIBUTOR.
+- Small-wavenumber tuning: For very small wavenumbers, the number of modes are too small to correctly reproduce average power spectrum. With unlucky gaussain random seed, this might cause unwated finte-box effect. May have to restrict randomness of power spectrum amplitude (not phase though) of smallest k modes.
+- Nested grid: Not yet. Again, we welcome contributors on this side.
+
 ## Citing
 
 If you use `BCCOMICS` in your work, please cite as:
