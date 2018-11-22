@@ -427,6 +427,9 @@ sp_Etot_enzo = sp_Etot_enzo + 1/2*(vb2*MpcMyr_2_kms*1e5/VelocityUnits).^2;
 
 Vb2 = reshape(vb2(:,:,1) *MpcMyr_2_kms, Nmode_p, Nmode_p); %% for figure
 
+%% into enzo velocity unit
+vb2 = vb2 * MpcMyr_2_kms * 1e5 /VelocityUnits;
+
 if enzo_bin_flag
   fout = fopen([ICsubdir '/vb2'], 'w');
   fwrite(fout, vb2, 'double');
@@ -459,6 +462,9 @@ vb3                 = vb3 - V_cb_3_azend(ic,jc,kc);
 sp_Etot_enzo = sp_Etot_enzo + 1/2*(vb3*MpcMyr_2_kms*1e5/VelocityUnits).^2; 
 
 Vb3 = reshape(vb3(:,:,1) *MpcMyr_2_kms, Nmode_p, Nmode_p); %% for figure
+
+%% into enzo velocity unit
+vb3 = vb3 * MpcMyr_2_kms * 1e5 /VelocityUnits;
 
 if enzo_bin_flag
   fout = fopen([ICsubdir '/vb3'], 'w');
