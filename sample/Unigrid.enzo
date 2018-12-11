@@ -1,0 +1,206 @@
+#;-*-C-*-
+
+# AMR PROBLEM DEFINITION FILE: Cosmology Simulation (amr version)
+#
+#  define problem
+#
+ProblemType                = 30      // cosmology simulation
+TopGridRank                = 3
+TopGridDimensions          = 64 64 64
+PotentialIterations        = 30
+SelfGravity                = 1       // gravity on
+TopGridGravityBoundary     = 0       // Periodic BC for gravity
+LeftFaceBoundaryCondition  = 3 3 3   // same for fluid
+RightFaceBoundaryCondition = 3 3 3
+#
+#  problem parameters
+#
+CosmologySimulationOmegaBaryonNow       = 0.045
+CosmologySimulationOmegaCDMNow          = 0.231
+CosmologySimulationDensityName          = GridDensity
+CosmologySimulationVelocity1Name        = GridVelocities
+CosmologySimulationVelocity2Name        = GridVelocities
+CosmologySimulationVelocity3Name        = GridVelocities
+CosmologySimulationParticlePositionName = ParticlePositions
+CosmologySimulationParticleVelocityName = ParticleVelocities
+CosmologySimulationTotalEnergyName      = GasTotalSpecEnergy
+CosmologySimulationGasEnergyName        = GasThermalSpecEnergy
+CosmologySimulationNumberOfInitialGrids = 1
+CosmologySimulationUseMetallicityField  = 1
+#
+#  define cosmology parameters
+#
+ComovingCoordinates        = 1
+CosmologyOmegaMatterNow    = 0.276
+CosmologyOmegaLambdaNow    = 0.724
+CosmologyOmegaRadiationNow = 8.4278e-5
+CosmologyHubbleConstantNow = 0.703
+CosmologyComovingBoxSize   = 1.   // Mpc/h
+CosmologyMaxExpansionRate  = 0.02
+CosmologyInitialRedshift   = 200
+CosmologyFinalRedshift     = 0.1
+GravitationalConstant      = 1
+#
+#  set I/O and stop/start parameters
+#
+#DataDumpDir  = DD
+#DataDumpName = DD
+# dtDataDump       = 1.25
+RedshiftDumpName = RD
+RedshiftDumpDir  = RD
+#StopCycle    = 100000
+#StopCPUTime  = 420000
+OutputTemperature = 1
+OutputCoolingTime = 1
+
+#
+# I/O and stop/start parameters
+#
+CosmologyOutputRedshift[0] = 200.0 
+CosmologyOutputRedshift[1] = 180.0 
+CosmologyOutputRedshift[2] = 160.0
+CosmologyOutputRedshift[3] = 140.0  
+CosmologyOutputRedshift[4] = 120.0  
+CosmologyOutputRedshift[5] = 100.0  
+CosmologyOutputRedshift[6] = 90.0
+CosmologyOutputRedshift[7] = 80.0
+CosmologyOutputRedshift[8] = 70.0
+CosmologyOutputRedshift[9] = 60.0
+CosmologyOutputRedshift[10] = 50.0
+CosmologyOutputRedshift[11] = 40.0
+CosmologyOutputRedshift[12] = 30.0
+CosmologyOutputRedshift[13] = 28.0
+CosmologyOutputRedshift[14] = 26.0
+CosmologyOutputRedshift[15] = 24.0
+CosmologyOutputRedshift[16] = 22.0
+CosmologyOutputRedshift[17] = 20.0
+CosmologyOutputRedshift[18] = 19.0
+CosmologyOutputRedshift[19] = 18.0
+CosmologyOutputRedshift[20] = 17.0
+CosmologyOutputRedshift[21] = 16.0
+CosmologyOutputRedshift[22] = 15.0
+CosmologyOutputRedshift[23] = 14.0
+CosmologyOutputRedshift[24] = 13.0
+CosmologyOutputRedshift[25] = 12.0
+CosmologyOutputRedshift[26] = 11.0
+CosmologyOutputRedshift[27] = 10.0
+CosmologyOutputRedshift[28] =  9.5
+CosmologyOutputRedshift[29] =  9.0
+CosmologyOutputRedshift[30] =  8.5
+CosmologyOutputRedshift[31] =  8.0
+CosmologyOutputRedshift[32] =  7.5
+CosmologyOutputRedshift[33] =  7.0
+CosmologyOutputRedshift[34] =  6.5
+CosmologyOutputRedshift[35] =  6.0
+CosmologyOutputRedshift[36] =  5.5
+CosmologyOutputRedshift[37] =  5.0
+CosmologyOutputRedshift[38] =  4.5
+CosmologyOutputRedshift[39] =  4.0
+CosmologyOutputRedshift[40] =  3.5
+CosmologyOutputRedshift[41] =  3.0
+CosmologyOutputRedshift[42] =  2.5
+CosmologyOutputRedshift[43] =  2.0
+CosmologyOutputRedshift[44] =  1.75
+CosmologyOutputRedshift[45] =  1.5
+CosmologyOutputRedshift[46] =  1.25
+CosmologyOutputRedshift[47] =  1.0
+CosmologyOutputRedshift[48] =  0.75
+CosmologyOutputRedshift[49] =  0.5
+CosmologyOutputRedshift[50] =  0.3
+CosmologyOutputRedshift[51] =  0.2
+CosmologyOutputRedshift[52] =  0.1
+
+#
+#  set hydro parameters
+#
+HydroMethod                 = 0       // PPM
+RiemannSolver               = 4       // HLLC
+ReconstructionMethod        = 1 // PPM
+RiemannSolverFallback       = 1 // HLL if there's a dnu<=0
+Gamma                       = 1.6667
+PPMDiffusionParameter       = 0       // diffusion off
+DualEnergyFormalism         = 1       // use total & internal energy
+InterpolationMethod         = 1       // SecondOrderA
+FluxCorrection              = 1
+ConservativeInterpolation   = 0
+CourantSafetyNumber         = 0.3
+ParticleCourantSafetyNumber = 0.8
+UseMinimumPressureSupport   = 0
+
+#
+#  set grid refinement parameters
+#
+StaticHierarchy                  = 1    // dynamic hierarchy
+MaximumRefinementLevel 	         = 4
+MaximumGravityRefinementLevel 	 = 4
+MaximumParticleRefinementLevel 	 = 4
+RefineBy                         = 2    // refinement factor
+CellFlaggingMethod               = 2 4 6
+MinimumEfficiency                = 0.3  // fraction efficiency
+MinimumOverDensityForRefinement  = 8 8
+MinimumMassForRefinementLevelExponent = 0.0 0.0
+RefineByJeansLengthSafetyFactor    = 4.0
+
+# RadiativeTransfer = 1
+# RadiativeTransferRaysPerCell            = 5.1
+# RadiativeTransferInitialHEALPixLevel    = 1
+# RadiativeTransferHydrogenOnly           = 0
+# RadiativeTransferOpticallyThinH2        = 1
+# RadiativeTransferPeriodicBoundary       = 0
+# RadiativeTransferAdaptiveTimestep       = 1
+# RadiativeTransferRadiationPressure      = 1
+# RadiativeTransferHubbleTimeFraction     = 10
+#RadiativeTransferPhotonMergeRadius      = 2.5 #2.5 is the default
+# RadiationFieldType = 16
+
+#
+# Star formation and feedback
+#
+# StarParticleCreation   = 40   // star particle creation turned on, using model #5 and #3
+# StarParticleFeedback   = 40   // stellar feedback turned on, using model #5 #3 ray tracing
+
+# Just Pop III star particle creation and no feedback 
+StarParticleCreation    = 8
+StarParticleFeedback    = 0
+ 
+#
+#PopIII/II parameters
+#
+ 
+PopIIIOverDensityThreshold            = 1e3
+PopIIIMetalCriticalFraction           = 1.295e-8 # absolute (1e-6 Zsun)
+PopIIIH2CriticalFraction              = 5e-4
+PopIIISupernovaRadius                 = 10
+PopIIISupernovaUseColour              = 1
+PopIIIHeliumIonization                = 1
+PopIIIStarMass                        = 20
+PopIIIInitialMassFunction             = 1
+PopIIIInitialMassFunctionSeed         = 1823
+PopIIIMassRange                       = 1.000000 300.000000 
+
+# StarClusterUseMetalField              = 1
+# StarClusterMinDynamicalTime           = 3e+06 
+# StarClusterIonizingLuminosity         = 1.12e+46
+# StarClusterSNEnergy                   = 1e49
+# StarClusterSNRadius                   = 10
+# StarClusterFormEfficiency             = 0.07
+# StarClusterMinimumMass                = 1000
+
+RadiativeCooling      = 1
+MultiSpecies          = 2
+# MetalCooling          = 3
+# CloudyCoolingGridFile = solar_2008_3D_metals.h5
+# H2FormationOnDust     = 1
+# CMBTemperatureFloor   = 1 // sets grackle.cmb_temperature_floor
+RadiationShield       = 2 // H2 self-shielding
+
+#
+#  set some global parameters
+#
+GreensFunctionMaxNumber   = 30   // # of greens function at any one time
+#SubgridSizeAutoAdjust = 1
+#PartitionNestedGrids = 1
+#ParallelRootGridIO   = 1
+#ParallelParticleIO   = 1
+UnigridTranspose     = 2
+LoadBalancing        = 4
