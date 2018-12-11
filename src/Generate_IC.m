@@ -404,6 +404,7 @@ end
 
 %% If SPH in mind:
 if (particlevelocity_accuracyflag & baryonparticleflag)
+  disp('******* Calculating baryon particle velocity x more accurately than 1LPT **');
   %% pad with periodic boundary condition, to provide 1:Nmode_p+1 domain. (**)
   vb1 = padarray(vb1, [1 1 1], 'circular', 'post'); %% now (Nmode_p+1)^3 elements.
   %% Find 
@@ -440,6 +441,7 @@ if enzo_HDF5_flag
 end
 
 if (particlevelocity_accuracyflag & baryonparticleflag)
+  disp('******* Calculating baryon particle velocity y more accurately than 1LPT **');
   %% pad with periodic boundary condition, to provide 1:Nmode_p+1 domain. (**)
   vb2 = padarray(vb2, [1 1 1], 'circular', 'post'); %% now (Nmode_p+1)^3 elements.
   %% Find 
@@ -486,6 +488,7 @@ if enzo_HDF5_flag
 end
 
 if (particlevelocity_accuracyflag & baryonparticleflag)
+  disp('******* Calculating baryon particle velocity z more accurately than 1LPT **');
   %% pad with periodic boundary condition, to provide 1:Nmode_p+1 domain. (**)
   vb3 = padarray(vb3, [1 1 1], 'circular', 'post'); %% now (Nmode_p+1)^3 elements.
   %% Find 
@@ -595,4 +598,17 @@ end
 %% in erg (total energy per baryon)
 Zetot = reshape(sp_Etot_enzo(:,:,1)*VelocityUnits^2,Nmode_p,Nmode_p); %% for figure
 
-clear dT sp_Etot_enzo
+%% If SPH in mind: (this if-end statement should be placed after other dT related
+%% grid quantities are all calculated. So developers, do not change this location.)
+if (particlevelocity_accuracyflag & baryonparticleflag)
+  disp('******* Calculating baryon particle thermal energy more accurately than 1LPT **');
+  %% pad with periodic boundary condition, to provide 1:Nmode_p+1 domain. (**)
+  dT = padarray(dT, [1 1 1], 'circular', 'post'); %% now (Nmode_p+1)^3 elements.
+  %% Find 
+  dT = interpn(dT, Psi1, Psi2, Psi3, interpnopt); %% now Nmode_p^3 elements
+  fout = fopen([ICsubdir '/eptherm'], 'w');
+  fwrite(fout, 3/2*kb*(dT+1)*Tz /(mmw*mH) /VelocityUnits^2, 'double');
+  fclose(fout);
+end
+
+clear dT sp_Etot_enzo Psi1 Psi2 Psi3
