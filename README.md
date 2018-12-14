@@ -194,16 +194,14 @@ If you use `BCCOMICS` in your work, please cite as:
 
 BIBTEX:
 ```
-@ARTICLE{2018arXiv180704063A,
-   author = {{Ahn}, K. and {Smith}, B.~D.},
-    title = "{Formation of First Galaxies inside Density Peaks and Voids under the Influence of Dark Matter-Baryon Streaming Velocity, I: Initial Condition and Simulation Scheme}",
-  journal = {ArXiv e-prints},
-archivePrefix = "arXiv",
-   eprint = {1807.04063},
- keywords = {Astrophysics - Cosmology and Nongalactic Astrophysics},
-     year = 2018,
-    month = jul,
-   adsurl = {http://adsabs.harvard.edu/abs/2018arXiv180704063A},
-  adsnote = {Provided by the SAO/NASA Astrophysics Data System}
+@ARTICLE{0004-637X-869-1-76,
+  author={Kyungjin Ahn and Britton D. Smith},
+  title={Formation of First Galaxies inside Density Peaks and Voids under the Influence of Dark Matter–Baryon Streaming Velocity. I. Initial Condition and Simulation Scheme},
+  journal={The Astrophysical Journal},
+  volume={869},
+  number={1},
+  pages={76},
+  url={http://stacks.iop.org/0004-637X/869/i=1/a=76},
+  year={2018}
 }
 ```
