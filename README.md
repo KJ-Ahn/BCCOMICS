@@ -36,9 +36,9 @@ BCCOMICS has two main scripts that run on either [MATLAB(R)](https://www.mathwor
 
 To install a rather recent version of OCTAVE on old linux distributions (or to install it privately on a shared machine without root priviledge), you might want to try installing [Anaconda](https://www.anaconda.com/download/), and then do `conda install -c conda-forge octave` for installing a recent OCTAVE with its dependencey without headache. 
 
-For MATLAB, in addition to the main program, following additional packages need to be installed.  
-- Image Processing Toolbox  
-- Statistics and Machine Learning Toolbox
+For MATLAB, in addition to the main program, it is preferred (but not essential) that following additional packages be installed.  
+- Image Processing Toolbox (optional; if uninstalled BCCOMICS will use `padarray.m` under BCCOMICS/mfiles_for_matlab/ImagProc_Tool)  
+- Statistics and Machine Learning Toolbox (optional; if uninstalled BCCOMICS will use functions under BCCOMICS/mfiles_for_matlab/Stat_Tool)
 
 For gnu OCTAVE, in addition to the main program, following additional packages need to be installed. Use your linux distribution's package installer (e.g. `sudo apt install octave-image` for Ubuntu). It is OK not to install following "octave-*" packages if you want, BCCOMICS is shipped with necessary function files of these packages anyways.  
 - octave-image (optional; if uninstalled BCCOMICS will use `padarray.m` under BCCOMICS/mfiles_for_octave/) 

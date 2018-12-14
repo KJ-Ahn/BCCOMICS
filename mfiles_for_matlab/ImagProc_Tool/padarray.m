@@ -1,5 +1,7 @@
 %% Copyright (C) 2013 Carnë Draug <carandraug@octave.org>
 %%
+%% ** Kyungjin Ahn edited this to make compatible in MATLAB(C).
+%%
 %% This program is free software; you can redistribute it and/or modify it under
 %% the terms of the GNU General Public License as published by the Free Software
 %% Foundation; either version 3 of the License, or (at your option) any later
@@ -122,7 +124,6 @@ function B = padarray(A, padsize, varargin)
       error ('padarray: PADVAL and DIRECTION must be a string or a scalar');
     end
   end
-
   fancy_pad = false;
   if (~isempty(pattern))
     fancy_pad = true;
@@ -170,14 +171,18 @@ function B = padarray(A, padsize, varargin)
     replicate = false;
     symmetric = false;
     reflect = false;
-    switch (lower(pattern))
-      case 'circular',  circular  = true;
-      case 'replicate', replicate = true;
-      case 'symmetric', symmetric = true;
-      case 'reflect',   reflect   = true;
+    switch lower(pattern)
+      case 'circular'
+        circular  = true;
+      case 'replicate'
+        replicate = true;
+      case 'symmetric'
+        symmetric = true;
+      case 'reflect'
+        reflect   = true;
       otherwise
         error ('padarray: unknown PADVAL %s.', pattern);
-    endswitch
+    end
 
     %% For a dimension of the input matrix of size 1, since reflect does
     %% not includes the borders, it is not possible to pad singleton dimensions.

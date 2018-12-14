@@ -7,7 +7,8 @@
 %% some old version of octave interpn either requires meshgrid data for X & Y 
 %% in interp2(X,Y,Z,x,y,interp2opt), or 'pchip' is not allowed as interp2opt, 
 %% or even some old octave does not have interp2 function. 
-%% Test this and if this is the case use the working interp2.m.
+%% Test this and if this is the case use the working interp2.m provides
+%% in mfiles_for_octave.
 %%
 %% interpn is used for 3D interpolation when particlevelocity_accuracyflag
 %% is true. Again, test this ('pchip' is not implemented yet, so use 'linear'
@@ -57,14 +58,20 @@ if ~matlabflag
     addpath([pkgdir '/statistics-1.3.0/inst']);
   end
 else
-  if ~exist('raylrnd')
-    disp('Statistics Toolbox need be installed. Rerun after installation.');
-    returnflag = true;
-    return;
+  %% mfiles_for_matlab provides GPL licensed scripts that do what
+  %% MATLAB Statistics Toolbox and Image Processing Toolbox would do
+  %% for bccomics_setup and bccomics. Still, you may like to install
+  %% these toolboxes for efficiency.
+  if (~exist('raylrnd') || ~exist('unifrnd'))
+    %%disp('Statistics Toolbox need be installed. Rerun after installation.');
+    %%returnflag = true;
+    %%return;
+    addpath([pkgdir '/mfiles_for_matlab/Stat_Tool']);
   end
   if ~exist('padarray')
-    disp('Image Processing Toolbox need be installed. Rerun after installation.');
-    returnflag = true;
-    return;
+    %%disp('Image Processing Toolbox need be installed. Rerun after installation.');
+    %%returnflag = true;
+    %%return;
+    addpath([pkgdir '/mfiles_for_matlab/ImagProc_Tool']);
   end
 end
