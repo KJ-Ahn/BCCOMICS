@@ -1,31 +1,31 @@
 # BCCOMICS
 BCCOMICS - Baryon CDM COsMological Initial Condition generator for Small scales.
 
-Small-scale fluctuations in the early universe, even at redshift as high as z=200, are found strongy affected by large-scale density and streaming-velocity environments. BCCOMICS is an initial condition generator that allows study of structure formation inside a simulation box of < 4 comoving Mpc, where the simulation box can have non-zero overdensity (Delta) and streaming velocity (V_cb = mean velocity of CDM - mean velocity of baryon) as its environmental condition. This allows study of cosmic variance of e.g. first star formation under varying large-scale environments.
+Small-scale fluctuations in the early universe, even at redshifts as high as z=200, are found to be strongly affected by large-scale density and streaming-velocity environments. BCCOMICS is an initial condition generator that allows the study of structure formation inside a simulation box of < 4 comoving Mpc, where the simulation box can have non-zero overdensity (&Delta;) and streaming velocity (V<sub>cb</sub> = mean velocity of CDM - mean velocity of baryon) as its environmental condition. This allows for the study of cosmic variance of e.g., first star formation under varying large-scale environments.
 
 Currently, it only supports [enzo](http://enzo-project.org). We are inviting contributors to help port this to [Gadget](https://wwwmpa.mpa-garching.mpg.de/gadget/), [RAMSES](https://bitbucket.org/rteyssie/ramses/overview), and many other fabulous N-body+hydro simulation codes.
 
 The main code is composed of two parts.
 
-(1) Realization of large-scale fluctuations (at a length resolution of 4 Mpc comoving) and transfer function calculation (`bccomics_setup.m`):  
-Because the perturbation theory studying the dual impact from large-scale Delta and V_cb on small-scale fluctuations is relatively new ([Ahn 2016](http://adsabs.harvard.edu/abs/2016ApJ...830...68A)), transfer functions from usual linear Boltzmann solvers such as CAMB do not provide the level of accuracy of this new theory. Even when Delta variance is not considered, the suppression of high-k (around k~100/Mpc) modes due to V_cb ([Tseliakhovich & Hirata 2010](http://adsabs.harvard.edu/abs/2010PhRvD..82h3520T)) is not reflected in transfer function from CAMB. "bccomics_setup.m" makes realization of environmental variables, and once the user chooses a specific "patch" of generically non-zero Delta and V_cb, it calculates and records the transfer function.
+1. Realization of large-scale fluctuations (at a length resolution of 4 Mpc comoving) and transfer function calculation (`bccomics_setup.m`):  
+Because the perturbation theory studying the dual impact from large-scale &Delta; and V<sub>cb</sub> on small-scale fluctuations is relatively new ([Ahn 2016](http://adsabs.harvard.edu/abs/2016ApJ...830...68A)), transfer functions from the usual linear Boltzmann solvers, such as CAMB, do not provide the level of accuracy of this new theory. Even when &Delta; variance is not considered, the suppression of high-k (around k~100/Mpc) modes due to V<sub>cb</sub> ([Tseliakhovich & Hirata 2010](http://adsabs.harvard.edu/abs/2010PhRvD..82h3520T)) is not reflected in the transfer function from CAMB. "bccomics_setup.m" makes a realization of environmental variables, and once the user chooses a specific "patch" of generically non-zero &Delta; and V<sub>cb</sub>, it calculates and records the transfer function.
 
-(2) Realization of small-scale fluctuations on a selected patch (`bccomics.m`):  
-The user is asked again to choose one from already calculated set of patches, and then the corresponding transfer function is read in and used to generate 3D data of CDM and baryons. Currently, following data in simple bianry form and in enzo units are generated:  
-(a) CDM particle positions (cpos1, cpos2, cpos3)  
-(b) CDM particle velocities (vc1, vc2, vc3)  
-(c) baryon grid density (db)  
-(d) baryon grid velocities (vb1, vb2, vb3)  
-(e) baryon grid thermal energy (etherm)  
-(f) baryon grid kinetic+thermal energy (etot)  
-(g) baryon particle positions (bpos1, bpos2, bpos3) (optional; with SPH in mind)  
-(h) baryon particle velocities (vpb1, vpb2, vpb3) (optional; with SPH in mind)  
-(i) baryon particle thermal energy (eptherm) (optional; with SPH in mind)  
+2. Realization of small-scale fluctuations on a selected patch (`bccomics.m`):  
+The user is asked again to choose one from a previously-calculated set of patches, and then the corresponding transfer function is read in and used to generate 3D data of CDM and baryons. Currently, the following data are generated:  
+a. CDM particle positions (cpos1, cpos2, cpos3)  
+b. CDM particle velocities (vc1, vc2, vc3)  
+c. baryon grid density (db)  
+d. baryon grid velocities (vb1, vb2, vb3)  
+e. baryon grid thermal energy (etherm)  
+f. baryon grid kinetic+thermal energy (etot)  
+g. baryon particle positions (bpos1, bpos2, bpos3) (optional, for SPH)  
+h. baryon particle velocities (vpb1, vpb2, vpb3) (optional, for SPH)  
+i. baryon particle thermal energy (eptherm) (optional, for SPH)  
+Data is written in [Enzo's](https://enzo.readthedocs.io) internal unit system.  
+**If using MATLAB, initial conditions can be saved directly to Enzo's HDF5 format. Saving to HDF5 is not supported in OCTAVE, but a Python script for converting the native output to Enzo format is provided.**  
+**Items _g_, _h_, and _i_ can be written when `baryonparticleflag=true` and `particlevelocity_accuracyflag=true` in `params_patch.m`.**
 
-*In case of MATLAB, initial conditions in hdf5 binary, ready to be used for enzo, can be generated.  
-** (g), (h), (i) can be written when `baryonparticleflag=true` and `particlevelocity_accuracyflag=true` in `params_patch.m`.  
-
-(3) (OCTAVE-only) Conversion of binary data from step (2) into enzo-usable initial conditions, by "convert_enzo.py" using python+h5py. 
+3. (OCTAVE-only) Conversion of binary data from step (2) into enzo-usable initial conditions, by "convert_enzo.py" using python+h5py. 
 
 ## Installation and Requirements
 
@@ -56,10 +56,10 @@ Best explained with an example. Let's assume that BCCOMICS is installed at `/hom
 Below `$` is a linux command prompt, `>>` is either OCTAVE's or MATLAB's command prompt.
 
 ### (1) Set a work directory
-First, you need a work directory under which "params.m" and "params_patch.m" exist (You should stick to this naming convention!!), and also a cosmology parameter file (as provided as BCCOMICS/sample/LCDM.m). The name of the work directory can be anything. Inside OCTAVE/MATLAB, you need to go to this directory by `cd` command. You also need to add the source path by `addpath` commmand.  
-Current example "params.m" generates 151^3 unigrid patches inside (604 Mpc)^3 volume with `bccomics_setup.m`. Current example "params_patch.m" generates initial conditions of CDM and baryons with 64^3 resolution with `bccomics.m`.  
-For your own setup, do a recursive copy of `sample` directory to e.g. `my_params`, and modify "params.m" and "params_patch.m" which are both self-explanatory. The cosmology parameter file (e.g. LCDM.m) should carefully reflect parameters you used for running CAMB and RECFAST.  
-** If you want to use pre-generated (by bccomics_setup.m) gaussian random seed ("gaussseed.matbin"; stick to this naming convention!!), place it under `setupdir` specified in params.m.
+First, you need a work directory under which "params.m" and "params_patch.m" exist (You should stick to this naming convention!!), and also a cosmology parameter file (as provided as BCCOMICS/sample/LCDM.m). The name of the work directory can be anything. Inside OCTAVE/MATLAB, you need to go to this directory by the `cd` command. You also need to add the source path by the `addpath` commmand.  
+The current example "params.m" generates 151<sup>3</sup> unigrid patches inside a (604 Mpc)<sup>3</sup> volume with `bccomics_setup.m`. The example "params_patch.m" generates initial conditions of CDM and baryons with 64<sup>3</sup> resolution with `bccomics.m`.  
+For your own setup, do a recursive copy of the `sample` directory to e.g. `my_params`, and modify "params.m" and "params_patch.m" which are both self-explanatory. The cosmology parameter file (e.g. LCDM.m) should carefully reflect parameters you used for running CAMB and RECFAST.  
+**If you want to use the pre-generated (by bccomics_setup.m) gaussian random seed ("gaussseed.matbin"; stick to this naming convention!!), place it under `setupdir` specified in params.m.**
 #### (for OCTAVE on linux machine)
 ```
 $ octave
@@ -74,7 +74,7 @@ $ octave
 ```
 
 ### (2) Run bccomics_setup (when patchidxinput_flag=false in params.m)
-You will be asked to choose a patch with your desired CDM overdensity and V_cb (absolute value).
+You will be asked to choose a patch with your desired CDM overdensity and V<sub>cb</sub> (absolute value).
 ```
 >> bccomics_setup
 ... Several message outputs ...
@@ -99,7 +99,7 @@ Peak of Vbc in Maxwell-Boltzmann distribution is 22.477 km/s
 Choose Vbc environment at z = 1000
 Enter Vbc at z = 1000 in units of km/s: 
 ```
-If you are interested in typical ones, from above Vbc=30 km/s is a good choice, so enter 30
+If you are interested in typical ones, from above V<sub>cb</sub>=30 km/s is a good choice, so enter 30
 ```
 Enter Vbc at z = 1000 in units of km/s: 30
 311 patches out of total 3.44295e+06 patches satisfy your chosen condition with 1% margin.
