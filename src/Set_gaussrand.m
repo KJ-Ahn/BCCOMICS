@@ -23,6 +23,7 @@ if oldseedflag  %% use preexisting seed
   fileNseed    = [diroldseed '/subgaussseed' num2str(Nmode_p) '.matbin'];
   if (~exist(fileNoldseed) & ~exist(fileNseed))
     disp(['You let oldseedflag true, but neither ' fileNoldseed ' nor ' fileNseed ' exists.']);
+    disp(['Set oldseedflag to false in params_patch.m and rerun bccomics (will generate new seed)']);
     returnflag=true;
     return;
   end
