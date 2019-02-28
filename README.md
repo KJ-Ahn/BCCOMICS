@@ -162,12 +162,15 @@ Because cosmology simulation by enzo needs typically a periodic boundary conditi
 $ pwd
 kjahn@machine:/home/kjahn/BCCOMICS/ICs/1.00Mpch_64_ic75_jc42_kc120
 $ cat zglobal.dat
+200
 100
 90
 80
 70
 60
 50
+20
+10
 $
 ```
 You may try zglobal.m in the source directory for easy creation of zglobal.dat to your taste.
@@ -178,7 +181,57 @@ $ octave
 >> cd '/home/kjahn/BCCOMICS/ICs/1.00Mpch_64_ic75_jc42_kc120'
 >> addpath('/home/kjahn/BCCOMICS/src')
 >> enzo_patchcosmo
+plotflag = 0
+THflag = 0
+OWRTflag =  1
+mmw =  1.2195
+rhocrit0 =  9.2834e-30
+a_i =  0.0049751
+TimeUnits =  2.3939e+14
+************ Local parameters found and written ********
+Contents of enzoparm_part.enzo should replace parameters in your full enzo parameter file.
+*********************************************************
+>>
 ```
+
+Here is a specific example. Say you are at an IC directory named `/home/kjahn/BCCOMICS/ICs/1.00Mpch_64_ic75_jc42_kc120`. This patch is a 2-sigma density peak (see (2) above), as can be roughly checked out from `icc_Dc_Db_Thc_Thb_Vcb1_Vcb2_Vcb3_Vcb_DT.dat` as well:
+```
+$ cat icc_Dc_Db_Thc_Thb_Vcb1_Vcb2_Vcb3_Vcb_DT.dat
+  75   42  120 3.191772e-02 1.762073e-02 -3.194254e-03 -2.902584e-03 2.005724e+00 -9.677555e+00 -1.796974e+00 1.004525e+01 2.651701e-03
+```
+showing Dc=3.191772e-02 at the redshift (z=200) of the initial condition, which has evolved from the value Dc=
+0.0083638 at z=1000. Running `enzo_patchcosmo`, the output file `enzoparam_part.enzo` reads:
+```
+$ cat enzoparam_part.enzo
+CosmologySimulationOmegaBaryonNow        = 0.603016
+CosmologySimulationOmegaCDMNow           = 3.138966
+
+CosmologyOmegaMatterNow    = 3.741982
+CosmologyOmegaLambdaNow    = 0.003767
+CosmologyOmegaRadiationNow = 0.015079
+CosmologyHubbleConstantNow = 9.745857
+CosmologyComovingBoxSize   = 1.018051   // Mpc/h
+CosmologyInitialRedshift   = 13.763798
+CosmologyFinalRedshift     = 0.000000
+
+CosmologyOutputRedshift[0] = 13.763798
+CosmologyOutputRedshift[1] = 10.125176
+CosmologyOutputRedshift[2] = 6.489630
+CosmologyOutputRedshift[3] = 5.763133
+CosmologyOutputRedshift[4] = 5.036844
+CosmologyOutputRedshift[5] = 4.310549
+CosmologyOutputRedshift[6] = 3.584862
+CosmologyOutputRedshift[7] = 2.859749
+CosmologyOutputRedshift[8] = 0.695545
+CosmologyOutputRedshift[9] = 0.000000
+```
+
+The "local" redshifts listed here correspond to those in `zlobal.dat`. The final redshift in `zglobal.dat` will always end up as "local" redshift 0 (CosmologyOutputRedshift[9] in the example above). Local redshift of 0 is the "present", and the usual cosmological parameters at "present", which are usually required for code are also listed in this file; e.g. CosmologySimulationOmegaCDMNow = 3.138966 is the Omega_CDM at present and CosmologyHubbleConstantNow = 9.745857 is h (Hubble constant in units of 100 km/s/Mpc) at present. Omega_curvature at present will be automatically calculated inside Enzo, which is 1-CosmologyOmegaMatterNow-CosmologyOmegaLambdaNow-CosmologyOmegaRadiationNow.
+
+Then, copy & paste these quantities into `Unigrid.enzo` you can find under `sample` directory, and of course these quantities should replace those already in `Unigrid.enzo`. Then, run enzo with this file: `enzo Unigrid.enzo`. Any result at local redshift e.g. 0.695545 is the result at global redshift z=20 in the above example. See Section 3 of Ahn & Smith for more details.
+
+**If `enzo_patchcosmo` fails to run, the redshifts in `zglobal.dat` is likely to contain those redshifts after the patch turns around (you know a closed universe expands, stops, and turns around to collapse, right?). In this case, try shifting the final redshift in `zglobal.dat` to higher redshift and try again.**
+
 ## To-Do
 - Porting to Gadget, RAMSES, etc. WE WELCOME ANYONE WHO IS INTERESTED IN THIS EFFORT. DROP US A LINE, WE'LL ADD YOU AS A CONTRIBUTOR.
 - Small-wavenumber tuning: For very small wavenumbers, the number of modes are too small to correctly reproduce average power spectrum. With unlucky gaussain random seed, this might cause unwated finte-box effect. May have to restrict randomness of power spectrum amplitude (not phase though) of smallest k modes.
