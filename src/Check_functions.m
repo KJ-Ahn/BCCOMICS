@@ -57,6 +57,11 @@ if ~matlabflag
   if ~exist('raylrnd')
     addpath([pkgdir '/statistics-1.3.0/inst']);
   end
+  try  %% test if unifrnd exists in octave core (... version >4.4 separates unifrnd from core ...)
+    aa=unifrnd(0,1);
+  catch
+    addpath([pkgdir '/statistics-1.3.0/unifrnd']);
+  end
 else
   %% mfiles_for_matlab provides GPL licensed scripts that do what
   %% MATLAB Statistics Toolbox and Image Processing Toolbox would do
