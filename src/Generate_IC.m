@@ -7,7 +7,7 @@
 %% (3) FFT & record.
 
 %% For memory-efficient 2D interpolation, will slice k-space cube by this number
-Nslice         = 8;  %% intended # of coarse slices; may differ from the actual # of coarse slices
+Nslice         = 16;  %% intended # of coarse slices; may differ from the actual # of coarse slices
 Nsubslice      = floor(Nmode_p/Nslice);
 Nfinalsubslice = mod(Nmode_p,Nslice);
 if Nfinalsubslice == 0  %% actual # of coarse slices
@@ -38,12 +38,12 @@ end
 %% term (k=0) may obtain inf or nan due to 0.5*log(ksq_p). 
 %% We will cure this by nullifying monopole anyway down below (**).
 disp('----- Interpolating transfer function -----');
-dc  = zeros(Nmode_p,Nmode_p,Nc_p);
+dc  = zeros(Nmode_p,Nmode_p,Nmode_p);
 for islice=1:Nslice_actual
     isstart = 1 + (islice-1)*Nsubslice;
     isend   = islice*Nsubslice;
     if islice == Nslice_actual
-      isend = min(islice*Nsubslice, Nmode_p);
+      isend = Nmode_p;
     end
     dc(isstart:isend,:,:)  = interp2(muext,log(ksampletab), deltasc,  costh_k_V(isstart:isend,:,:),0.5*log(ksq_p(isstart:isend,:,:)),interp2opt);  %% dc still k-space values here.
 end
@@ -170,12 +170,12 @@ clear dc  %% save memory
 %% =========== CDM velocity ==================================== begin
 %% Matlab & Octave 2D interpolation!! --> generating k-space deltas 
 disp('----- Interpolating transfer function -----');
-Thc  = zeros(Nmode_p,Nmode_p,Nc_p);
+Thc  = zeros(Nmode_p,Nmode_p,Nmode_p);
 for islice=1:Nslice_actual
     isstart = 1 + (islice-1)*Nsubslice;
     isend   = islice*Nsubslice;
     if islice == Nslice_actual
-      isend = min(islice*Nsubslice, Nmode_p);
+      isend = Nmode_p;
     end
     Thc(isstart:isend,:,:)  = interp2(muext,log(ksampletab), deltasThc,  costh_k_V(isstart:isend,:,:),0.5*log(ksq_p(isstart:isend,:,:)),interp2opt);  %% dc still k-space values here.
 end
@@ -295,12 +295,12 @@ clear Thc  %% save memory
 %% =========== baryon density ================================== begin
 %% Matlab & Octave 2D interpolation!! --> generating k-space deltas 
 disp('----- Interpolating transfer function -----');
-db  = zeros(Nmode_p,Nmode_p,Nc_p);
+db  = zeros(Nmode_p,Nmode_p,Nmode_p);
 for islice=1:Nslice_actual
     isstart = 1 + (islice-1)*Nsubslice;
     isend   = islice*Nsubslice;
     if islice == Nslice_actual
-      isend = min(islice*Nsubslice, Nmode_p);
+      isend = Nmode_p;
     end
     db(isstart:isend,:,:)  = interp2(muext,log(ksampletab), deltasb,  costh_k_V(isstart:isend,:,:),0.5*log(ksq_p(isstart:isend,:,:)),interp2opt);  %% dc still k-space values here.
 end
@@ -400,12 +400,12 @@ clear db  %% save memory
 %% =========== baryon velocity ==================================== begin
 %% Matlab & Octave 2D interpolation!! --> generating k-space deltas 
 disp('----- Interpolating transfer function -----');
-Thb  = zeros(Nmode_p,Nmode_p,Nc_p);
+Thb  = zeros(Nmode_p,Nmode_p,Nmode_p);
 for islice=1:Nslice_actual
     isstart = 1 + (islice-1)*Nsubslice;
     isend   = islice*Nsubslice;
     if islice == Nslice_actual
-      isend = min(islice*Nsubslice, Nmode_p);
+      isend = Nmode_p;
     end
     Thb(isstart:isend,:,:)  = interp2(muext,log(ksampletab), deltasThb,  costh_k_V(isstart:isend,:,:),0.5*log(ksq_p(isstart:isend,:,:)),interp2opt);  %% dc still k-space values here.
 end
@@ -553,12 +553,12 @@ clear Thb  %% save memory
 %% =========== baryon temperature, energies ======================= begin
 %% Matlab & Octave 2D interpolation!! --> generating k-space deltas 
 disp('----- Interpolating transfer function -----');
-dT  = zeros(Nmode_p,Nmode_p,Nc_p);
+dT  = zeros(Nmode_p,Nmode_p,Nmode_p);
 for islice=1:Nslice_actual
     isstart = 1 + (islice-1)*Nsubslice;
     isend   = islice*Nsubslice;
     if islice == Nslice_actual
-      isend = min(islice*Nsubslice, Nmode_p);
+      isend = Nmode_p;
     end
     dT(isstart:isend,:,:)  = interp2(muext,log(ksampletab), deltasT,  costh_k_V(isstart:isend,:,:),0.5*log(ksq_p(isstart:isend,:,:)),interp2opt);  %% dc still k-space values here.
 end
