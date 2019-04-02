@@ -8,12 +8,15 @@
 
 %% For memory-efficient 2D interpolation, will slice k-space cube by this number
 Nslice         = 16;  %% intended # of coarse slices; may differ from the actual # of coarse slices
+if (Nmode_p <= 64)  %% safeguard & efficiency for poor-resolution IC
+  Nslice = 1
+end
 Nsubslice      = floor(Nmode_p/Nslice);
 Nfinalsubslice = mod(Nmode_p,Nslice);
 if Nfinalsubslice == 0  %% actual # of coarse slices
-  Nslice_actual = floor(Nmode_p/Nslice); 
+  Nslice_actual = Nslice;
 else
-  Nslice_actual = floor(Nmode_p/Nslice)+1;
+  Nslice_actual = Nslice+1;
 end
 
 enzo_HDF5_flag = (enzo_HDF5_flag && matlabflag);  %% HDF5 output only possible in Matlab
