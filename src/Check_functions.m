@@ -51,7 +51,7 @@ if ~matlabflag
   try  %% test if padarray exists
     a=[1 2;3 4];
     aa=padarray(a,[1 1],'circular','post');
-  catch  %% when error occurs guide for installation
+  catch  %% when error occurs addpath the m file directory
     addpath([pkgdir '/mfiles_for_octave']); 
   end
   if ~exist('raylrnd')
@@ -59,7 +59,7 @@ if ~matlabflag
   end
   try  %% test if unifrnd exists in octave core (... version >4.4 separates unifrnd from core ...)
     aa=unifrnd(0,1);
-  catch
+  catch  %% when error occurs addpath the m file directory
     addpath([pkgdir '/statistics-1.3.0/unifrnd']);
   end
 else
