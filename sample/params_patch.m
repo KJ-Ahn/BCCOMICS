@@ -1,12 +1,12 @@
 %% Initial condition configuration inside a chosen patch
 Lbox_p    = 1/h;         %% box size in Mpc unit; Should be <= Lbox/Ncell
-Ncell_p   = 128;         %% # of cells & particles along one axis: make it an even number
+Ncell_p   = 64;         %% # of cells & particles along one axis: make it an even number
 
 ICdir     = '../ICs';  %% directory to place initial condition outputs
 
 %% Nseed    denotes [setupdir '/subgaussseed' num2str(Nmode_p)  '.matbin'].
 %% Noldseed denotes [setupdir '/subgaussseed' num2str(Noldseed) '.matbin'].
-oldseedflag    = true;   %% if true, use old seed; if false, generate new seed
+oldseedflag    = false;   %% if true, use old seed; if false, generate new seed
 %% Following two parameters needed only when oldseedflag = true
 diroldseed     = '/home/kjahn/BCCOMICS/ICs/1.00Mpch_64_ic40_jc84_kc79'; %% directory where old seed exists
 %%diroldseed     = setupdir; %% directory where old seed exists

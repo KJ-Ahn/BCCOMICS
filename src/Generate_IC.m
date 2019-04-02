@@ -6,6 +6,19 @@
 %% (2) Apply random seed and normalize (rand_real_norm).
 %% (3) FFT & record.
 
+%% For memory-efficient 2D interpolation, will slice k-space cube by this number
+Nslice         = 16;  %% intended # of coarse slices; may differ from the actual # of coarse slices
+if (Nmode_p <= 64)  %% safeguard & efficiency for poor-resolution IC
+  Nslice = 1
+end
+Nsubslice      = floor(Nmode_p/Nslice);
+Nfinalsubslice = mod(Nmode_p,Nslice);
+if Nfinalsubslice == 0  %% actual # of coarse slices
+  Nslice_actual = Nslice;
+else
+  Nslice_actual = Nslice+1;
+end
+
 enzo_HDF5_flag = (enzo_HDF5_flag && matlabflag);  %% HDF5 output only possible in Matlab
 %% Output binary when running Octave & the user wrongfully intends HDF5 output
 if (~enzo_bin_flag && ~matlabflag)  
@@ -28,7 +41,15 @@ end
 %% term (k=0) may obtain inf or nan due to 0.5*log(ksq_p). 
 %% We will cure this by nullifying monopole anyway down below (**).
 disp('----- Interpolating transfer function -----');
-dc  = interp2(muext,log(ksampletab), deltasc,  costh_k_V,0.5*log(ksq_p),interp2opt);  %% dc still k-space values here.
+dc  = zeros(Nmode_p,Nmode_p,Nmode_p);
+for islice=1:Nslice_actual
+    isstart = 1 + (islice-1)*Nsubslice;
+    isend   = islice*Nsubslice;
+    if islice == Nslice_actual
+      isend = Nmode_p;
+    end
+    dc(isstart:isend,:,:)  = interp2(muext,log(ksampletab), deltasc,  costh_k_V(isstart:isend,:,:),0.5*log(ksq_p(isstart:isend,:,:)),interp2opt);  %% dc still k-space values here.
+end
 
 %% randomize, apply reality, and normalize
 disp('----- Convolving transfer function with random number -----');
@@ -152,7 +173,15 @@ clear dc  %% save memory
 %% =========== CDM velocity ==================================== begin
 %% Matlab & Octave 2D interpolation!! --> generating k-space deltas 
 disp('----- Interpolating transfer function -----');
-Thc = interp2(muext,log(ksampletab), deltasThc, costh_k_V,0.5*log(ksq_p),interp2opt);
+Thc  = zeros(Nmode_p,Nmode_p,Nmode_p);
+for islice=1:Nslice_actual
+    isstart = 1 + (islice-1)*Nsubslice;
+    isend   = islice*Nsubslice;
+    if islice == Nslice_actual
+      isend = Nmode_p;
+    end
+    Thc(isstart:isend,:,:)  = interp2(muext,log(ksampletab), deltasThc,  costh_k_V(isstart:isend,:,:),0.5*log(ksq_p(isstart:isend,:,:)),interp2opt);  %% dc still k-space values here.
+end
 
 %% randomize, apply reality, and normalize
 disp('----- Convolving transfer function with random number -----');
@@ -269,7 +298,15 @@ clear Thc  %% save memory
 %% =========== baryon density ================================== begin
 %% Matlab & Octave 2D interpolation!! --> generating k-space deltas 
 disp('----- Interpolating transfer function -----');
-db  = interp2(muext,log(ksampletab), deltasb,  costh_k_V,0.5*log(ksq_p),interp2opt);
+db  = zeros(Nmode_p,Nmode_p,Nmode_p);
+for islice=1:Nslice_actual
+    isstart = 1 + (islice-1)*Nsubslice;
+    isend   = islice*Nsubslice;
+    if islice == Nslice_actual
+      isend = Nmode_p;
+    end
+    db(isstart:isend,:,:)  = interp2(muext,log(ksampletab), deltasb,  costh_k_V(isstart:isend,:,:),0.5*log(ksq_p(isstart:isend,:,:)),interp2opt);  %% dc still k-space values here.
+end
 
 %% randomize, apply reality, and normalize
 disp('----- Convolving transfer function with random number -----');
@@ -366,7 +403,15 @@ clear db  %% save memory
 %% =========== baryon velocity ==================================== begin
 %% Matlab & Octave 2D interpolation!! --> generating k-space deltas 
 disp('----- Interpolating transfer function -----');
-Thb = interp2(muext,log(ksampletab), deltasThb, costh_k_V,0.5*log(ksq_p),interp2opt);
+Thb  = zeros(Nmode_p,Nmode_p,Nmode_p);
+for islice=1:Nslice_actual
+    isstart = 1 + (islice-1)*Nsubslice;
+    isend   = islice*Nsubslice;
+    if islice == Nslice_actual
+      isend = Nmode_p;
+    end
+    Thb(isstart:isend,:,:)  = interp2(muext,log(ksampletab), deltasThb,  costh_k_V(isstart:isend,:,:),0.5*log(ksq_p(isstart:isend,:,:)),interp2opt);  %% dc still k-space values here.
+end
 
 %% randomize, apply reality, and normalize
 disp('----- Convolving transfer function with random number -----');
@@ -511,7 +556,15 @@ clear Thb  %% save memory
 %% =========== baryon temperature, energies ======================= begin
 %% Matlab & Octave 2D interpolation!! --> generating k-space deltas 
 disp('----- Interpolating transfer function -----');
-dT  = interp2(muext,log(ksampletab), deltasT,  costh_k_V,0.5*log(ksq_p),interp2opt);
+dT  = zeros(Nmode_p,Nmode_p,Nmode_p);
+for islice=1:Nslice_actual
+    isstart = 1 + (islice-1)*Nsubslice;
+    isend   = islice*Nsubslice;
+    if islice == Nslice_actual
+      isend = Nmode_p;
+    end
+    dT(isstart:isend,:,:)  = interp2(muext,log(ksampletab), deltasT,  costh_k_V(isstart:isend,:,:),0.5*log(ksq_p(isstart:isend,:,:)),interp2opt);  %% dc still k-space values here.
+end
 
 %% randomize, apply reality, and normalize
 disp('----- Convolving transfer function with random number -----');
