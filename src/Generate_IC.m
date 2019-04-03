@@ -93,7 +93,7 @@ end
 %% Prepare for interpn, let positions run from 1:Nmode_p for unperturbed particles,
 %% to get more-accurate-than-1LPT velocity when particlevelocity_accuracyflag=true.
 %% Using mod function, the actual positions will run from 1 to Nmode_p+0.9999999...
-%% Interpolation basis will have domain 1:Nmode_p+1 for safe interpolation (see **).
+%% Interpolation basis will have domain 1:Nmode_p+1 for safe interpolation (see ***).
 if particlevelocity_accuracyflag  
   Psi1 = mod(Psi1*Nmode_p - 0.5, Nmode_p)+1;
 else
@@ -195,15 +195,24 @@ vc1                 = real(ifftn(ifftshift(vc1)));
 
 Vc1 = reshape(vc1(:,:,1) *MpcMyr_2_kms, Nmode_p, Nmode_p); %% for figure
 
+vc_1 = zeros(Nmode_p,Nmode_p,Nmode_p); %% temporary variable (see ****)
 if particlevelocity_accuracyflag
   disp('******* Calculating CDM velocity x more accurately than 1LPT **');
-  %% pad with periodic boundary condition, to provide 1:Nmode_p+1 domain. (**)
+  %% pad with periodic boundary condition, to provide 1:Nmode_p+1 domain. (***)
   vc1 = padarray(vc1, [1 1 1], 'circular', 'post'); %% now (Nmode_p+1)^3 elements.
-  %% Find 
-  vc1 = interpn(vc1, Psi1, Psi2, Psi3, interpnopt); %% now Nmode_p^3 elements
+  %% Find values at displaced particle locations
+  for islice=1:Nslice_actual
+    isstart = 1 + (islice-1)*Nsubslice;
+    isend   = islice*Nsubslice;
+    if islice == Nslice_actual
+      isend = Nmode_p;
+    end
+    vc_1(isstart:isend,:,:) = interpn(vc1, Psi1(isstart:isend,:,:), Psi2(isstart:isend,:,:), Psi3(isstart:isend,:,:), interpnopt);
+  end
 end
-%% into enzo velocity unit
-vc1 = vc1 * MpcMyr_2_kms * 1e5 /VelocityUnits;
+%% into enzo velocity unit, and rename back to vc1 from vc_1 (****)
+vc1 = vc_1 * MpcMyr_2_kms * 1e5 /VelocityUnits;
+clear vc_1;
 
 if enzo_bin_flag
   fout = fopen([ICsubdir '/vc1'], 'w');
@@ -231,14 +240,24 @@ vc2                 = real(ifftn(ifftshift(vc2)));
 
 Vc2 = reshape(vc2(:,:,1) *MpcMyr_2_kms, Nmode_p, Nmode_p); %% for figure
 
+vc_2 = zeros(Nmode_p,Nmode_p,Nmode_p); %% temporary variable (see ****)
 if particlevelocity_accuracyflag
   disp('******* Calculating CDM velocity y more accurately than 1LPT **');
-  %% pad with periodic boundary condition, to provide 1:Nmode_p+1 domain. (**)
+  %% pad with periodic boundary condition, to provide 1:Nmode_p+1 domain. (***)
   vc2 = padarray(vc2, [1 1 1], 'circular', 'post'); %% now (Nmode_p+1)^3 elements.
-  %% Find 
-  vc2 = interpn(vc2, Psi1, Psi2, Psi3, interpnopt); %% now Nmode_p^3 elements
+  %% Find values at displaced particle locations
+  for islice=1:Nslice_actual
+    isstart = 1 + (islice-1)*Nsubslice;
+    isend   = islice*Nsubslice;
+    if islice == Nslice_actual
+      isend = Nmode_p;
+    end
+    vc_2(isstart:isend,:,:) = interpn(vc2, Psi1(isstart:isend,:,:), Psi2(isstart:isend,:,:), Psi3(isstart:isend,:,:), interpnopt);
+  end
 end
-vc2 = vc2 * MpcMyr_2_kms * 1e5 /VelocityUnits;
+%% into enzo velocity unit, and rename back to vc2 from vc_2 (****)
+vc2 = vc_2 * MpcMyr_2_kms * 1e5 /VelocityUnits;
+clear vc_2;
 
 if enzo_bin_flag
   fout = fopen([ICsubdir '/vc2'], 'w');
@@ -258,14 +277,24 @@ vc3                 = real(ifftn(ifftshift(vc3)));
 
 Vc3 = reshape(vc3(:,:,1) *MpcMyr_2_kms, Nmode_p, Nmode_p); %% for figure
 
+vc_3 = zeros(Nmode_p,Nmode_p,Nmode_p); %% temporary variable (see ****)
 if particlevelocity_accuracyflag
   disp('******* Calculating CDM velocity y more accurately than 1LPT **');
   %% pad with periodic boundary condition, to provide 1:Nmode_p+1 domain. (**)
   vc3 = padarray(vc3, [1 1 1], 'circular', 'post'); %% now (Nmode_p+1)^3 elements.
-  %% Find 
-  vc3 = interpn(vc3, Psi1, Psi2, Psi3, interpnopt); %% now Nmode_p^3 elements
+  %% Find values at displaced particle locations
+  for islice=1:Nslice_actual
+    isstart = 1 + (islice-1)*Nsubslice;
+    isend   = islice*Nsubslice;
+    if islice == Nslice_actual
+      isend = Nmode_p;
+    end
+    vc_3(isstart:isend,:,:) = interpn(vc3, Psi1(isstart:isend,:,:), Psi2(isstart:isend,:,:), Psi3(isstart:isend,:,:), interpnopt);
+  end
 end
-vc3 = vc3 * MpcMyr_2_kms * 1e5 /VelocityUnits;
+%% into enzo velocity unit, and rename back to vc3 from vc_3 (****)
+vc3 = vc_3 * MpcMyr_2_kms * 1e5 /VelocityUnits;
+clear vc_3;
 
 if enzo_bin_flag
   fout = fopen([ICsubdir '/vc3'], 'w');
@@ -448,12 +477,23 @@ if enzo_HDF5_flag
 end
 
 %% If SPH in mind:
+vb_1 = zeros(Nmode_p,Nmode_p,Nmode_p); %% temporary variable (see ****)
 if (particlevelocity_accuracyflag & baryonparticleflag)
   disp('******* Calculating baryon particle velocity x more accurately than 1LPT **');
   %% pad with periodic boundary condition, to provide 1:Nmode_p+1 domain. (**)
   vb1 = padarray(vb1, [1 1 1], 'circular', 'post'); %% now (Nmode_p+1)^3 elements.
-  %% Find 
-  vb1 = interpn(vb1, Psi1, Psi2, Psi3, interpnopt); %% now Nmode_p^3 elements
+  %% Find values at displaced particle locations
+  for islice=1:Nslice_actual
+    isstart = 1 + (islice-1)*Nsubslice;
+    isend   = islice*Nsubslice;
+    if islice == Nslice_actual
+      isend = Nmode_p;
+    end
+    vb_1(isstart:isend,:,:) = interpn(vb1, Psi1(isstart:isend,:,:), Psi2(isstart:isend,:,:), Psi3(isstart:isend,:,:), interpnopt);
+  end
+  %% rename back to vb1 from vb_1 (****)
+  vb1 = vb_1;
+  clear vb_1;
   fout = fopen([ICsubdir '/vpb1'], 'w');
   fwrite(fout, vb1, 'double');
   fclose(fout);
@@ -485,12 +525,24 @@ if enzo_HDF5_flag
   h5write(foutname,datasetname, vb2, [1 1 1 2], [ND1 ND1 ND1 1]);
 end
 
+%% If SPH in mind:
+vb_2 = zeros(Nmode_p,Nmode_p,Nmode_p); %% temporary variable (see ****)
 if (particlevelocity_accuracyflag & baryonparticleflag)
   disp('******* Calculating baryon particle velocity y more accurately than 1LPT **');
   %% pad with periodic boundary condition, to provide 1:Nmode_p+1 domain. (**)
   vb2 = padarray(vb2, [1 1 1], 'circular', 'post'); %% now (Nmode_p+1)^3 elements.
-  %% Find 
-  vb2 = interpn(vb2, Psi1, Psi2, Psi3, interpnopt); %% now Nmode_p^3 elements
+  %% Find values at displaced particle locations
+  for islice=1:Nslice_actual
+    isstart = 1 + (islice-1)*Nsubslice;
+    isend   = islice*Nsubslice;
+    if islice == Nslice_actual
+      isend = Nmode_p;
+    end
+    vb_2(isstart:isend,:,:) = interpn(vb2, Psi1(isstart:isend,:,:), Psi2(isstart:isend,:,:), Psi3(isstart:isend,:,:), interpnopt);
+  end
+  %% rename back to vb2 from vb_2 (****)
+  vb2 = vb_2;
+  clear vb_2;
   fout = fopen([ICsubdir '/vpb2'], 'w');
   fwrite(fout, vb2, 'double');
   fclose(fout);
@@ -532,12 +584,24 @@ if enzo_HDF5_flag
   h5writeatt(foutname,datasetname,'TopGridStart',  int64(zeros(1,3)));
 end
 
+%% If SPH in mind:
+vb_3 = zeros(Nmode_p,Nmode_p,Nmode_p); %% temporary variable (see ****)
 if (particlevelocity_accuracyflag & baryonparticleflag)
   disp('******* Calculating baryon particle velocity z more accurately than 1LPT **');
   %% pad with periodic boundary condition, to provide 1:Nmode_p+1 domain. (**)
   vb3 = padarray(vb3, [1 1 1], 'circular', 'post'); %% now (Nmode_p+1)^3 elements.
-  %% Find 
-  vb3 = interpn(vb3, Psi1, Psi2, Psi3, interpnopt); %% now Nmode_p^3 elements
+  %% Find values at displaced particle locations
+  for islice=1:Nslice_actual
+    isstart = 1 + (islice-1)*Nsubslice;
+    isend   = islice*Nsubslice;
+    if islice == Nslice_actual
+      isend = Nmode_p;
+    end
+    vb_3(isstart:isend,:,:) = interpn(vb3, Psi1(isstart:isend,:,:), Psi2(isstart:isend,:,:), Psi3(isstart:isend,:,:), interpnopt);
+  end
+  %% rename back to vb3 from vb_3 (****)
+  vb3 = vb_3;
+  clear vb_3;
   fout = fopen([ICsubdir '/vpb3'], 'w');
   fwrite(fout, vb3, 'double');
   fclose(fout);
@@ -653,12 +717,23 @@ Zetot = reshape(sp_Etot_enzo(:,:,1)*VelocityUnits^2,Nmode_p,Nmode_p); %% for fig
 
 %% If SPH in mind: (this if-end statement should be placed after other dT related
 %% grid quantities are all calculated. So developers, do not change this location.)
+dT_ = zeros(Nmode_p,Nmode_p,Nmode_p); %% temporary variable (see ****)
 if (particlevelocity_accuracyflag & baryonparticleflag)
   disp('******* Calculating baryon particle thermal energy more accurately than 1LPT **');
   %% pad with periodic boundary condition, to provide 1:Nmode_p+1 domain. (**)
   dT = padarray(dT, [1 1 1], 'circular', 'post'); %% now (Nmode_p+1)^3 elements.
-  %% Find 
-  dT = interpn(dT, Psi1, Psi2, Psi3, interpnopt); %% now Nmode_p^3 elements
+  %% Find values at displaced particle locations
+  for islice=1:Nslice_actual
+    isstart = 1 + (islice-1)*Nsubslice;
+    isend   = islice*Nsubslice;
+    if islice == Nslice_actual
+      isend = Nmode_p;
+    end
+    dT_(isstart:isend,:,:) = interpn(dT, Psi1(isstart:isend,:,:), Psi2(isstart:isend,:,:), Psi3(isstart:isend,:,:), interpnopt);
+  end
+  %% rename back to dT from dT_ (****)
+  dT = dT_;
+  clear dT_;
   fout = fopen([ICsubdir '/eptherm'], 'w');
   fwrite(fout, 3/2*kb*(dT+1)*Tz /(mmw*mH) /VelocityUnits^2, 'double');
   fclose(fout);
