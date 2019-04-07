@@ -1,9 +1,9 @@
 %% Create/Use/Shuffle/Add random numbers for initial condition.
 %% First search for fileNseed and use it.
-%% In case fileNseed doesnt exist but file512seed does,
-%% 'subgaussseed512.matbin' is used as the seed for any Ncell_p<=512 cases,
-%% when oldseedflag is true. For Ncell_p>512 cases, if oldseedflag is still true,
-%% 'subgaussseed512.matbin' is used as part of the seed and missing seeds are
+%% In case fileNseed doesnt exist but fileNoldseed does,
+%% fileNoldseed is used as the seed for any Ncell_p<=Noldseed cases,
+%% when oldseedflag is true. For Ncell_p>Noldseed cases, if oldseedflag is still true,
+%% fileNoldseed is used as part of the seed and missing seeds are
 %% generated and attached.
 %% Seeds are arranged such that resolution studies can be done.
 %%
@@ -18,29 +18,49 @@ if (mod(Nold,4) ~= 0)
     returnflag = true;
 end
 
-if oldseedflag  %% use preexisting seed
+%% Old seed file may have varying file name, but there must be only one file with given Nmode_p.
+%% For example, if there are both subgaussseed64.matbin and subgaussseed64.bin, 
+if oldseedflag  %% use preexisting seed (extension of file name may be either of matbin or bin)
   fileNoldseed = [diroldseed '/subgaussseed' num2str(Noldseed) '.matbin'];
   fileNseed    = [diroldseed '/subgaussseed' num2str(Nmode_p) '.matbin'];
-  if (~exist(fileNoldseed) & ~exist(fileNseed))
-    disp(['You let oldseedflag true, but neither ' fileNoldseed ' nor ' fileNseed ' exists.']);
+  fileNoldseed_1 = [diroldseed '/subgaussseed' num2str(Noldseed) '.bin'];
+  fileNseed_1    = [diroldseed '/subgaussseed' num2str(Nmode_p) '.bin'];
+  if (~(exist(fileNoldseed)|exist(fileNoldseed_1)) & ~(exist(fileNseed)|exist(fileNseed_1)))
+    disp(['You let oldseedflag true, but neither ' fileNoldseed '(.bin) nor ' fileNseed '(.bin) exists.']);
     disp(['Set oldseedflag to false in params_patch.m and rerun bccomics (will generate new seed)']);
     returnflag=true;
     return;
   end
   if exist(fileNseed)  %% use preexisting fileNseed
+    disp('--- Random seed array of precise size exists, so it is being read in. ---');
     if matlabflag
       load(fileNseed, '-mat', 'randamp', 'randphs');
     else
       load('-mat-binary', fileNseed, 'randamp', 'randphs');
     end
     clear fileNseed;  %% save memory 
+  elseif exist(fileNseed_1)  %% use preexisting fileNseed_1
+    disp('--- Random seed array of precise size exists, so it is being read in. ---');
+    fseed   = fopen(fileNseed_1,'r');
+    randamp = fread(fseed, Nmode_p*Nmode_p*Nc_p, 'double');
+    randphs = fread(fseed, Nmode_p*Nmode_p*Nc_p, 'double');
+    fclose(fseed);
   elseif (Nmode_p < Nold)  %% use part of preexisting fileNoldseed for Nmode_p < Nold
-    if matlabflag
-      load(fileNoldseed, '-mat', 'randamp', 'randphs');
-    else
-      load('-mat-binary', fileNoldseed, 'randamp', 'randphs');
+    disp('--- Random seed array of larger size is being read in. ---');
+    disp('--- Only a part of these seeds will be used.           ---');
+    if exist(fileNoldseed)
+      if matlabflag
+        load(fileNoldseed, '-mat', 'randamp', 'randphs');
+      else
+        load('-mat-binary', fileNoldseed, 'randamp', 'randphs');
+      end
+      clear fileNoldseed;  %% save memory 
+    elseif exist(fileNoldseed_1)
+      fseed   = fopen(fileNoldseed_1,'r');
+      randamp = fread(fseed, Nold*Nold*Ncold, 'double');
+      randphs = fread(fseed, Nold*Nold*Ncold, 'double');
+      fclose(fseed);
     end
-    clear fileNoldseed;  %% save memory 
     randamp = reshape(randamp, Nold, Nold, Ncold); %% into 3D
     randphs = reshape(randphs, Nold, Nold, Ncold); %% into 3D
 
@@ -52,12 +72,21 @@ if oldseedflag  %% use preexisting seed
     randamp = reshape(randamp, Nmode_p*Nmode_p*Nc_p, 1);  %% into 1D array
     randphs = reshape(randphs, Nmode_p*Nmode_p*Nc_p, 1);  %% into 1D array
   elseif (Nmode_p > Nold)  %% use preexisting Noldseed, and generate & attach higher-k seeds.
-    if matlabflag
-      load(fileNoldseed, '-mat', 'randamp', 'randphs');
-    else
-      load('-mat-binary', fileNoldseed, 'randamp', 'randphs');
+    disp('--- Random seed array of smaller size is being read in.                 ---');
+    disp('--- These seeds will be used; missing seeds will be generated/attached. ---');
+    if exist(fileNoldseed)
+      if matlabflag
+        load(fileNoldseed, '-mat', 'randamp', 'randphs');
+      else
+        load('-mat-binary', fileNoldseed, 'randamp', 'randphs');
+      end
+      clear fileNoldseed;  %% save memory 
+    elseif exist(fileNoldseed_1)
+      fseed   = fopen(fileNoldseed_1,'r');
+      randamp = fread(fseed, Nold*Nold*Ncold, 'double');
+      randphs = fread(fseed, Nold*Nold*Ncold, 'double');
+      fclose(fseed);
     end
-    clear fileNoldseed;
     Nmissing = Nmode_p*Nmode_p*Nc_p - Nold*Nold*Ncold; %% # of missing modes
     randamp_  = zeros(Nmode_p, Nmode_p, Nc_p);   %% seed to fill in
     randphs_  = zeros(Nmode_p, Nmode_p, Nc_p);   %% seed to fill in
@@ -112,6 +141,7 @@ if oldseedflag  %% use preexisting seed
     clear randamp_ randphs_;
   end
 else  %% generate completely new seed
+  disp('--- New seed is being generated. ---');
   randamp = raylrnd(1,      [Nmode_p*Nmode_p*Nc_p,1]);   %% new seed (amplitude)
   randphs = unifrnd(0,2*pi, [Nmode_p*Nmode_p*Nc_p,1]);   %% new seed (phase)
 end
