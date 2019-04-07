@@ -128,18 +128,13 @@ if memory_save
 end
 
 if ~memory_save
-  disp('---debug: assigning k1k2k3')
   [k1_3D_p, k2_3D_p, k3_3D_p] = ndgrid(-Nhalf_p:Nhalf_p-1);
-  disp('---debug: assigned k1k2k3')
   k1_3D_p = kunit_p * k1_3D_p;
   k2_3D_p = kunit_p * k2_3D_p;
   k3_3D_p = kunit_p * k3_3D_p;
-  disp('---debug: k^2 assigning---')
   ksq_p   = k1_3D_p.^2 +k2_3D_p.^2 +k3_3D_p.^2; %% |k|^2
-  disp('---debug: k^2 assigned---')
 else
   [k1_2D_p, k2_2D_p] = ndgrid(-Nhalf_p:Nhalf_p-1);
-  disp('---debug: assigned k1k2k3')
   k1_2D_p = kunit_p * k1_2D_p;
   k2_2D_p = kunit_p * k2_2D_p;
 

@@ -6,19 +6,6 @@
 %% (2) Apply random seed and normalize (rand_real_norm).
 %% (3) FFT & record.
 
-%% For memory-efficient 2D interpolation, will slice k-space cube by this number
-Nslice         = 16;  %% intended # of coarse slices; may differ from the actual # of coarse slices
-if (Nmode_p <= 32)  %% safeguard & efficiency for poor-resolution IC
-  Nslice = 1
-end
-Nsubslice      = floor(Nmode_p/Nslice);
-Nfinalsubslice = mod(Nmode_p,Nslice);
-if Nfinalsubslice == 0  %% actual # of coarse slices
-  Nslice_actual = Nslice;
-else
-  Nslice_actual = Nslice+1;
-end
-
 enzo_HDF5_flag = (enzo_HDF5_flag && matlabflag);  %% HDF5 output only possible in Matlab
 %% Output binary when running Octave & the user wrongfully intends HDF5 output
 if (~enzo_bin_flag && ~matlabflag)  
