@@ -154,9 +154,7 @@ else
     k3_3D_p_chunk = cat(3, k3_3D_p_chunk, kunit_p*kkk*onesk1k2_2D);
   end
   
-  disp('---debug: k1^2+k2^2 assigning---')
   k1k2sq_p_chunk = k1_3D_p_chunk.^2 +k2_3D_p_chunk.^2; %% k1^2+k2^2
-  disp('---debug: k1^2+k2^2 assigned---')
 end
 
 %% utilize above for rvector too, but just in memory saving way (****)
@@ -170,7 +168,6 @@ dmu = mu(2)-mu(1);
 Nmu = length(mu);
 
 %% choose patch to generate initial condition on
-disp('---debug: before choose_finalpatch')
 Choose_finalpatch;  %%==== script ==================
 if returnflag
   clear;
