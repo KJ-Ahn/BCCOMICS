@@ -112,12 +112,49 @@ interpnopt = 'linear'
 %% from Briggs convention [-Nhalf_p+1:Nhalf_p], but this is
 %% to par with Matlab and Octave FFT convention.
 
+
 %% k1 component on each (k1,k2,k3) point, etc.
-[k1_3D_p, k2_3D_p, k3_3D_p] = ndgrid(-Nhalf_p:Nhalf_p-1);
-k1_3D_p = kunit_p * k1_3D_p;
-k2_3D_p = kunit_p * k2_3D_p;
-k3_3D_p = kunit_p * k3_3D_p;
-ksq_p   = k1_3D_p.^2 +k2_3D_p.^2 +k3_3D_p.^2; %% |k|^2
+%% If memory error occurs, better to turn on memory_save (looping over k3 axis)
+if Nmode_p<=32
+  memory_save = false;
+end
+
+%% number of chunks to iterate for memory_save
+if memory_save
+  Nsub_chunk = 8;  %% # of slices to treat in one chunk
+  Nchunk = ceil(Nmode_p/Nsub_chunk);  %% check for residual slices after chunkening
+  Nsub_r = mod(Nmode_p,Nsub_chunk); %% # of residual slices
+end
+
+if ~memory_save
+  [k1_3D_p, k2_3D_p, k3_3D_p] = ndgrid(-Nhalf_p:Nhalf_p-1);
+  k1_3D_p = kunit_p * k1_3D_p;
+  k2_3D_p = kunit_p * k2_3D_p;
+  k3_3D_p = kunit_p * k3_3D_p;
+  ksq_p   = k1_3D_p.^2 +k2_3D_p.^2 +k3_3D_p.^2; %% |k|^2
+else
+  [k1_2D_p, k2_2D_p] = ndgrid(-Nhalf_p:Nhalf_p-1);
+  k1_2D_p = kunit_p * k1_2D_p;
+  k2_2D_p = kunit_p * k2_2D_p;
+
+  k1_3D_p_chunk = k1_2D_p;
+  k2_3D_p_chunk = k2_2D_p;
+  %% makes Nmode_p*Nmode_p*Nsub_chunk k1-vector & k2-vector array, using cat(concatenate).
+  for kkk=2:Nsub_chunk
+    k1_3D_p_chunk = cat(3, k1_3D_p_chunk, k1_2D_p);
+    k2_3D_p_chunk = cat(3, k2_3D_p_chunk, k2_2D_p);
+  end
+
+  onesk1k2_2D = ones(Nmode_p,Nmode_p);  %% ones on k1-k2 plane
+  k3_3D_p_chunk = kunit_p*(-Nhalf_p)*onesk1k2_2D;  %% 2D array at this point
+  %% makes Nmode_p*Nmode_p*Nsub_chunk k1-vector & k2-vector array, using cat(concatenate).
+  %% integer index runs from -Nhalf_p:-Nhalf_p+(Nsub_chunk-1)
+  for kkk=-Nhalf_p+1:-Nhalf_p+(Nsub_chunk-1)
+    k3_3D_p_chunk = cat(3, k3_3D_p_chunk, kunit_p*kkk*onesk1k2_2D);
+  end
+  
+  k1k2sq_p_chunk = k1_3D_p_chunk.^2 +k2_3D_p_chunk.^2; %% k1^2+k2^2
+end
 
 %% utilize above for rvector too, but just in memory saving way (****)
 %%r1 = k1_3D_p/kunit_p;
@@ -182,10 +219,28 @@ Set_gaussrand;  %%==== script ==================
 %% record random seed if wanted
 if recordseedflag
   fileNseed = [ICsubdir '/subgaussseed' num2str(Nmode_p) '.matbin'];
+  disp(['--- Seed is being recorded under ' ICsubdir ' ---']);
   if matlabflag
     save(fileNseed, 'randamp', 'randphs', '-v6');
   else
     save('-mat-binary', fileNseed, 'randamp', 'randphs');
+  end
+  %% check if wrongful (in size) matbin file is written, and if so write in simpler binary.
+  %% (Octave behaves badly when writing matbin file with big (~1000*1000*500*2)array)
+  if matlabflag
+    msg   = dir(fileNseed);
+    fsize = msg.bytes; %% file size in bytes
+  else
+    msg   = lstat(fileNseed);
+    fsize = msg.size; %% file size in bytes
+  end  
+  if (fsize < Nmode_p*Nmode_p*Nc_p*2*8)  %% randamp & randphs at 8 bytes
+    delete(fileNseed);
+    fileNseed_1 = [ICsubdir '/subgaussseed' num2str(Nmode_p) '.bin'];
+    ffout = fopen(fileNseed_1,'w');
+    fwrite(ffout, randamp, 'double');
+    fwrite(ffout, randphs, 'double');
+    fclose(ffout);
   end
 end
 
@@ -213,7 +268,31 @@ muext(Nmu-1:-1:1)  = -mu(2:Nmu);
 
 %% mu = cosine(angle between k vector and V_cb=V_c-V_b).
 %% The mu convention is consistent with f.m.
-costh_k_V = (V_cb_1_azend(ic,jc,kc)*k1_3D_p + V_cb_2_azend(ic,jc,kc)*k2_3D_p + V_cb_3_azend(ic,jc,kc)*k3_3D_p) /norm([V_cb_1_azend(ic,jc,kc) V_cb_2_azend(ic,jc,kc) V_cb_3_azend(ic,jc,kc)]) ./sqrt(ksq_p);
+disp('--- costh between V_cb and wavevector(k) being calculated ---')
+if ~memory_save
+  costh_k_V = (V_cb_1_azend(ic,jc,kc)*k1_3D_p + V_cb_2_azend(ic,jc,kc)*k2_3D_p + V_cb_3_azend(ic,jc,kc)*k3_3D_p) /norm([V_cb_1_azend(ic,jc,kc) V_cb_2_azend(ic,jc,kc) V_cb_3_azend(ic,jc,kc)]) ./sqrt(ksq_p);
+else
+  for kkchunk=1:Nchunk
+    disp(['*** ' num2str(kkchunk) ' out of ' num2str(Nchunk) ' chunks being processed ***'])
+    kkstart = 1 + (kkchunk-1)*Nsub_chunk;
+    kkend   = kkchunk*Nsub_chunk;
+    if kkchunk == Nchunk
+      kkend = Nmode_p;
+    end
+    %% k3_3D_p_chunk is defined at the bottom chunk, so need to add a shift in iteration
+    kshift = kunit_p*(kkchunk-1)*Nsub_chunk;
+    if kkchunk ~= Nchunk
+      costh_k_V(:,:,kkstart:kkend) = (V_cb_1_azend(ic,jc,kc)*k1_3D_p_chunk             + V_cb_2_azend(ic,jc,kc)*k2_3D_p_chunk             + V_cb_3_azend(ic,jc,kc)*(k3_3D_p_chunk            +kshift)) /norm([V_cb_1_azend(ic,jc,kc) V_cb_2_azend(ic,jc,kc) V_cb_3_azend(ic,jc,kc)]) ./sqrt(k1k2sq_p_chunk            +(k3_3D_p_chunk            +kshift).^2);
+    else %% the last chunk
+      if Nsub_r == 0
+        Nsub = Nsub_chunk;
+      else
+        Nsub = Nsub_r;
+      end
+      costh_k_V(:,:,kkstart:kkend) = (V_cb_1_azend(ic,jc,kc)*k1_3D_p_chunk(:,:,1:Nsub) + V_cb_2_azend(ic,jc,kc)*k2_3D_p_chunk(:,:,1:Nsub) + V_cb_3_azend(ic,jc,kc)*(k3_3D_p_chunk(:,:,1:Nsub)+kshift)) /norm([V_cb_1_azend(ic,jc,kc) V_cb_2_azend(ic,jc,kc) V_cb_3_azend(ic,jc,kc)]) ./sqrt(k1k2sq_p_chunk(:,:,1:Nsub)+(k3_3D_p_chunk(:,:,1:Nsub)+kshift).^2);
+    end
+  end
+end
 
 %% Generate and dump initial condition data
 Generate_IC;  %%==== script ==================
