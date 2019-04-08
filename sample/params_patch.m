@@ -38,6 +38,6 @@ enzo_HDF5_flag  = true;
 gadget_bin_flag = false;  %% Not implemented yet
 
 %% Decide whether to use memory-optimized routine (when bccomics crashes)
-%% Saves about 24*Nmode_p^3 bytes.
+%% Saves about 32*Nmode_p^3 bytes.
 %% This will somewhat slow down calculation
 memory_save = true;
