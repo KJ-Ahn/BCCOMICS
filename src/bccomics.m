@@ -115,7 +115,6 @@ interpnopt = 'linear'
 
 %% k1 component on each (k1,k2,k3) point, etc.
 %% If memory error occurs, better to turn on memory_save (looping over k3 axis)
-memory_save = true;
 if Nmode_p<=32
   memory_save = false;
 end
