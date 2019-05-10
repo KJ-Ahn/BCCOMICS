@@ -34,7 +34,7 @@ Either (1) clone this repo (`git clone https://github.com/KJ-Ahn/BCCOMICS.git`),
 
 BCCOMICS has two main scripts that run on either [MATLAB(R)](https://www.mathworks.com/products/matlab.html) or [gnu OCTAVE](https://www.gnu.org/software/octave/). gnu OCTAVE is easily installed with its dependency by package managers (e.g. "apt", "rpm", "synaptic", "flatpak", ...) in usual linux distributions. Ask your system administrator for installation on a shared unix machine.
 
-To install a rather recent version of OCTAVE on old linux distributions (or to install it privately on a shared machine without root priviledge), you might want to try installing [Anaconda](https://www.anaconda.com/download/), and then do `conda install -c conda-forge octave` for installing a recent OCTAVE with its dependencey without headache. 
+To install a rather recent version of OCTAVE on old linux distributions (or to install it privately on a shared machine without root priviledge), you might want to try installing [Anaconda](https://www.anaconda.com/download/), and then do `conda install -c conda-forge octave` for installing a recent OCTAVE with its dependencey without headache  (**As of May-10-2019, the current Anaconda version of octave fails on some systems. Try instead [Homebrew](https://brew.sh/))**.
 
 For MATLAB, in addition to the main program, it is preferred (but not essential) that following additional packages be installed.  
 - Image Processing Toolbox (optional; if uninstalled BCCOMICS will use `padarray.m` under BCCOMICS/mfiles_for_matlab/ImagProc_Tool)  
