@@ -1,5 +1,5 @@
 # BCCOMICS
-# Warning: A colleague of mine found a serious bug which overestimates the given power spectrum. I will fix the error within a couple of days and until then, pls refrain from using this package. The fix will be reflected in a new version and the warning on versions of the code will be sustained. -- Kyungjin Ahn
+# Warning: Do not use any version <= 1.1.5, which contains normalization error in small scale power spectrum. Instaed, use version >= 1.5. -- Kyungjin Ahn
 BCCOMICS - Baryon CDM COsMological Initial Condition generator for Small scales.
 
 Small-scale fluctuations in the early universe, even at redshifts as high as z=200, are found to be strongly affected by large-scale density and streaming-velocity environments. BCCOMICS is an initial condition generator that allows the study of structure formation inside a simulation box of < 4 comoving Mpc, where the simulation box can have non-zero overdensity (&Delta;) and streaming velocity (V<sub>cb</sub> = mean velocity of CDM - mean velocity of baryon) as its environmental condition. This allows for the study of cosmic variance of e.g., first star formation under varying large-scale environments.
