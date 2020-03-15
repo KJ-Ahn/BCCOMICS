@@ -33,20 +33,22 @@ Data is written in [Enzo's](https://enzo.readthedocs.io) internal unit system.
 Installation of BCCOMICS:  
 Either (1) clone this repo (`git clone https://github.com/KJ-Ahn/BCCOMICS.git`), or (2) download as a zip and extract its contents. Click the green "Clone or download" button and choose whichever suits you. No further installation process is required.
 
-BCCOMICS has two main scripts that run on either [MATLAB(R)](https://www.mathworks.com/products/matlab.html) or [gnu OCTAVE](https://www.gnu.org/software/octave/). gnu OCTAVE is easily installed with its dependency by package managers (e.g. "apt", "rpm", "synaptic", "flatpak", ...) in usual linux distributions. Ask your system administrator for installation on a shared unix machine.
+BCCOMICS has two main scripts that run on either [MATLAB(R)](https://www.mathworks.com/products/matlab.html) or [gnu OCTAVE](https://www.gnu.org/software/octave/). gnu OCTAVE is easily installed with its dependency by package managers (e.g. "apt", "rpm", "synaptic", "flatpak", ...) in usual linux distributions. Ask your system administrator for installation on a shared unix machine, unless you have a large quota.
 
-To install a rather recent version of OCTAVE on old linux distributions (or to install it privately on a shared machine without root priviledge), you might want to try installing [Anaconda](https://www.anaconda.com/download/), and then do `conda install -c conda-forge octave` for installing a recent OCTAVE with its dependencey without headache  (**As of May-10-2019, the current Anaconda version of octave fails on some systems. Try instead [Homebrew](https://brew.sh/))**.
+To install a rather recent version of OCTAVE on old linux distributions (or to install it privately on a shared machine without root priviledge), you might want to try installing [Anaconda](https://www.anaconda.com/download/), and then do `conda install -c conda-forge octave` for installing a recent OCTAVE with its dependencey without headache  (**As of 05/10/2019, the current Anaconda version of octave fails on some systems. Try instead [Homebrew](https://brew.sh/))**. Flatpak is another option, now even favored by GNU, and flatpak Octave version supercedes other binary packages like .deb, .rpm, etc. For example on Ubuntu 16.04, as of 03/16/2020, you can install Octave 5.2.0 with flatpak.
 
 For MATLAB, in addition to the main program, it is preferred (but not essential) that following additional packages be installed.  
 - Image Processing Toolbox (optional; if uninstalled BCCOMICS will use `padarray.m` under BCCOMICS/mfiles_for_matlab/ImagProc_Tool)  
 - Statistics and Machine Learning Toolbox (optional; if uninstalled BCCOMICS will use functions under BCCOMICS/mfiles_for_matlab/Stat_Tool)
 
-For gnu OCTAVE, in addition to the main program, following additional packages need to be installed. Use your linux distribution's package installer (e.g. `sudo apt-get install octave-image` for Ubuntu). It is OK not to install following "octave-*" packages if you want, BCCOMICS is shipped with necessary function files of these packages anyways.  
+For gnu OCTAVE, in addition to the main program, following additional packages better be installed for the optimal performance. Use your linux distribution's package installer (e.g. `sudo apt-get install octave-image` for Ubuntu). It is OK not to install following "octave-*" packages if you want, BCCOMICS is shipped with necessary function files of these packages anyways.  
 - octave-image (optional; if uninstalled BCCOMICS will use `padarray.m` under BCCOMICS/mfiles_for_octave/) 
 - octave-statistics (optional; if uninstalled BCCOMICS will use functions under BCCOMICS/statistics-1.3.0/)  
 - octave-odepkg (optional; if uninstalled BCCOMICS will use octave functions or those under BCCOMICS/odepkg-0.8.5/)
 - python
 - h5py
+
+You can install "octave-image" mentioned above alternatively by typing `pkg install image` inside Octave, but then you should remember to load the package by typing in `pkg load image` to use e.g. `padarray` fundtion. Check out octave-forge webpage for further reference. 
 
 BCCOMICS needs transfer function output files of [CAMB](https://camb.info/) (as provided in BCCOMICS/sample/CAMB_for_mode_finding), and also a redshift-ionization output file from [RECFAST](http://www.astro.ubc.ca/people/scott/recfast.html) (as provided as the file BCCOMICS/sample/output_recfast). So in general, you need to install  
 - CAMB
