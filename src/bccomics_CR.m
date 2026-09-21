@@ -140,7 +140,7 @@ dm_val    = fc * cellspec(idxcc, 4) + fb * cellspec(idxcc, 5);
 sigma_val = dm_val / stdDm_zi;
 
 %% calculate relative direction ratios (e.g., [1, 1, 1])
-vdir_raw = cellspec(idxcc, 8:10);
+vdir_raw = -cellspec(idxcc, 8:10);
 if vcb_val > 1e-6
     nonzero_v = abs(vdir_raw(abs(vdir_raw) > 1e-6));
     vdir_rel  = round((vdir_raw / min(nonzero_v)) * 10) / 10;
@@ -150,7 +150,7 @@ end
 
 dir_str = ['_dir' num2str(vdir_rel(1), '%g') '_' num2str(vdir_rel(2), '%g') '_' num2str(vdir_rel(3), '%g')];
 
-ICsubdir = [ICdir '/' num2str(Lbox_p_inMpch,'%.2f') 'Mpch_' num2str(Ncell_p) '_Dm' num2str(sigma_val, '%.1f') 's_Vcb' num2str(vcb_val, '%.1f') dir_str];
+ICsubdir = [ICdir '/' num2str(Lbox_p_inMpch,'%.2f') 'Mpch_' num2str(Ncell_p) '_Dm' num2str(sigma_val, '%.1f') 's_Vbc' num2str(vcb_val, '%.1f') dir_str];
 if ~exist(ICsubdir)
   mkdir(ICsubdir); 
 end
@@ -203,18 +203,18 @@ if recordseedflag
   end
 end
 
-%% Switching Real and Imag is done easily by i*conj(complex_number).
+%% Switching Real and Imag is done easily by 1i*conj(complex_number).
 deltasc  (:,Nmu:2*Nmu-1) = deltasc  (:,:);
 deltasb  (:,Nmu:2*Nmu-1) = deltasb  (:,:);
 deltasThc(:,Nmu:2*Nmu-1) = deltasThc(:,:);
 deltasThb(:,Nmu:2*Nmu-1) = deltasThb(:,:);
 deltasT  (:,Nmu:2*Nmu-1) = deltasT  (:,:);
 
-deltasc  (:,Nmu-1:-1:1) = conj(deltasc  (:,Nmu+1:2*Nmu-1))*i;
-deltasb  (:,Nmu-1:-1:1) = conj(deltasb  (:,Nmu+1:2*Nmu-1))*i;
-deltasThc(:,Nmu-1:-1:1) = conj(deltasThc(:,Nmu+1:2*Nmu-1))*i;
-deltasThb(:,Nmu-1:-1:1) = conj(deltasThb(:,Nmu+1:2*Nmu-1))*i;
-deltasT  (:,Nmu-1:-1:1) = conj(deltasT  (:,Nmu+1:2*Nmu-1))*i;
+deltasc  (:,Nmu-1:-1:1) = conj(deltasc  (:,Nmu+1:2*Nmu-1))*1i;
+deltasb  (:,Nmu-1:-1:1) = conj(deltasb  (:,Nmu+1:2*Nmu-1))*1i;
+deltasThc(:,Nmu-1:-1:1) = conj(deltasThc(:,Nmu+1:2*Nmu-1))*1i;
+deltasThb(:,Nmu-1:-1:1) = conj(deltasThb(:,Nmu+1:2*Nmu-1))*1i;
+deltasT  (:,Nmu-1:-1:1) = conj(deltasT  (:,Nmu+1:2*Nmu-1))*1i;
 
 muext              = zeros(1,2*Nmu-1);
 muext(Nmu:2*Nmu-1) =  mu(1:Nmu);

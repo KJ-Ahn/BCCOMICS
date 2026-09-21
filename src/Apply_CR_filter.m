@@ -1,12 +1,17 @@
 %% Script: Apply_CR_filter.m
 %% What it does: Applies the Hoffman-Ribak Constrained Realization filter
 %%               to the unconstrained k-space fields and updates real-space grids.
-%%               Velocity constraints are applied as a global, divergence-free 
-%%               shift to prevent unphysical high-k ringing.
 
 disp('-----------------------------------------------------------------------');
 disp(' Applying Constrained Realization (CR) Filter in k-space');
 disp('-----------------------------------------------------------------------');
+
+%% --- SAFETY GUARD: Prevent NaN * 0 contamination ---
+k0_check = [Deltacval(Nc,Nc,Nc) Deltabval(Nc,Nc,Nc) Thetacval(Nc,Nc,Nc) Thetabval(Nc,Nc,Nc) DeltaTval(Nc,Nc,Nc) ...
+            Deltacomval(Nc,Nc,Nc) Deltastrval(Nc,Nc,Nc) Deltagroval(Nc,Nc,Nc) Deltadecval(Nc,Nc,Nc)];
+if any(~isfinite(k0_check))
+    error('Non-finite k=0 amplitude detected. This will contaminate CR fields (NaN*0=NaN).');
+end
 
 %% 1. Extract unconstrained baseline values at target coordinate ---------- begin
 unconst_Dm = fc * Delta_c(icc(1), icc(2), icc(3)) + fb * Delta_b(icc(1), icc(2), icc(3));
@@ -17,7 +22,8 @@ delta_C1 = target_Dm - unconst_Dm;
 dx_shift = (icc(1) - 1) * Lbox / Nmode;
 dy_shift = (icc(2) - 1) * Lbox / Nmode;
 dz_shift = (icc(3) - 1) * Lbox / Nmode;
-phase_shift = exp(-i * (k1_3D * dx_shift + k2_3D * dy_shift + k3_3D * dz_shift));
+
+phase_shift = exp(-1i * (k1_3D * dx_shift + k2_3D * dy_shift + k3_3D * dz_shift));
 
 %% Construct the k-space correction seed (Density only)
 Delta_g_k = (1/sqrt(Vbox)) * (Deltamval * (delta_C1 / Sigma11_exact));
@@ -28,6 +34,7 @@ Delta_g_k(Nc, Nc, Nc) = complex(0); %% Nullify monopole
 %% 3. Apply Correction and Update Real-Space Arrays ----------------------- begin
 disp('----- Inverse FFT blending the constraints -----');
 norm_factor = 1/sqrt(Vbox) * Nmode^3;
+
 ksq_safe = ksq;
 ksq_safe(Nc, Nc, Nc) = 1;
 
@@ -44,13 +51,12 @@ Deltagro = Deltagro + real(ifftn(ifftshift( Deltagroval .* Delta_g_k * norm_fact
 Deltadec = Deltadec + real(ifftn(ifftshift( Deltadecval .* Delta_g_k * norm_factor )));
 
 %% Velocities (Update gravitationally induced infall velocities)
-V_c_1 = V_c_1 + real(ifftn(ifftshift( (-i*ai*k1_3D./ksq_safe) .* Thetacval .* Delta_g_k * norm_factor )));
-V_c_2 = V_c_2 + real(ifftn(ifftshift( (-i*ai*k2_3D./ksq_safe) .* Thetacval .* Delta_g_k * norm_factor )));
-V_c_3 = V_c_3 + real(ifftn(ifftshift( (-i*ai*k3_3D./ksq_safe) .* Thetacval .* Delta_g_k * norm_factor )));
-
-V_b_1 = V_b_1 + real(ifftn(ifftshift( (-i*ai*k1_3D./ksq_safe) .* Thetabval .* Delta_g_k * norm_factor )));
-V_b_2 = V_b_2 + real(ifftn(ifftshift( (-i*ai*k2_3D./ksq_safe) .* Thetabval .* Delta_g_k * norm_factor )));
-V_b_3 = V_b_3 + real(ifftn(ifftshift( (-i*ai*k3_3D./ksq_safe) .* Thetabval .* Delta_g_k * norm_factor )));
+V_c_1 = V_c_1 + real(ifftn(ifftshift( (-1i*ai*k1_3D./ksq_safe) .* Thetacval .* Delta_g_k * norm_factor )));
+V_c_2 = V_c_2 + real(ifftn(ifftshift( (-1i*ai*k2_3D./ksq_safe) .* Thetacval .* Delta_g_k * norm_factor )));
+V_c_3 = V_c_3 + real(ifftn(ifftshift( (-1i*ai*k3_3D./ksq_safe) .* Thetacval .* Delta_g_k * norm_factor )));
+V_b_1 = V_b_1 + real(ifftn(ifftshift( (-1i*ai*k1_3D./ksq_safe) .* Thetabval .* Delta_g_k * norm_factor )));
+V_b_2 = V_b_2 + real(ifftn(ifftshift( (-1i*ai*k2_3D./ksq_safe) .* Thetabval .* Delta_g_k * norm_factor )));
+V_b_3 = V_b_3 + real(ifftn(ifftshift( (-1i*ai*k3_3D./ksq_safe) .* Thetabval .* Delta_g_k * norm_factor )));
 %% 3. Apply Correction and Update Real-Space Arrays ----------------------- end
 
 %% 4. Force background bulk flow (V_cb) via Global Divergence-free Shift -- begin
@@ -65,8 +71,6 @@ offset_2 = target_Vcb_2 - V_cb_2_temp(icc(1), icc(2), icc(3));
 offset_3 = target_Vcb_3 - V_cb_3_temp(icc(1), icc(2), icc(3));
 
 %% Apply the offset universally to the CDM velocity field.
-%% Because the offset is a constant (k=0 mode), it is perfectly divergence-free
-%% and does not violate the continuity equation (Theta remains unchanged).
 V_c_1 = V_c_1 + offset_1;
 V_c_2 = V_c_2 + offset_2;
 V_c_3 = V_c_3 + offset_3;

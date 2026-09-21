@@ -7,6 +7,7 @@ more off;
 
 %% Read in constants in cgs unit and conversion factors.
 Consts_Conversions;  %%==== script ==================
+
 %% Read in parameters
 run('params.m');  %%==== script ==================
 
@@ -20,10 +21,10 @@ fc = omch2/(ombh2+omch2); %% CDM/matter fraction
 run('params_patch.m');  %%==== script ==================
 
 global H_i H_l_i Om_l_i Omr_l_i OmLambda_l_i OmK_l_i aloci;
-
 Lbox_p_inMpch = Lbox_p*h;  %% enzo uses 'ComovingBoxSize' in units of Mpc/h
 
 mmw = 1.2195 %% mean molecular weight with X=0.76, Y=0.24, neutral.
+
 rhocrit0 = 3*(100*h*1e5/Mpc)^2/(8*pi*G) %% in g/cm^3
 
 %% read in the redshift. zzbegin=1000, and zzend is for the
@@ -31,6 +32,7 @@ rhocrit0 = 3*(100*h*1e5/Mpc)^2/(8*pi*G) %% in g/cm^3
 zz    = load('zz.dat');
 zzbegin = zz(1);
 zzend   = zz(2);
+
 azbegin = 1/(1+zzbegin);
 azend   = 1/(1+zzend);
 
@@ -51,6 +53,7 @@ fclose(fin);
 Dm = fc * Dc + fb * Db;
 flagmean = (abs(Dm)/datstat(8) <1.1e-2); %% flag for mean-density cases
 disp(abs(Dm)/datstat(8));
+
 if flagmean
   disp('This patch has zero overdensity, so it is not needed to calculate local parameters.');
   disp('Stopping enzo_patchcosmo.');
@@ -60,16 +63,16 @@ else
   zglobal_enzo = load('zglobal.dat');
   zglobal_enzo = sort(zglobal_enzo, 'descend'); %% sort in descending order
   aglobal_enzo = 1./(1+zglobal_enzo);
-  Nz_enzo      = length(zglobal_enzo);
-
+  
   thefactor = sqrt(Om0/azend^3 + Omr0/azend^4 + OmLambda0); % global one
-
+  
   %% lock fb_l/fc_l ratio locked for the patch. In practice very close to fb/fc.
   fc_l         = (1+Dc)*fc / ((1+Dc)*fc + (1+Db)*fb); %% local CDM fraction
   fb_l         = 1 - fc_l; %% local CDM fraction
-  Thm          = fc * Thc + fb * Thb;
   
+  Thm          = fc * Thc + fb * Thb;
   Ddot_over_D1 = -Thm/(1+Dm);  %% Myr^-1, using dD/dt=-Th relation, and follow total matter.
+  
   H_i          = H0*thefactor; %% initial Hubble constant (Myr^-1) for global, flat universe
   H_loc_i = H_i - (1/3)*Ddot_over_D1; %% As in Goldberg & Vogeley (2004, eq. 3)
 
@@ -87,19 +90,17 @@ else
   Omr_loc_i      = Omr_i      / rhocrit_ratio_i;
   OmLambda_loc_i = OmLambda_i / rhocrit_ratio_i;
   OmK_loc_i      = 1 - (Om_loc_i + Omr_loc_i + OmLambda_loc_i);
-
+  
   %% record useful values
   fout        = fopen('global_and_local_quantities.dat','w');
   datglobal_i = [zzend rhocrit_i H_i Om_i Omr_i OmLambda_i];
   fprintf(fout, '## zred rhocrit(g/cm^3) H(Myr^-1) Om Omr OmLambda\n');
   fprintf(fout, '%i %e %e %e %e %e\n', datglobal_i');
   fprintf(fout, '\n');
-
   datloc_i = [icc rhocrit_loc_i H_loc_i Om_loc_i Omr_loc_i OmLambda_loc_i OmK_loc_i];
   fprintf(fout, '## icc1 icc2 icc3 rhocrit(g/cm^3) H(Myr^-1)  Om   Omr   OmLambda  OmK\n');
   fprintf(fout, '%4i %4i %4i %e %e %e %e %e %e\n', datloc_i');
   fclose(fout);
-
 
 %%%%%%%%% Now do integration to obtain (time) ~ (scale factor) table,
 %%%%%%%%% both for the global case and for each patch.
@@ -110,7 +111,7 @@ else
 
   %% For simplicity, set the initial time = 0.
   %% Whenever required, one can add the actual cosmic time_i*H_i to the timetable.
-
+  
   %% assign values to globals: mean-density patch just follows global LCDM evolution
   H_l_i        = H_i;
   Om_l_i       = Om_i;
@@ -118,7 +119,7 @@ else
   OmLambda_l_i = OmLambda_i;
   OmK_l_i      = 1 - (Om_l_i + Omr_l_i + OmLambda_l_i);
   aloci        = a_i;
-
+  
 %%%% time ~ (scale factor) table for global case.
   %% take small enough value for radiation domination
   tiHi                 = 0.000001;
@@ -126,13 +127,15 @@ else
   options              = odeset('RelTol',1e-6,'AbsTol',1e-9);
   %% initial a value, assuming radiation domination, is given analytically.
   [tHiode, aglobalode] = ode45(@fdadt, [tiHi, tfHi], sqrt(2*tiHi*sqrt(Omr_i))*a_i, options);
+  
   while (max(aglobalode)<1.1) %% Lets make the final a at tfHi to be larger than 1.1.
     tfHi                 = 2*tfHi;
     [tHiode, aglobalode] = ode45(@fdadt, [tiHi, tfHi], sqrt(2*tiHi*sqrt(Omr_i))*a_i, options);
   end
+
   %% tHi table corresponding to aglobal table.
   tHiglobal_enzo = interp1(aglobalode, tHiode, aglobal_enzo, 'spline');
-
+  
 %% plot for debugging
 %%  loglog(tHiode, aglobalode, tHiode, 6.4e-3*tHiode.^(2/3))
 %%  axis([1e-3 1e4 5e-5 1])
@@ -161,10 +164,12 @@ else
   if (OmK_l_i < 0)
     aloc_test    = linspace(a_i,max(aglobalode),1e5);
     insidesquare = Om_l_i./(aloc_test/aloci) + Omr_l_i./(aloc_test/aloci).^2 + OmLambda_l_i*(aloc_test/aloci).^2 + OmK_l_i;
+    
     if (any(insidesquare<0))
       %% "find" below gives index just after turnaround, so subtract some indices
       %% to safely pick the stopping time
       aloc_test_before_ta = aloc_test(find(insidesquare<0, 1,'first')-50);
+      
       %% Do something clever to choose appropriate tfHi for local overdense patch
       [tHiode, a_loc_ode] = ode45(@fdadt, [tiHi, tfHi], sqrt(2*tiHi*sqrt(Omr_l_i))*aloci, options);
       while (~any(a_loc_ode>aloc_test_before_ta))
@@ -183,7 +188,7 @@ else
     idx_final_ode = length(tHiode);
     idx_final_local = length(tHiglobal_enzo);
   end
-
+  
   tHiglobal_enzo = tHiglobal_enzo(1:idx_final_local);
   aloc_enzo = interp1(tHiode(1:idx_final_ode), a_loc_ode(1:idx_final_ode), tHiglobal_enzo, 'pchip');
   alocf     = aloc_enzo(length(aloc_enzo));
@@ -195,9 +200,9 @@ else
   fclose(fout);
 
 %%%% Calculate local cosmological parameters at the final time, which will be "present".
-
   aratio      = alocf/aloci;
   denominator = Om_loc_i*aratio^(-3) + Omr_loc_i*aratio^(-4) + OmLambda_loc_i + OmK_loc_i*aratio^(-2);
+  
   Om0_l       = Om_loc_i      *aratio^(-3) / denominator;
   Omr0_l      = Omr_loc_i     *aratio^(-4) / denominator;
   OmLambda0_l = OmLambda_loc_i             / denominator;
@@ -211,13 +216,12 @@ else
   %% 1+zloc_new = (1+zloc)/(1+zlocf), or zloc_new = (1+zloc)/(1+zlocf) -1.
   %% This also means                     zloc_new = alocf/aloc -1.
   %% Similarly, aloc/alocf = aloc_new.
-
+  
   aloc_new_enzo = aloc_enzo/alocf;
   zloc_new_enzo = 1./aloc_new_enzo - 1;
-
+  Nz_enzo       = length(zloc_new_enzo);
 
   %%%% Write an enzo parameter file patch, to be included in there.
-
   fout = fopen('enzoparam_part.enzo', 'w');
   fprintf(fout, 'CosmologySimulationOmegaBaryonNow        = %f\n', Om0_l*fb_l);
   fprintf(fout, 'CosmologySimulationOmegaCDMNow           = %f\n', Om0_l*fc_l);
@@ -226,6 +230,7 @@ else
   fprintf(fout, 'CosmologyOmegaLambdaNow    = %f\n', OmLambda0_l );
   fprintf(fout, 'CosmologyOmegaRadiationNow = %f\n', Omr0_l      );
   fprintf(fout, 'CosmologyHubbleConstantNow = %f\n', h0_l        );
+
   %% comoving box size is the proper size at "0", so it is
   %% (proper size at a_i)*(expansion ratio) = L * a_i * (alocf/aloci) = L * alocf
   %% But also, Lbox_p_inMpch uses h, not h0_l, so need to rescale with (h0_l/h)
@@ -238,6 +243,7 @@ else
       fprintf(fout, 'CosmologyOutputRedshift[%i] = %f\n', iz_enzo-1, zloc_new_enzo(iz_enzo) );
   end
   fclose(fout);
+
   %% Print out the ratios of enzo units (in CosmologyGetUnits.C).
   %% ratio = global/local
   lengunit_ratio = Lbox_p_inMpch/(h*(1+zzend)) /(Lbox_p_inMpch*(h0_l/h)*alocf/(h0_l*(1+zloc_new_enzo(1))));
@@ -245,6 +251,7 @@ else
   timeunit_ratio = sqrt(Om0_l)*h0_l*(1+zloc_new_enzo(1))^1.5 /(sqrt(Om0)*h*(1+zzend)^1.5);
   velounit_ratio = Lbox_p_inMpch*sqrt(Om0)*sqrt(1+zzend) /(Lbox_p_inMpch*(h0_l/h)*alocf*sqrt(Om0_l)*sqrt(1+zloc_new_enzo(1)));
   tempunit_ratio = velounit_ratio^2;
+
   datcc = [icc lengunit_ratio densunit_ratio timeunit_ratio velounit_ratio tempunit_ratio];
   foutratio=fopen('enzounit_ratio.dat','w');
   fprintf(foutratio, '%4i %4i %4i  %e %e %e %e %e\n', datcc');

@@ -17,11 +17,12 @@ else
 end
 
 disp('----------------Initializing----------------');
-
 %% Read in essential parameters
 run('params.m');  %%==== script ==================
+
 %% Define some box-related quantities
 box_init;  %%==== script ==================
+
 if (mod(Ncell,2)==0)
   disp('Choose an odd number to make a patch 4 Mpc in size');
   clear; %% clearing workspace (memory)
@@ -88,8 +89,7 @@ TF_zi = load([TFstr1 num2str(zi) TFstr2]); %% transfer function at zi
 kktab = TF_zi(:,1)*h;  %% k, in Mpc^-1 unit
 
 %% Primordial power spectrum: See IV.A in CAMB.pdf from http://cosmologist.info/notes
-lnPstab     = log(As)+(ns-1)*log(kktab/k0)+nrun/2*(log(kktab/k0)).^2+nrunrun/6*(log(kktab/k0)).^3;
-%% powe spectrum without TF^2, where TF is the CAMB transfer function output
+lnPstab     = log(As)+(ns-1)*log(kktab/k0)+nrun/2*(log(kktab/k0)).^2+nrunrun/6*(log(kktab/k0)).^3; %% powe spectrum without TF^2, where TF is the CAMB transfer function output
 %% Refer to Transfer_GetMatterPowerData subroutine in CAMB
 PS_wo_TFtab_ = exp(lnPstab) .* kktab *2*pi^2 * h^3; %% if TF^2 multiplied, in h^-3 Mpc^3 unit
 PS_wo_TFtab  = PS_wo_TFtab_ * h^-3;  %% if TF^2 multiplied, in Mpc^3 unit
@@ -109,13 +109,6 @@ THc_zi = -sqrt(PkTHc_zi) .*sign(TF_zi(:,11))*Hzi; %% Mpc^(3/2) Myr^-1 unit
 THb_zi = -sqrt(PkTHb_zi) .*sign(TF_zi(:,12))*Hzi; %% Mpc^(3/2) Myr^-1 unit
 Vcb_zi = -sqrt(PkVcb_zi) .*sign(TF_zi(:,13))*c_inkms/MpcMyr_2_kms; %% Mpc^(3/2) Mpc Myr^-1 unit
 
-%% sanity check of sign: Try plots for confirmation if wanted...
-Vc_zi  = -sqrt(PkTHc_zi) .*sign(TF_zi(:,11))*ai*Hzi./kktab;
-Vb_zi  = -sqrt(PkTHb_zi) .*sign(TF_zi(:,12))*ai*Hzi./kktab;
-% semilogx(kktab, THc_zi); %% should be negative, because THc = -dDc/dt
-% semilogx(kktab, (Vc_zi-Vb_zi)./Vcb_zi); %% should be 1, NOT -1.
-%% Fluctuations and power spectra at zi ----------------------- end
-
 %% Use recfast output for z(redshift)-xe(global ionized fraction) table.
 %% Table can be non-recfast as long as you trust it.
 %% CAREFUL: for efficient interpolation at any given redshift, the redshift
@@ -134,6 +127,7 @@ if (dzrecf ~= zrecf(9)-zrecf(10))
   clear;
   return;
 end
+
 %% table should be in descending order in z
 if (zrecf(1) < zrecf(2))
   disp('z-xe table should have decreasing z');
@@ -142,11 +136,8 @@ if (zrecf(1) < zrecf(2))
 end
 
 %% Temporal evolution of growing, decaying, and streaming modes ---------------- begin
-%% Radiation components (photon + neutrino) make these modes NOT follow the simple
-%% power laws (\propto a, a^-1.5, a^-0.5 respectively for density). Therefore,
-%% numerical integration should be done to find the correct mode evolution &
-%% mode extraction.
 global Dplus_grow Dplus_decay Dminus_stream dDplus_grow_da dDplus_decay_da dDminus_stream_da azz log10az_min dlog10az;
+
 Get_growth;  %%==== script ==================
 %% Temporal evolution of growing, decaying, and streaming modes ---------------- end
 
@@ -155,8 +146,8 @@ Extract_modes;  %%==== script ==================
 if returnflag %% inherit scriptwise return
   clear;
   return;
-end
-  %% --- plot ---
+end  
+%% --- plot ---
 if plotflag
   Plot_modes;  %%==== script ==================
 end
@@ -181,7 +172,6 @@ if (~exist(fgaussstr))
   gauss2 = normrnd(0,1,[Nreallization,1]);
   gauss  = gauss1+i*gauss2;
   %% Save gaussian ramdom seed, in complex format.
-  %% For compatibility with older octave versions, matlab binary should be in v6.
   if (matlabflag)
     save(fgaussstr, 'gauss', '-v6');
   else
@@ -203,30 +193,17 @@ disp('----------------Generating real-space 3D fields----------------');
 Get_patches_3D_zi;  %%==== script ==================
 %%%%%% Get 3D spatial fluctuatons in the big box ------------------------------ end
 
-%%%%%% Constrained Realization Pipeline --------------------------------------- begin
-%% Calculate background statistics from the unconstrained realization
-disp('----------------Calculating Base Statistics----------------');
-Delta_m = fc * Delta_c + fb * Delta_b;
-stdDm   = std(Delta_m(:));
-rmsVcb  = sqrt(mean(V_cb_1(:).^2 + V_cb_2(:).^2 + V_cb_3(:).^2));
 
-%% Phase 1: Set Target Constraints
-Set_constraints;  %%==== script ==================
-
-%% Phase 2: Calculate Covariance Matrix for CR
-Calculate_Covariance;  %%==== script ==================
-
-%% Phase 3: Apply Constrained Realization Filter to Fourier Space
-Apply_CR_filter;  %%==== script ==================
-%%%%%% Constrained Realization Pipeline --------------------------------------- end
-
+%% =======================================================================
+%% CRITICAL FIX: Record Unconstrained Background Statistics BEFORE CR
+%% =======================================================================
 azbegin = ai;    %% z=1000
 azend   = 1/(1+zzend);
 
-%% By using modes generate 3D fields of patches at z=zzend.
-%% Only for DeltaT, fitting formula is used (Get_DeltaT_fit used inside the script)
 global beta gamma;
 global signDT alpha coeff_Delta_T;
+
+%% Evolve unconstrained fields to zend for background stats
 Get_patches_3D_zend;  %%==== script ==================
 
 disp('----- Recording Background Statistics (stats_zi.dat, stats_zend.dat) -----');
@@ -236,8 +213,13 @@ stdDb   = std(Delta_b(:));
 stdTb   = std(Theta_b(:));
 rmsVc   = sqrt(mean(V_c_1(:).^2+V_c_2(:).^2+V_c_3(:).^2));
 rmsVb   = sqrt(mean(V_b_1(:).^2+V_b_2(:).^2+V_b_3(:).^2));
+rmsVcb  = sqrt(mean(V_cb_1(:).^2 + V_cb_2(:).^2 + V_cb_3(:).^2));
 Vcbp    = sqrt(2/3)*rmsVcb;
 stdT    = std(Delta_T(:));
+
+Delta_m = fc * Delta_c + fb * Delta_b;
+stdDm   = std(Delta_m(:));
+
 datstat_zi = [stdDc stdTc rmsVc*MpcMyr_2_kms stdDb stdTb rmsVb*MpcMyr_2_kms rmsVcb*MpcMyr_2_kms Vcbp*MpcMyr_2_kms stdT stdDm];
 fout    = fopen([setupdir '/stats_zi.dat'],'w');
 fprintf(fout,'@ zi:  stdDc stdThc rmsVc stdDb stdThb rmsVb rmsVcb Vcbp stdT stdDm\n');
@@ -255,13 +237,39 @@ Vcb_azend    = sqrt(V_cb_1_azend(:).^2+V_cb_2_azend(:).^2+V_cb_3_azend(:).^2);
 rmsVcb_azend = sqrt(mean(Vcb_azend.^2));
 Vcbp_azend   = sqrt(2/3)*rmsVcb_azend;
 sT_azend     = std(DT3D_azend(:));
+
 datstat_zend = [sDc_azend sTc_azend sDb_azend sTb_azend rmsVcb_azend*MpcMyr_2_kms Vcbp_azend*MpcMyr_2_kms sT_azend sDm_azend];
 fout    = fopen([setupdir '/stats_zend.dat'],'w');
 fprintf(fout,'@ zend:  stdDc  stdThc  stdDb  stdThb  rmsVcb  Vcbp  stdT sDm_azend\n');
 fprintf(fout,'Units:   None   Myr^-1  None   Myr^-1  km/s    km/s  None None\n');
 fprintf(fout,'%e %e %e %e %e %e %e %e\n', datstat_zend);
 fclose(fout);
+
+
+%%%%%% Constrained Realization Pipeline --------------------------------------- begin
+disp('----------------Applying CR Constraints----------------');
+
+%% Phase 1: Set Target Constraints
+Set_constraints;  %%==== script ==================
+
+if returnflag
+  clear;
+  return;
+end
+
+%% Phase 2: Calculate Covariance Matrix for CR
+Calculate_Covariance;  %%==== script ==================
+
+%% Phase 3: Apply Constrained Realization Filter to Fourier Space
+Apply_CR_filter;  %%==== script ==================
+%%%%%% Constrained Realization Pipeline --------------------------------------- end
+
+
 %% =======================================================================
+%% CRITICAL FIX: Re-run to apply CR-filtered modes to zend fields
+%% =======================================================================
+Get_patches_3D_zend;  %%==== script ==================
+
 
 %%%%%% Data Dumping for bccomics_CR.m -------------------------------------------- begin
 disp('----- Saving CR-filtered 3D fields at z=1000 -----');
@@ -301,6 +309,7 @@ daticc_zi(6) = V_cb_2 (icc(1),icc(2),icc(3))*MpcMyr_2_kms;
 daticc_zi(7) = V_cb_3 (icc(1),icc(2),icc(3))*MpcMyr_2_kms;
 daticc_zi(8) = norm([V_cb_1(icc(1),icc(2),icc(3)) V_cb_2(icc(1),icc(2),icc(3)) V_cb_3(icc(1),icc(2),icc(3))])*MpcMyr_2_kms;
 daticc_zi(9) = Delta_T(icc(1),icc(2),icc(3));
+
 fout = fopen([setupdir '/zi_icc_Dc_Db_Thc_Thb_Vcb1_Vcb2_Vcb3_Vcb_DT.dat'],'a');
 fprintf(fout,'%i %i %i %e %e %e %e %e %e %e %e %e\n',[icc daticc_zi]');
 fclose(fout);
@@ -315,36 +324,20 @@ daticc_zend(6) = V_cb_2_azend(icc(1),icc(2),icc(3))*MpcMyr_2_kms;
 daticc_zend(7) = V_cb_3_azend(icc(1),icc(2),icc(3))*MpcMyr_2_kms;
 daticc_zend(8) = norm([V_cb_1_azend(icc(1),icc(2),icc(3)) V_cb_2_azend(icc(1),icc(2),icc(3)) V_cb_3_azend(icc(1),icc(2),icc(3))])*MpcMyr_2_kms;
 daticc_zend(9) = DT3D_azend  (icc(1),icc(2),icc(3));
+
 fout = fopen([setupdir '/zend_icc_Dc_Db_Thc_Thb_Vcb1_Vcb2_Vcb3_Vcb_DT.dat'],'a');
 fprintf(fout,'%i %i %i %e %e %e %e %e %e %e %e %e\n',[icc daticc_zend]');
 fclose(fout);
 %%%%%% Data Dumping for bccomics_CR.m -------------------------------------------- end
 
 %% master equation for high k modes:
-%% *_p are the 4 modes at a chosen patch
-global ksample costh Deltagro_p Deltadec_p Deltacom_p Deltastr_p;
-global Thc_i Thb_i rV_i;
-
-%% Assigning initial target variables at chosen patch ---------- begin
-ic = icc(1);
-jc = icc(2);
-kc = icc(3);
-
-Deltagro_p = Deltagro(ic,jc,kc);
-Deltadec_p = Deltadec(ic,jc,kc);
-Deltacom_p = Deltacom(ic,jc,kc);
-Deltastr_p = Deltastr(ic,jc,kc);
-
-Thc_i = Theta_c(ic,jc,kc);
-Thb_i = Theta_b(ic,jc,kc);
-rV_i  = norm([V_cb_1(ic,jc,kc), V_cb_2(ic,jc,kc), V_cb_3(ic,jc,kc)]);
-%% Assigning initial target variables at chosen patch ---------- end
+global ksample costh;
+ic = icc(1); jc = icc(2); kc = icc(3);
 
 %% for mu(=cosine of angle between Vcb and k) loop
 dmu = 0.05;
 mu  = 0:dmu:1; %% Use symmetry of P(k,mu) about mu=0 to save calculation time.
 Nmu = length(mu);
-
 if matlabflag
   save([setupdir '/mu.dat'],'mu','-ascii');
 else
@@ -352,7 +345,6 @@ else
 end
 
 disp('----------------Integrating----------------');
-
 Integrate_evolODE;  %%==== script ==================
 
 disp('*********** bccomics_CR_setup successfully ended ************');

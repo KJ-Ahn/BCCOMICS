@@ -37,11 +37,13 @@ fclose(fin);
 %% Let user choose a patch with the original UI style + Relative Direction
 disp('Patches ordered in calculation time, from oldest(top) to newest(bottom)');
 disp('---------------------------------------------------------------------------------------');
-disp('Patch #  ix  iy  iz  Delta_m/sigma(Delta_m)   V_cb(km/s)    Vcb_dir[x,y,z]   at z=1000');
+disp('Patch #  ix  iy  iz  Delta_m/sigma(Delta_m)   V_bc(km/s)    Vbc_dir[x,y,z]   at z=1000');
 for ip=1:Ncc
   Dm_ip = fc * cellspec(ip,4) + fb * cellspec(ip,5);
   Vmag  = cellspec(ip,11);
-  Vdir_raw = cellspec(ip,8:10);
+  
+  %% cellspec(8:10) stores V_cb. To display V_bc properly, we invert the signs.
+  Vdir_raw = -cellspec(ip,8:10); 
   
   if Vmag > 1e-6
       %% Find the minimum non-zero component to restore relative integer ratios
@@ -51,7 +53,6 @@ for ip=1:Ncc
   else
       Vdir_rel = [0, 0, 0];
   end
-  
   AA = [ip cellspec(ip,1) cellspec(ip,2) cellspec(ip,3) Dm_ip/statszi(10) Vmag Vdir_rel(1) Vdir_rel(2) Vdir_rel(3)];
   fprintf('%3i     %3i %3i %3i     %10.3e           %10.3e     [%g, %g, %g]\n',AA);
 end
@@ -63,10 +64,20 @@ if isempty(idxcc)  %% default to the last patch calculated
 end
 disp(['Patch # ' num2str(idxcc) ' chosen.']);
 
-%% Do sanity check (optional, matching Choose_finalpatch.m structure)
 ic   = cellspec(idxcc,1);
 jc   = cellspec(idxcc,2);
 kc   = cellspec(idxcc,3);
+
+%% --- SAFETY GUARD: Prevent loading overwritten patches ---
+r   = cellspec_azend(idxcc,:);
+cur = [Dc3D_azend(ic,jc,kc) Db3D_azend(ic,jc,kc) ...
+       [V_cb_1_azend(ic,jc,kc) V_cb_2_azend(ic,jc,kc) V_cb_3_azend(ic,jc,kc)]*MpcMyr_2_kms];
+rec = r([4 5 8 9 10]);
+if any(abs(cur - rec) > 1e-5*abs(rec) + 1e-10)
+  disp('*** ERROR: This row was overwritten by a later bccomics_CR_setup run.');
+  disp('*** Re-run bccomics_CR_setup with this target to generate fresh 3D fields.');
+  returnflag = true; return;
+end
 
 %% Flush output buffer for Octave to prevent hanging display
 if ~matlabflag, fflush(stdout); end

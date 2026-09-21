@@ -21,8 +21,8 @@ Ncold = Nold/2+1;
 
 if (mod(Nold,4) ~= 0)
     disp('mod(Noldseed,4) should be zero. Check params_patch.m');
-    return;
     returnflag = true;
+    return;
 end
 
 %% Old seed file may have varying file name, but there must be only one file with given Nmode_p.
