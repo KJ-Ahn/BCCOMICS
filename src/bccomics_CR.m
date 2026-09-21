@@ -150,7 +150,7 @@ end
 
 dir_str = ['_dir' num2str(vdir_rel(1), '%g') '_' num2str(vdir_rel(2), '%g') '_' num2str(vdir_rel(3), '%g')];
 
-ICsubdir = [ICdir '/' num2str(Lbox_p_inMpch,'%.2f') 'Mpch_' num2str(Ncell_p) '_Dm' num2str(sigma_val, '%.1f') 's_Vbc' num2str(vcb_val, '%.1f') dir_str];
+ICsubdir = [ICdir '/' num2str(Lbox_p_inMpch,'%.2f') 'Mpch_' num2str(Ncell_p) '_Dm' num2str(sigma_val, '%.1f') 's_Vcb' num2str(vcb_val, '%.1f') dir_str];
 if ~exist(ICsubdir)
   mkdir(ICsubdir); 
 end
