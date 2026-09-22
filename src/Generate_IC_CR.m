@@ -790,11 +790,11 @@ if enzo_HDF5_flag
   h5write(foutname,datasetname, vb1, [1 1 1 1], [ND1 ND1 ND1 1]);
 end
 
+%% If SPH in mind:
 if (particlevelocity_accuracyflag & baryonparticleflag)
   disp('******* Calculating baryon particle velocity x more accurately than 1LPT **');
   vb1 = padarray(vb1, [1 1 1], 'circular', 'post'); 
   vb_1 = zeros(Nmode_p,Nmode_p,Nmode_p); %% CRITICAL FIX: Memory allocation inside block
-  
   if ~memory_save
     vb_1 = interpn(vb1, Psi1, Psi2, Psi3, interpnopt);
   else
@@ -857,11 +857,11 @@ if enzo_HDF5_flag
   h5write(foutname,datasetname, vb2, [1 1 1 2], [ND1 ND1 ND1 1]);
 end
 
+%% If SPH in mind:
 if (particlevelocity_accuracyflag & baryonparticleflag)
   disp('******* Calculating baryon particle velocity y more accurately than 1LPT **');
   vb2 = padarray(vb2, [1 1 1], 'circular', 'post'); 
   vb_2 = zeros(Nmode_p,Nmode_p,Nmode_p); %% CRITICAL FIX: Memory allocation inside block
-  
   if ~memory_save
     vb_2 = interpn(vb2, Psi1, Psi2, Psi3, interpnopt);
   else
@@ -933,11 +933,11 @@ if enzo_HDF5_flag
   h5writeatt(foutname,datasetname,'TopGridStart',  int64(zeros(1,3)));
 end
 
+%% If SPH in mind:
 if (particlevelocity_accuracyflag & baryonparticleflag)
   disp('******* Calculating baryon particle velocity z more accurately than 1LPT **');
   vb3 = padarray(vb3, [1 1 1], 'circular', 'post'); 
   vb_3 = zeros(Nmode_p,Nmode_p,Nmode_p); %% CRITICAL FIX: Memory allocation inside block
-  
   if ~memory_save
     vb_3 = interpn(vb3, Psi1, Psi2, Psi3, interpnopt);
   else
@@ -1049,11 +1049,12 @@ end
 
 Zetot = reshape(sp_Etot_enzo(:,:,1)*VelocityUnits^2,Nmode_p,Nmode_p); 
 
+%% If SPH in mind: (this if-end statement should be placed after other dT related
+%% grid quantities are all calculated. So developers, do not change this location.)
 if (particlevelocity_accuracyflag & baryonparticleflag)
   disp('******* Calculating baryon particle thermal energy more accurately than 1LPT **');
   dT = padarray(dT, [1 1 1], 'circular', 'post'); 
   dT_ = zeros(Nmode_p,Nmode_p,Nmode_p); %% CRITICAL FIX: Memory allocation inside block
-  
   if ~memory_save
     dT_ = interpn(dT, Psi1, Psi2, Psi3, interpnopt);
   else
