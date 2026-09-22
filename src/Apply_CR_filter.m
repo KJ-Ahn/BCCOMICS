@@ -18,18 +18,18 @@ unconst_Dm = fc * Delta_c(icc(1), icc(2), icc(3)) + fb * Delta_b(icc(1), icc(2),
 delta_C1 = target_Dm - unconst_Dm;
 %% 1. Extract unconstrained baseline values at target coordinate ---------- end
 
-%% 2. Construct the CR Bending Field (Delta_g_k) -------------------------- begin
+%% 2. Construct the HR Correction Seed (Delta_g_k) -------------------------- begin
 dx_shift = (icc(1) - 1) * Lbox / Nmode;
 dy_shift = (icc(2) - 1) * Lbox / Nmode;
 dz_shift = (icc(3) - 1) * Lbox / Nmode;
 
 phase_shift = exp(-1i * (k1_3D * dx_shift + k2_3D * dy_shift + k3_3D * dz_shift));
 
-%% Construct the k-space correction seed (Density only)
+%% Construct the k-space correction seed for HR filter (Density only)
 Delta_g_k = (1/sqrt(Vbox)) * (Deltamval * (delta_C1 / Sigma11_exact));
 Delta_g_k = Delta_g_k .* phase_shift;
 Delta_g_k(Nc, Nc, Nc) = complex(0); %% Nullify monopole
-%% 2. Construct the CR Bending Field (Delta_g_k) -------------------------- end
+%% 2. Construct the HR Correction Seed (Delta_g_k) -------------------------- end
 
 %% 3. Apply Correction and Update Real-Space Arrays ----------------------- begin
 disp('----- Inverse FFT blending the constraints -----');
@@ -50,7 +50,7 @@ Deltastr = Deltastr + real(ifftn(ifftshift( Deltastrval .* Delta_g_k * norm_fact
 Deltagro = Deltagro + real(ifftn(ifftshift( Deltagroval .* Delta_g_k * norm_factor )));
 Deltadec = Deltadec + real(ifftn(ifftshift( Deltadecval .* Delta_g_k * norm_factor )));
 
-%% Velocities (Update gravitationally induced infall velocities)
+%% Velocities (Irrotational velocity of corrected Theta)
 V_c_1 = V_c_1 + real(ifftn(ifftshift( (-1i*ai*k1_3D./ksq_safe) .* Thetacval .* Delta_g_k * norm_factor )));
 V_c_2 = V_c_2 + real(ifftn(ifftshift( (-1i*ai*k2_3D./ksq_safe) .* Thetacval .* Delta_g_k * norm_factor )));
 V_c_3 = V_c_3 + real(ifftn(ifftshift( (-1i*ai*k3_3D./ksq_safe) .* Thetacval .* Delta_g_k * norm_factor )));

@@ -7,7 +7,8 @@
 %% streaming mode and baryon velocity will alter the local density field. This breaks 
 %% the strict 'identical density background' condition required for our controlled 
 %% experiment. Therefore, density is constrained via HR, while the target V_cb is 
-%% achieved via a uniform Galilean boost (k=0 offset) in Apply_CR_filter.m.
+%% achieved via a uniform box-wide offset (k=0 component) in Apply_CR_filter.m, 
+%% ensuring the underlying scalar fields remain bit-for-bit identical across V_cb cases.
 
 disp('----------------Calculating Covariance Matrix----------------');
 %% Variance of Matter Overdensity

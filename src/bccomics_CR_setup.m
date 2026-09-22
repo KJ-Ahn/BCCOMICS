@@ -170,7 +170,7 @@ if (~exist(fgaussstr))
   Nreallization = Ncell^3;  %% need to be >= Ncell^3
   gauss1 = normrnd(0,1,[Nreallization,1]);
   gauss2 = normrnd(0,1,[Nreallization,1]);
-  gauss  = gauss1+i*gauss2;
+  gauss  = gauss1+1i*gauss2;
   %% Save gaussian ramdom seed, in complex format.
   if (matlabflag)
     save(fgaussstr, 'gauss', '-v6');
@@ -332,6 +332,9 @@ fclose(fout);
 
 %% master equation for high k modes:
 global ksample costh;
+global Deltagro_p Deltadec_p Deltacom_p Deltastr_p;
+global Thc_i Thb_i rV_i;
+
 ic = icc(1); jc = icc(2); kc = icc(3);
 
 %% for mu(=cosine of angle between Vcb and k) loop
@@ -343,6 +346,9 @@ if matlabflag
 else
   save('-ascii',[setupdir '/mu.dat'],'mu');
 end
+
+%% --- SAFETY GUARD: Force overwrite to prevent reading stale integration files
+OWRTflag = true; 
 
 disp('----------------Integrating----------------');
 Integrate_evolODE;  %%==== script ==================
