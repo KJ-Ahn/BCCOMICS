@@ -220,6 +220,7 @@ else
     kkstart = 1 + (kkchunk-1)*Nsub_chunk;
     kkend   = kkchunk*Nsub_chunk;
     if kkchunk == Nchunk; kkend=Nmode_p; end
+    kshift = kunit_p*(kkchunk-1)*Nsub_chunk;  %% CRITICAL FIX: kshift recalculation
     if kkchunk ~= Nchunk
       Psi3(:,:,kkstart:kkend) = mod((Psi3(:,:,kkstart:kkend) + ((k3_3D_p_chunk            +kshift)/kunit_p+0.5)*Lcell_p + Lbox_p/2)/Lbox_p, 1);
     else
@@ -642,6 +643,7 @@ if baryonparticleflag
       kkstart = 1 + (kkchunk-1)*Nsub_chunk;
       kkend   = kkchunk*Nsub_chunk;
       if kkchunk == Nchunk; kkend=Nmode_p; end
+      kshift = kunit_p*(kkchunk-1)*Nsub_chunk;  %% CRITICAL FIX: kshift recalculation
       if kkchunk ~= Nchunk
         fwrite(fout, mod((Psi3(:,:,kkstart:kkend) + ((k3_3D_p_chunk            +kshift)/kunit_p+0.5)*Lcell_p + Lbox_p/2)/Lbox_p, 1), 'double');
       else 
@@ -788,10 +790,10 @@ if enzo_HDF5_flag
   h5write(foutname,datasetname, vb1, [1 1 1 1], [ND1 ND1 ND1 1]);
 end
 
-vb_1 = zeros(Nmode_p,Nmode_p,Nmode_p); 
 if (particlevelocity_accuracyflag & baryonparticleflag)
   disp('******* Calculating baryon particle velocity x more accurately than 1LPT **');
   vb1 = padarray(vb1, [1 1 1], 'circular', 'post'); 
+  vb_1 = zeros(Nmode_p,Nmode_p,Nmode_p); %% CRITICAL FIX: Memory allocation inside block
   
   if ~memory_save
     vb_1 = interpn(vb1, Psi1, Psi2, Psi3, interpnopt);
@@ -855,10 +857,10 @@ if enzo_HDF5_flag
   h5write(foutname,datasetname, vb2, [1 1 1 2], [ND1 ND1 ND1 1]);
 end
 
-vb_2 = zeros(Nmode_p,Nmode_p,Nmode_p); 
 if (particlevelocity_accuracyflag & baryonparticleflag)
   disp('******* Calculating baryon particle velocity y more accurately than 1LPT **');
   vb2 = padarray(vb2, [1 1 1], 'circular', 'post'); 
+  vb_2 = zeros(Nmode_p,Nmode_p,Nmode_p); %% CRITICAL FIX: Memory allocation inside block
   
   if ~memory_save
     vb_2 = interpn(vb2, Psi1, Psi2, Psi3, interpnopt);
@@ -931,10 +933,10 @@ if enzo_HDF5_flag
   h5writeatt(foutname,datasetname,'TopGridStart',  int64(zeros(1,3)));
 end
 
-vb_3 = zeros(Nmode_p,Nmode_p,Nmode_p); 
 if (particlevelocity_accuracyflag & baryonparticleflag)
   disp('******* Calculating baryon particle velocity z more accurately than 1LPT **');
   vb3 = padarray(vb3, [1 1 1], 'circular', 'post'); 
+  vb_3 = zeros(Nmode_p,Nmode_p,Nmode_p); %% CRITICAL FIX: Memory allocation inside block
   
   if ~memory_save
     vb_3 = interpn(vb3, Psi1, Psi2, Psi3, interpnopt);
@@ -1047,10 +1049,10 @@ end
 
 Zetot = reshape(sp_Etot_enzo(:,:,1)*VelocityUnits^2,Nmode_p,Nmode_p); 
 
-dT_ = zeros(Nmode_p,Nmode_p,Nmode_p); 
 if (particlevelocity_accuracyflag & baryonparticleflag)
   disp('******* Calculating baryon particle thermal energy more accurately than 1LPT **');
   dT = padarray(dT, [1 1 1], 'circular', 'post'); 
+  dT_ = zeros(Nmode_p,Nmode_p,Nmode_p); %% CRITICAL FIX: Memory allocation inside block
   
   if ~memory_save
     dT_ = interpn(dT, Psi1, Psi2, Psi3, interpnopt);

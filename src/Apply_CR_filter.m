@@ -94,3 +94,5 @@ disp([' Final Delta_m: ' num2str(check_Dm)]);
 disp([' Final V_cb [x, y, z]: [' num2str(check_V1) '  ' num2str(check_V2) '  ' num2str(check_V3) '] km/s']);
 disp('-----------------------------------------------------------------------');
 %% 5. Verification Output ------------------------------------------------- end
+
+assert(abs(check_Dm - target_Dm) <= 1e-8*max(stdDm, abs(target_Dm)), 'CR density constraint failed');
