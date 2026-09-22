@@ -3,8 +3,8 @@
 %% remove %% from below for your choice and run this script
 
 %% piecewise linear
-zglobal = [linspace(200,120,5)';  linspace(100,40,7)'; linspace(30,22,5)'; linspace(20,11,10)'; linspace(10,3,15)'];
-%% zglobal = [linspace(200,120,5)';  linspace(100,40,7)'; linspace(30,22,5)'; linspace(20,11,10)'; linspace(10,2,17)'; linspace(1.75,1.0,4)'; [0.75; 0.50; 0.30; 0.20; 0.10; 0.00]];
+%% zglobal = [linspace(200,120,5)';  linspace(100,40,7)'; linspace(30,22,5)'; linspace(20,11,10)'; linspace(10,3,15)'];
+zglobal = [linspace(200,120,5)';  linspace(100,40,7)'; linspace(30,22,5)'; linspace(20,11,10)'; linspace(10,2,17)'; linspace(1.75,1.0,4)'; [0.75; 0.50; 0.30; 0.20; 0.10; 0.00]];
 
 %% fully linear sampling 
 %% zglobal = linspace(200,5,40)';
