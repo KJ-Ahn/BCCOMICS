@@ -91,7 +91,7 @@ check_V3 = V_cb_3(icc(1), icc(2), icc(3)) * MpcMyr_2_kms;
 disp('-----------------------------------------------------------------------');
 disp(' CR Filter Verification (Must match Targets exactly):');
 disp([' Final Delta_m: ' num2str(check_Dm)]);
-disp([' Final V_cb [x, y, z]: [' num2str(check_V1) '  ' num2str(check_V2) '  ' num2str(check_V3) '] km/s']);
+disp([' Final V_bc [x, y, z]: [' num2str(-check_V1) '  ' num2str(-check_V2) '  ' num2str(-check_V3) '] km/s']);
 disp('-----------------------------------------------------------------------');
 %% 5. Verification Output ------------------------------------------------- end
 
