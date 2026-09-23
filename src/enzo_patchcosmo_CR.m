@@ -223,9 +223,43 @@ else
 
   %%%% Write an enzo parameter file patch, to be included in there.
   fout = fopen('enzoparam_part.enzo', 'w');
-  fprintf(fout, 'CosmologySimulationOmegaBaryonNow        = %f\n', Om0_l*fb_l);
-  fprintf(fout, 'CosmologySimulationOmegaCDMNow           = %f\n', Om0_l*fc_l);
+  fprintf(fout, '#;-*-C-*-\n');     %% for Emacs editing 
   fprintf(fout, '\n');
+
+  fprintf(fout, '#\n');
+  fprintf(fout, '# define problem\n');
+  fprintf(fout, '#\n');
+  fprintf(fout, 'ProblemType                = 30      // cosmology simulation\n');
+  fprintf(fout, 'TopGridRank                = 3\n');
+  fprintf(fout, 'TopGridDimensions          = %i %i %i\n', Ncell_p, Ncell_p, Ncell_p);
+  fprintf(fout, 'PotentialIterations        = 30\n');
+  fprintf(fout, 'SelfGravity                = 1       // gravity on\n');
+  fprintf(fout, 'TopGridGravityBoundary     = 0       // Periodic BC for gravity\n');
+  fprintf(fout, 'LeftFaceBoundaryCondition  = 3 3 3   // same for fluid\n');
+  fprintf(fout, 'RightFaceBoundaryCondition = 3 3 3\n');
+  fprintf(fout, '\n');
+
+  fprintf(fout, '#\n');
+  fprintf(fout, '# problem parameters\n');
+  fprintf(fout, '#\n');
+  fprintf(fout, 'CosmologySimulationOmegaBaryonNow       = %f\n', Om0_l*fb_l);
+  fprintf(fout, 'CosmologySimulationOmegaCDMNow          = %f\n', Om0_l*fc_l);
+  fprintf(fout, 'CosmologySimulationDensityName          = GridDensity\n');
+  fprintf(fout, 'CosmologySimulationVelocity1Name        = GridVelocities\n');
+  fprintf(fout, 'CosmologySimulationVelocity2Name        = GridVelocities\n');
+  fprintf(fout, 'CosmologySimulationVelocity3Name        = GridVelocities\n');
+  fprintf(fout, 'CosmologySimulationParticlePositionName = ParticlePositions\n');
+  fprintf(fout, 'CosmologySimulationParticleVelocityName = ParticleVelocities\n');
+  fprintf(fout, 'CosmologySimulationTotalEnergyName      = GasTotalSpecEnergy\n');
+  fprintf(fout, 'CosmologySimulationGasEnergyName        = GasThermalSpecEnergy\n');
+  fprintf(fout, 'CosmologySimulationNumberOfInitialGrids = 1\n');
+  fprintf(fout, 'CosmologySimulationUseMetallicityField  = 1\n');
+  fprintf(fout, '\n');
+
+  fprintf(fout, '#\n');
+  fprintf(fout, '# define cosmology parameters\n');
+  fprintf(fout, '#\n');
+  fprintf(fout, 'ComovingCoordinates        = 1     // Expansion ON \n');
   fprintf(fout, 'CosmologyOmegaMatterNow    = %f\n', Om0_l       );
   fprintf(fout, 'CosmologyOmegaLambdaNow    = %f\n', OmLambda0_l );
   fprintf(fout, 'CosmologyOmegaRadiationNow = %f\n', Omr0_l      );
@@ -238,7 +272,24 @@ else
   fprintf(fout, ' // Mpc/h\n' );
   fprintf(fout, 'CosmologyInitialRedshift   = %f\n', zloc_new_enzo(1)      );
   fprintf(fout, 'CosmologyFinalRedshift     = %f\n', zloc_new_enzo(Nz_enzo));
+
+  fprintf(fout, 'GravitationalConstant      = 1     // this must be true for cosmology\n');
   fprintf(fout, '\n');
+
+  fprintf(fout, '#\n');
+  fprintf(fout, '# I/O and stop/start parameters\n');
+  fprintf(fout, '#\n');
+  fprintf(fout, '# DataDumpDir      = DD\n');
+  fprintf(fout, '# DataDumpName     = DD\n');
+  fprintf(fout, '# dtDataDump       = 0\n');
+  fprintf(fout, 'RedshiftDumpName   = RD\n');
+  fprintf(fout, 'RedshiftDumpDir    = RD\n');
+  fprintf(fout, '# StopCycle        = 0\n');
+  fprintf(fout, '# StopCPUTime      = 0\n');
+  fprintf(fout, 'OutputTemperature  = 1\n');
+  fprintf(fout, 'OutputCoolingTime  = 1\n');
+  fprintf(fout, '\n');
+
   for iz_enzo = 1:Nz_enzo
       fprintf(fout, 'CosmologyOutputRedshift[%i] = %f\n', iz_enzo-1, zloc_new_enzo(iz_enzo) );
   end
