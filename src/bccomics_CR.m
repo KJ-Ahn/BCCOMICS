@@ -138,13 +138,13 @@ stdDm_zi = statszi(10);
 vcb_val   = cellspec(idxcc, 11);
 dm_val    = fc * cellspec(idxcc, 4) + fb * cellspec(idxcc, 5);
 sigma_val = dm_val / stdDm_zi;
-sigma_val = round(sigma_val * 10) / 10 + 0; %% CRITICAL FIX: prevent -0.0
+sigma_val = round(sigma_val * 10) / 10 + 0; %% +0 turns -0 into 0, so that sprintf does not print "-0" in the directory name.
 
 %% calculate relative direction ratios (e.g., [1, 1, 1])
 vdir_raw = -cellspec(idxcc, 8:10);
 if vcb_val > 1e-6
     nonzero_v = abs(vdir_raw(abs(vdir_raw) > 1e-6));
-    vdir_rel  = round((vdir_raw / min(nonzero_v)) * 10) / 10 + 0; %% CRITICAL FIX: prevent -0.0
+    vdir_rel  = round((vdir_raw / min(nonzero_v)) * 10) / 10 + 0; %% +0 turns -0 into 0, so that sprintf does not print "-0" in the directory name.
 else
     vdir_rel  = [0, 0, 0];
 end

@@ -68,7 +68,7 @@ else
   
   %% lock fb_l/fc_l ratio locked for the patch. In practice very close to fb/fc.
   fc_l         = (1+Dc)*fc / ((1+Dc)*fc + (1+Db)*fb); %% local CDM fraction
-  fb_l         = 1 - fc_l; %% local CDM fraction
+  fb_l         = 1 - fc_l; %% local baryon fraction
   
   Thm          = fc * Thc + fb * Thb;
   Ddot_over_D1 = -Thm/(1+Dm);  %% Myr^-1, using dD/dt=-Th relation, and follow total matter.

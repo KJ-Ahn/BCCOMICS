@@ -195,7 +195,7 @@ Get_patches_3D_zi;  %%==== script ==================
 
 
 %% =======================================================================
-%% CRITICAL FIX: Record Unconstrained Background Statistics BEFORE CR
+%% Statistics of the unconstrained realization: stdDm (the target unit) and all later normalizations refer to the Gaussian field.
 %% =======================================================================
 azbegin = ai;    %% z=1000
 azend   = 1/(1+zzend);
@@ -266,7 +266,7 @@ Apply_CR_filter;  %%==== script ==================
 
 
 %% =======================================================================
-%% CRITICAL FIX: Re-run to apply CR-filtered modes to zend fields
+%% zend fields from the CR-modified mode fields. V_cb is scaled as a streaming mode, so the uniform V_cb offset propagates exactly.
 %% =======================================================================
 Get_patches_3D_zend;  %%==== script ==================
 

@@ -45,7 +45,7 @@ disp('---------------------------------------');
 
 %% Target Velocity Direction
 disp('Enter the V_bc direction vector [x, y, z] as an array.');
-disp('Example: [1, 1, 1] for isotropic, [1, 0, 0] for x-axis only.');
+disp('Example: [1, 1, 1] for body diagonal, [1, 0, 0] for x-axis only.');
 v_dir = input('Enter an array: ');
 
 if norm(v_dir) == 0 && target_Vcb_mag > 0
