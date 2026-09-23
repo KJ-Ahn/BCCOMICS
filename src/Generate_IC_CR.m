@@ -1,9 +1,24 @@
 %% This script generates initial condition data for enzo and dumps them.
 %% For ICs for other simulation codes, this is the script to start from.
+%%
 %% Initial condition generation using following steps, for enzo.
 %% (1) Get k and mu dependent fluctuation using transfer function.
 %% (2) Apply random seed and normalize (rand_real_norm).
 %% (3) FFT & record.
+%%
+%% [CR version] Called by bccomics_CR.m. Identical to Generate_IC.m except:
+%%  (a) The mean gas density uses the local baryon fraction fb_l of the target
+%%      patch (see "baryon density"), consistent with enzo_patchcosmo_CR.m.
+%%  (b) With particlevelocity_accuracyflag = false, the 1LPT CDM grid velocity is
+%%      written. (Generate_IC.m wrote zeros in that case; see "CDM velocity".)
+%%  (c) Temporary arrays for particle interpolation (vc_*, vb_*, dT_) are
+%%      allocated only when they are used.
+%%  (d) The imaginary unit is written as 1i, so that a variable named i in the
+%%      caller workspace cannot silently change the result.
+%%  Velocities and specific energies are written in the GLOBAL enzo units of
+%%  Prepare_enzoIC.m. For an over/underdense patch, enzo runs with the local
+%%  parameters of enzo_patchcosmo_CR.m, whose units differ; see the ratios in
+%%  enzounit_ratio.dat written there.
 
 enzo_HDF5_flag = (enzo_HDF5_flag && matlabflag);  %% HDF5 output only possible in Matlab
 %% Output binary when running Octave & the user wrongfully intends HDF5 output
@@ -643,7 +658,7 @@ if baryonparticleflag
       kkstart = 1 + (kkchunk-1)*Nsub_chunk;
       kkend   = kkchunk*Nsub_chunk;
       if kkchunk == Nchunk; kkend=Nmode_p; end
-      kshift = kunit_p*(kkchunk-1)*Nsub_chunk;  %% CRITICAL FIX: kshift recalculation
+      kshift = kunit_p*(kkchunk-1)*Nsub_chunk;  %% k3_3D_p_chunk holds the first chunk only, so shift k3 by kshift for each chunk.
       if kkchunk ~= Nchunk
         fwrite(fout, mod((Psi3(:,:,kkstart:kkend) + ((k3_3D_p_chunk            +kshift)/kunit_p+0.5)*Lcell_p + Lbox_p/2)/Lbox_p, 1), 'double');
       else 
@@ -682,7 +697,11 @@ disp('----- Calculating baryon density -----');
 db = real(ifftn(ifftshift(db)));  
 Zb    = reshape(db(:,:,1),Nmode_p,Nmode_p); 
 
-%% --- SAFETY GUARD: Use local baryon fraction for internal grid consistency ---
+%% Local baryon fraction of the target patch (Delta_c, Delta_b at zzend).
+%% enzo reads the gas density in units of the local mean matter density and sets
+%% the CDM particle mass from OmegaCDMNow/OmegaMatterNow = fc_l, so fb_l makes the
+%% box-averaged total density exactly 1. Generate_IC.m uses the global fb, i.e. the
+%% approximation that baryons are locked to CDM (AS18, Section 2.1).
 fb_l = (1+cellspec_azend(idxcc,5))*fb / ((1+cellspec_azend(idxcc,4))*fc + (1+cellspec_azend(idxcc,5))*fb);
 
 if enzo_bin_flag
@@ -861,7 +880,7 @@ end
 if (particlevelocity_accuracyflag & baryonparticleflag)
   disp('******* Calculating baryon particle velocity y more accurately than 1LPT **');
   vb2 = padarray(vb2, [1 1 1], 'circular', 'post'); 
-  vb_2 = zeros(Nmode_p,Nmode_p,Nmode_p); %% CRITICAL FIX: Memory allocation inside block
+  vb_2 = zeros(Nmode_p,Nmode_p,Nmode_p); %% %% temporary variable. Allocated only when used.
   if ~memory_save
     vb_2 = interpn(vb2, Psi1, Psi2, Psi3, interpnopt);
   else
@@ -937,7 +956,7 @@ end
 if (particlevelocity_accuracyflag & baryonparticleflag)
   disp('******* Calculating baryon particle velocity z more accurately than 1LPT **');
   vb3 = padarray(vb3, [1 1 1], 'circular', 'post'); 
-  vb_3 = zeros(Nmode_p,Nmode_p,Nmode_p); %% CRITICAL FIX: Memory allocation inside block
+  vb_3 = zeros(Nmode_p,Nmode_p,Nmode_p); %% %% temporary variable. Allocated only when used.
   if ~memory_save
     vb_3 = interpn(vb3, Psi1, Psi2, Psi3, interpnopt);
   else
@@ -1054,7 +1073,7 @@ Zetot = reshape(sp_Etot_enzo(:,:,1)*VelocityUnits^2,Nmode_p,Nmode_p);
 if (particlevelocity_accuracyflag & baryonparticleflag)
   disp('******* Calculating baryon particle thermal energy more accurately than 1LPT **');
   dT = padarray(dT, [1 1 1], 'circular', 'post'); 
-  dT_ = zeros(Nmode_p,Nmode_p,Nmode_p); %% CRITICAL FIX: Memory allocation inside block
+  dT_ = zeros(Nmode_p,Nmode_p,Nmode_p); %% %% temporary variable. Allocated only when used.
   if ~memory_save
     dT_ = interpn(dT, Psi1, Psi2, Psi3, interpnopt);
   else
