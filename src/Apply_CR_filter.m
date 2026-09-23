@@ -25,7 +25,7 @@ dz_shift = (icc(3) - 1) * Lbox / Nmode;
 
 phase_shift = exp(-1i * (k1_3D * dx_shift + k2_3D * dy_shift + k3_3D * dz_shift));
 
-%% Construct the k-space correction seed for HR filter (Density only)
+%% Construct the k-space correction kernel for HR filter (Density only)
 Delta_g_k = (1/sqrt(Vbox)) * (Deltamval * (delta_C1 / Sigma11_exact));
 Delta_g_k = Delta_g_k .* phase_shift;
 Delta_g_k(Nc, Nc, Nc) = complex(0); %% Nullify monopole

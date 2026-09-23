@@ -270,6 +270,7 @@ else
   %% But also, Lbox_p_inMpch uses h, not h0_l, so need to rescale with (h0_l/h)
   fprintf(fout, 'CosmologyComovingBoxSize   = %f  ', Lbox_p_inMpch*(h0_l/h)*alocf);
   fprintf(fout, ' // Mpc/h\n' );
+  fprintf(fout, 'CosmologyMaxExpansionRate  = 0.02\n');
   fprintf(fout, 'CosmologyInitialRedshift   = %f\n', zloc_new_enzo(1)      );
   fprintf(fout, 'CosmologyFinalRedshift     = %f\n', zloc_new_enzo(Nz_enzo));
 
