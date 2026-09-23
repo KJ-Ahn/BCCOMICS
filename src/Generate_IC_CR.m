@@ -220,7 +220,7 @@ else
     kkstart = 1 + (kkchunk-1)*Nsub_chunk;
     kkend   = kkchunk*Nsub_chunk;
     if kkchunk == Nchunk; kkend=Nmode_p; end
-    kshift = kunit_p*(kkchunk-1)*Nsub_chunk;  %% CRITICAL FIX: kshift recalculation
+    kshift = kunit_p*(kkchunk-1)*Nsub_chunk;  %% k3_3D_p_chunk holds the first chunk only, so shift k3 by kshift for each chunk.
     if kkchunk ~= Nchunk
       Psi3(:,:,kkstart:kkend) = mod((Psi3(:,:,kkstart:kkend) + ((k3_3D_p_chunk            +kshift)/kunit_p+0.5)*Lcell_p + Lbox_p/2)/Lbox_p, 1);
     else
@@ -794,7 +794,7 @@ end
 if (particlevelocity_accuracyflag & baryonparticleflag)
   disp('******* Calculating baryon particle velocity x more accurately than 1LPT **');
   vb1 = padarray(vb1, [1 1 1], 'circular', 'post'); 
-  vb_1 = zeros(Nmode_p,Nmode_p,Nmode_p); %% CRITICAL FIX: Memory allocation inside block
+  vb_1 = zeros(Nmode_p,Nmode_p,Nmode_p); %% temporary variable. Allocated only when used.
   if ~memory_save
     vb_1 = interpn(vb1, Psi1, Psi2, Psi3, interpnopt);
   else
