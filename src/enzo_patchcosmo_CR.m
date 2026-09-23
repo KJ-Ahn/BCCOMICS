@@ -259,7 +259,7 @@ else
   fprintf(fout, '#\n');
   fprintf(fout, '# define cosmology parameters\n');
   fprintf(fout, '#\n');
-  fprintf(fout, 'ComovingCoordinates        = 1     // Expansion ON \n');
+  fprintf(fout, 'ComovingCoordinates        = 1     // Expansion ON\n');
   fprintf(fout, 'CosmologyOmegaMatterNow    = %f\n', Om0_l       );
   fprintf(fout, 'CosmologyOmegaLambdaNow    = %f\n', OmLambda0_l );
   fprintf(fout, 'CosmologyOmegaRadiationNow = %f\n', Omr0_l      );
