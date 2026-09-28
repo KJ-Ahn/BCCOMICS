@@ -274,23 +274,61 @@ Get_patches_3D_zend;  %%==== script ==================
 %%%%%% Data Dumping for bccomics_CR.m -------------------------------------------- begin
 disp('----- Saving CR-filtered 3D fields at z=1000 -----');
 if matlabflag
+  %% to matlab binary format
   save([setupdir '/Dc3D.matbin'],   'Delta_c', '-v6'); 
   save([setupdir '/Db3D.matbin'],   'Delta_b', '-v6'); 
   save([setupdir '/THc3D.matbin'],  'Theta_c', '-v6'); 
   save([setupdir '/THb3D.matbin'],  'Theta_b', '-v6'); 
   save([setupdir '/DT.matbin'],     'Delta_T', '-v6');
+
   save([setupdir '/V_cb_1.matbin'], 'V_cb_1',  '-v6'); 
   save([setupdir '/V_cb_2.matbin'], 'V_cb_2',  '-v6'); 
   save([setupdir '/V_cb_3.matbin'], 'V_cb_3',  '-v6'); 
+  save([setupdir '/V_c_1.matbin'],  'V_c_1',   '-v6'); 
+  save([setupdir '/V_c_2.matbin'],  'V_c_2',   '-v6'); 
+  save([setupdir '/V_c_3.matbin'],  'V_c_3',   '-v6'); 
+
+  %% to hdf5 format
+  save([setupdir '/Dc3D.h5'],   'Delta_c', '-v7.3'); 
+  save([setupdir '/Db3D.h5'],   'Delta_b', '-v7.3'); 
+  save([setupdir '/THc3D.h5'],  'Theta_c', '-v7.3'); 
+  save([setupdir '/THb3D.h5'],  'Theta_b', '-v7.3'); 
+  save([setupdir '/DT.h5'],     'Delta_T', '-v7.3');
+
+  save([setupdir '/V_cb_1.h5'], 'V_cb_1',  '-v7.3'); 
+  save([setupdir '/V_cb_2.h5'], 'V_cb_2',  '-v7.3'); 
+  save([setupdir '/V_cb_3.h5'], 'V_cb_3',  '-v7.3'); 
+  save([setupdir '/V_c_1.h5'],  'V_c_1',   '-v7.3'); 
+  save([setupdir '/V_c_2.h5'],  'V_c_2',   '-v7.3'); 
+  save([setupdir '/V_c_3.h5'],  'V_c_3',   '-v7.3'); 
 else
+  %% to matlab binary format
   save('-mat-binary', [setupdir '/Dc3D.matbin'],   'Delta_c'); 
   save('-mat-binary', [setupdir '/Db3D.matbin'],   'Delta_b'); 
   save('-mat-binary', [setupdir '/THc3D.matbin'],  'Theta_c'); 
   save('-mat-binary', [setupdir '/THb3D.matbin'],  'Theta_b'); 
   save('-mat-binary', [setupdir '/DT.matbin'],     'Delta_T');
+
   save('-mat-binary', [setupdir '/V_cb_1.matbin'], 'V_cb_1'); 
   save('-mat-binary', [setupdir '/V_cb_2.matbin'], 'V_cb_2'); 
   save('-mat-binary', [setupdir '/V_cb_3.matbin'], 'V_cb_3'); 
+  save('-mat-binary', [setupdir '/V_c_1.matbin'],  'V_c_1'); 
+  save('-mat-binary', [setupdir '/V_c_2.matbin'],  'V_c_2'); 
+  save('-mat-binary', [setupdir '/V_c_3.matbin'],  'V_c_3'); 
+
+  %% to hdf5 format
+  save('-hdf5', [setupdir '/Dc3D.h5'],   'Delta_c'); 
+  save('-hdf5', [setupdir '/Db3D.h5'],   'Delta_b'); 
+  save('-hdf5', [setupdir '/THc3D.h5'],  'Theta_c'); 
+  save('-hdf5', [setupdir '/THb3D.h5'],  'Theta_b'); 
+  save('-hdf5', [setupdir '/DT.h5'],     'Delta_T');
+  
+  save('-hdf5', [setupdir '/V_cb_1.h5'], 'V_cb_1'); 
+  save('-hdf5', [setupdir '/V_cb_2.h5'], 'V_cb_2'); 
+  save('-hdf5', [setupdir '/V_cb_3.h5'], 'V_cb_3'); 
+  save('-hdf5', [setupdir '/V_c_1.h5'],  'V_c_1'); 
+  save('-hdf5', [setupdir '/V_c_2.h5'],  'V_c_2'); 
+  save('-hdf5', [setupdir '/V_c_3.h5'],  'V_c_3'); 
 end
 
 disp('----- Recording target patch data -----');
