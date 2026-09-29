@@ -43,19 +43,21 @@ vcb_mag_input  = input(['Enter V_bc magnitude at z = ' num2str(zi) ' in units of
 target_Vcb_mag = abs(vcb_mag_input) / MpcMyr_2_kms; 
 disp('---------------------------------------');
 
-%% Target Velocity Direction
-disp('Enter the V_bc direction vector [x, y, z] as an array.');
-disp('Example: [1, 1, 1] for body diagonal, [1, 0, 0] for x-axis only.');
-v_dir = input('Enter an array: ');
-
-if norm(v_dir) == 0 && target_Vcb_mag > 0
-    disp('WARNING: Velocity magnitude is non-zero, but direction vector is [0,0,0]. Setting V_bc to 0.');
+%% Target Velocity Direction (not needed when the magnitude is zero)
+if target_Vcb_mag > 0
+  disp('Enter the V_bc direction vector [x, y, z] as an array.');
+  disp('Example: [1, 0, 0] for the x-axis, [1, 1, 1] for the body diagonal.');
+  v_dir = input('Enter an array: ');
+  if norm(v_dir) == 0
+    disp('WARNING: Direction vector is [0, 0, 0]. Setting V_bc to 0.');
     target_Vcb_mag = 0;
     v_dir_norm = [0, 0, 0];
-elseif norm(v_dir) == 0
-    v_dir_norm = [0, 0, 0];
-else
+  else
     v_dir_norm = v_dir / norm(v_dir);
+  end
+else
+  disp('V_bc magnitude is zero, so the direction is not asked for.');
+  v_dir_norm = [0, 0, 0];
 end
 
 %% Pipeline uses V_cb = V_c - V_b internally. Input is V_bc = V_b - V_c.
